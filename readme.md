@@ -2,6 +2,7 @@
 
 Server engine using Weld and Netty for building web applications using REST and WebSockets.
 
-* https://netty.io
-* http://seamframework.org/Weld
-* http://www.jboss.org/resteasy
+* [Netty](http://netty.io)
+* [Weld](http://seamframework.org/Weld)
+* [RestEasy](http://www.jboss.org/resteasy)
+* [The WebSocket Protocol](http://tools.ietf.org/html/rfc6455)
