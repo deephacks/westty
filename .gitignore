@@ -1,0 +1,9 @@
+.classpath
+.project
+*.log
+.metadata
+.settings/
+target/
+eclipse-out/
+test-output/
+bin/
