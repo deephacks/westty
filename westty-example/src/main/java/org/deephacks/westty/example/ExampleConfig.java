@@ -28,7 +28,7 @@ public class ExampleConfig {
     @Id(desc = ExampleConfig.DESC)
     public static final String ID = "example.config";
 
-    @Config(desc = "URI where jaxrs services listen.")
+    @Config(desc = "Example param")
     @Size(max = 10)
     private String param;
 
