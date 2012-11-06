@@ -1,0 +1,2 @@
+CREATE SCHEMA westtyexample AUTHORIZATION westtyexample
+CREATE TABLE EXAMPLE (UUID varchar(255) PRIMARY KEY, PARAM varchar(1024))

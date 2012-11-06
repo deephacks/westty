@@ -4,20 +4,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.deephacks.westty</groupId>
   <artifactId>westty-root</artifactId>
-  <name>westty</name>
+  <name>Westty Root</name>
   <packaging>pom</packaging>
   <version>0.0.1-SNAPSHOT</version>
-  <description>Server engine using Weld and Netty for building REST applications</description>
+  <description>Server engine using Weld and Netty for building REST applications.</description>
   <url>http://westty.deephacks.org</url>
   <inceptionYear>2012</inceptionYear>
   <mailingLists>
     <mailingList>
       <name>Development List</name>
-      <post>tools4j-dev@googlegroups.com</post>
+      <post>westty@googlegroups.com</post>
     </mailingList>
     <mailingList>
       <name>User List</name>
-      <post>tools4j-user@googlegroups.com</post>
+      <post>westty@googlegroups.com</post>
     </mailingList>
   </mailingLists>
   <issueManagement>
@@ -52,6 +52,7 @@
 
   <properties>
     <version.westty>0.0.1-SNAPSHOT</version.westty>
+    <version.tools4j.config>0.0.1</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.6</version.java-compiler>
     <version.java-source>1.6</version.java-source>
@@ -63,14 +64,15 @@
     <version.jar-plugin>2.3.2</version.jar-plugin>
     <version.javadoc-plugin>2.8</version.javadoc-plugin>
     <version.source-plugin>2.1.2</version.source-plugin>
-
   </properties>
 
   <modules>
-<!--
-    <module>westty-server</module>
+    <module>westty-api</module>
+    <module>westty-core</module>
     <module>westty-jpa</module>
--->
+    <module>westty-websocket</module>
+    <module>westty-example</module>
+    <module>westty-docbkx</module>
   </modules>
 
   <build>
@@ -157,6 +159,7 @@
         </executions>
         <configuration>
           <javadoc:aggregate>true</javadoc:aggregate>
+          <!--          <excludePackageNames>*.internal:*.test:*.examples</excludePackageNames> -->
         </configuration>
       </plugin>
       <plugin>
@@ -172,107 +175,226 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/assembly.xml</descriptor>
+          </descriptors>
+          <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>maven2</id>
+      <name>Maven Central Repository</name>
+      <layout>default</layout>
+      <url>http://repo2.maven.org/maven2</url>
+    </repository>
+  </repositories>
+
   <dependencies>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>compile</scope>
+      <version>1.6.4</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <scope>test</scope>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>13.0.1</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-api</artifactId>
+        <scope>compile</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-core</artifactId>
+        <scope>runtime</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-jpa</artifactId>
+        <scope>provided</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-websocket</artifactId>
+        <scope>provided</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty</artifactId>
         <version>3.3.1.Final</version>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>jaxrs-api</artifactId>
         <version>2.3.4.Final</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-netty</artifactId>
         <version>2.3.4.Final</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.resteasy</groupId>
+        <artifactId>resteasy-jackson-provider</artifactId>
+        <version>2.3.4.Final</version>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>javax.inject</groupId>
         <artifactId>javax.inject</artifactId>
         <version>1</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>javax.enterprise</groupId>
         <artifactId>cdi-api</artifactId>
         <version>1.0</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.jboss.weld.se</groupId>
         <artifactId>weld-se-core</artifactId>
         <version>1.1.9.Final</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>13.0.1</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>3.12.1.GA</version>
-        <scope>provided</scope>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
         <version>1.1.0.Alpha1</version>
-        <scope>provided</scope>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
         <version>5.0.0.Alpha1</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.6.4</version>
-        <scope>compile</scope>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.6.6</version>
-        <scope>provided</scope>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>1.0.6</version>
-        <scope>provided</scope>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-core</artifactId>
         <version>1.0.6</version>
-        <scope>provided</scope>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>ch.qos.cal10n</groupId>
         <artifactId>cal10n-api</artifactId>
         <version>0.7.4</version>
-        <scope>provided</scope>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.javax.persistence</groupId>
+        <artifactId>hibernate-jpa-2.0-api</artifactId>
+        <version>1.0.0.Final</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>4.0.0.Final</version>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.10</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-config-core</artifactId>
+        <version>${version.tools4j.config}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-config-api-runtime</artifactId>
+        <version>${version.tools4j.config}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-config-api-model</artifactId>
+        <version>${version.tools4j.config}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-config-admin-jaxrs</artifactId>
+        <version>${version.tools4j.config}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-config-api-admin</artifactId>
+        <version>${version.tools4j.config}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-cli</artifactId>
+        <version>0.0.4</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.8.2.2</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
