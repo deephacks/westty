@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Stack;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -15,12 +16,12 @@ public class ThreadLocalEntityManager implements Serializable {
 
     private static final long serialVersionUID = -3337029214056469814L;
 
-    private static EntityManagerFactory emf;
+    private EntityManagerFactory emf;
+
+    @Inject
+    private JpaConfig config;
 
     private ThreadLocal<Stack<EntityManager>> emStackThreadLocal = new ThreadLocal<Stack<EntityManager>>();
-    static {
-        emf = Persistence.createEntityManagerFactory("jpa-unit", new JpaConfig().getProperties());
-    }
 
     public EntityManager get() {
         final Stack<EntityManager> entityManagerStack = emStackThreadLocal.get();
@@ -32,7 +33,10 @@ public class ThreadLocalEntityManager implements Serializable {
     }
 
     public EntityManager createAndRegister() {
-
+        if (emf == null) {
+            emf = Persistence.createEntityManagerFactory(config.getUnitName(),
+                    config.getProperties());
+        }
         Stack<EntityManager> entityManagerStack = emStackThreadLocal.get();
         if (entityManagerStack == null) {
             entityManagerStack = new Stack<EntityManager>();

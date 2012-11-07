@@ -56,6 +56,10 @@ public class JpaConfig {
     @Id(desc = JpaConfig.DESC)
     public static final String ID = "westty.jpa";
 
+    @Config(desc = "Jpa persistence unit name")
+    @NotNull
+    private String unitName = "jpa-unit";
+
     @Config(desc = USER)
     @NotNull
     private String user = "admin";
@@ -93,40 +97,84 @@ public class JpaConfig {
         return ID;
     }
 
-    public String getProvider() {
-        return provider;
+    public String getUnitName() {
+        return unitName;
     }
 
-    public String getTxType() {
-        return txType;
-    }
-
-    public String getHibDdl() {
-        return hibDdl;
-    }
-
-    public boolean isHibShowSql() {
-        return hibShowSql;
-    }
-
-    public String getHibDialect() {
-        return hibDialect;
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
     }
 
     public String getUser() {
         return user;
     }
 
+    public void setUser(String user) {
+        this.user = user;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getUrl() {
         return url;
     }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getDriver() {
         return driver;
+    }
+
+    public void setDriver(String driver) {
+        this.driver = driver;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getTxType() {
+        return txType;
+    }
+
+    public void setTxType(String txType) {
+        this.txType = txType;
+    }
+
+    public void setHibDdl(String hibDdl) {
+        this.hibDdl = hibDdl;
+    }
+
+    public void setHibDialect(String hibDialect) {
+        this.hibDialect = hibDialect;
+    }
+
+    public String getHibDdl() {
+        return hibDdl;
+    }
+
+    public String getHibDialect() {
+        return hibDialect;
+    }
+
+    public Boolean getHibShowSql() {
+        return hibShowSql;
+    }
+
+    public void setHibShowSql(Boolean hibShowSql) {
+        this.hibShowSql = hibShowSql;
     }
 
     public Properties getProperties() {
