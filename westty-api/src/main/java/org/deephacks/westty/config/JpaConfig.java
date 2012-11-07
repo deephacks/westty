@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -257,6 +258,15 @@ public class JpaConfig {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void execute(String... commands) throws SQLException, IOException {
+        execute(false, commands);
+    }
+
+    public void execute(boolean ignoreSqlEx, String... commands) throws SQLException, IOException {
+        Connection c = getConnection();
+        execute(Arrays.asList(commands), c, ignoreSqlEx);
     }
 
     public void execute(List<String> commands, boolean ignoreSqlEx) throws SQLException,
