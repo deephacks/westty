@@ -35,7 +35,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
-@Config(desc = JpaConfig.DESC)
+@Config(name = JpaConfig.ID, desc = JpaConfig.DESC)
 @ConfigScope
 public class JpaConfig {
 
