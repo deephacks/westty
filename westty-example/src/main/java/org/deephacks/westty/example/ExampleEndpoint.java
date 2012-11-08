@@ -37,9 +37,6 @@ public class ExampleEndpoint {
     private Logger log = LoggerFactory.getLogger(ExampleEndpoint.class);
 
     @Inject
-    private ExampleConfig config;
-
-    @Inject
     private EntityManager em;
 
     @GET
@@ -58,7 +55,7 @@ public class ExampleEndpoint {
     @Path("/create/{id}")
     @Transactional
     public void create(@PathParam("id") String id) {
-        ExampleEntity entity = new ExampleEntity(id, config.getParam());
+        ExampleEntity entity = new ExampleEntity(id, "config prop, fixme");
         em.persist(entity);
         log.debug("persisted successful {}", entity);
     }
