@@ -77,10 +77,6 @@
       <artifactId>tools4j-config-admin-jaxrs</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-cli</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-jpa</artifactId>
     </dependency>

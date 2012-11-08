@@ -13,27 +13,15 @@
  */
 package org.deephacks.westty.example;
 
-import javax.validation.constraints.Size;
+import org.deephacks.tools4j.config.ConfigDefault;
+import org.deephacks.westty.config.WesttyApplication;
 
-import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
+public class ExampleApplication {
 
-@Config(name = ExampleConfig.ID, desc = ExampleConfig.DESC)
-@ConfigScope
-public class ExampleConfig {
-
-    static final String DESC = "Example config.";
-
-    @Id(desc = ExampleConfig.DESC)
-    public static final String ID = "example.config";
-
-    @Config(desc = "Example param")
-    @Size(max = 10)
-    private String param;
-
-    public String getParam() {
-        return param;
+    @ConfigDefault
+    public static WesttyApplication createApplication() {
+        WesttyApplication app = new WesttyApplication("westty.example");
+        app.setAppUri("example");
+        return app;
     }
-
 }
