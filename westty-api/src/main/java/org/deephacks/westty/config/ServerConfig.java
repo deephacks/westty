@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.deephacks.tools4j.config.Config;
+import org.deephacks.tools4j.config.ConfigQuery;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
 
@@ -66,6 +67,9 @@ public class ServerConfig {
 
     @Config(desc = "Static web configuration.")
     private WebConfig web;
+
+    @Config(desc = "Westty applications.")
+    private ConfigQuery<WesttyApplication> applications;
 
     public ServerConfig() {
 
