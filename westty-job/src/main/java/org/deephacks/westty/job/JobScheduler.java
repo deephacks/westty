@@ -55,10 +55,12 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
 public class JobScheduler implements Extension {
+    private Logger logger = LoggerFactory.getLogger(JobScheduler.class);
     static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private Scheduler scheduler;
     private static BeanManager beanManager;
     private static final String JOB_CLASS_KEY = "JOB_ID_KEY";
+    private static final String LAST_EXECUTION_TIMESTAMP = "LAST_EXECUTION_TIMESTAMP";
     private static final Set<Class<? extends Job>> jobs = new HashSet<Class<? extends Job>>();
 
     public JobScheduler() throws SchedulerException {
@@ -98,10 +100,12 @@ public class JobScheduler implements Extension {
         try {
             for (Class<? extends Job> cls : jobs) {
                 String id = cls.getName();
+
                 TriggerKey triggerKey = new TriggerKey(id);
                 JobKey jobKey = new JobKey(id);
                 Trigger trigger = newTrigger().withIdentity(triggerKey)
                         .withSchedule(cronSchedule(getCron(cls))).forJob(jobKey).build();
+                logger.debug("Reschedule {}", id);
                 scheduler.rescheduleJob(triggerKey, trigger);
             }
         } catch (SchedulerException e) {
@@ -165,6 +169,12 @@ public class JobScheduler implements Extension {
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
             JobDataMap map = context.getJobDetail().getJobDataMap();
+            if (map.get(LAST_EXECUTION_TIMESTAMP) != null) {
+                long ts = Long.parseLong(map.getString(LAST_EXECUTION_TIMESTAMP));
+                if (System.currentTimeMillis() - ts < 2000) {
+                    return;
+                }
+            }
             String className = map.getString(JOB_CLASS_KEY);
             Class<? extends Job> cls;
             try {
@@ -180,7 +190,12 @@ public class JobScheduler implements Extension {
             Job job = (Job) beanManager.getReference(jobBean, Job.class, cc);
             try {
                 Stopwatch s = new Stopwatch().start();
-                job.execute(new JobDataImpl(map));
+                try {
+                    job.execute(new JobDataImpl(map));
+                    map.putAsString(LAST_EXECUTION_TIMESTAMP, System.currentTimeMillis());
+                } catch (Exception e) {
+                    logger.warn("Unexpected exception", e);
+                }
                 logger.debug("Execution took " + s.elapsedTime(TimeUnit.NANOSECONDS) + "ns");
             } finally {
                 jobBean.destroy((Object) job, cc);

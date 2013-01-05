@@ -16,7 +16,7 @@ public class JobTest {
 
     static {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.DEBUG);
+        root.setLevel(Level.WARN);
         RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
         ctx.register(JpaConfig.class);
         ctx.register(JobSchedulerConfig.class);
@@ -30,12 +30,7 @@ public class JobTest {
             JobScheduler.class);
 
     public static void main(String[] args) throws Exception {
-        JobScheduler scheduler = instance.get();
 
-        while (true) {
-            Thread.sleep(5000);
-            scheduler.reschedule();
-        }
     }
 
 }
