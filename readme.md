@@ -13,3 +13,4 @@ Westty also support the following capabilities. Optional, no classpath pollution
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [google-protobuf](http://code.google.com/p/protobuf)
+* [Quartz-CDI](http://quartz-scheduler.org)
