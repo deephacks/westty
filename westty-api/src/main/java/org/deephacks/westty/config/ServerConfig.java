@@ -13,14 +13,10 @@
  */
 package org.deephacks.westty.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.ConfigQuery;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
 
@@ -71,9 +67,6 @@ public class ServerConfig {
     @Config(desc = "Static web configuration.")
     private WebConfig web;
 
-    @Config(desc = "Westty applications.")
-    private ConfigQuery<WesttyApplication> applications;
-
     public ServerConfig() {
 
     }
@@ -110,14 +103,4 @@ public class ServerConfig {
         return web;
     }
 
-    /**
-     * @return all applications indexed on application uri
-     */
-    public Map<String, WesttyApplication> getApplications() {
-        HashMap<String, WesttyApplication> result = new HashMap<String, WesttyApplication>();
-        for (WesttyApplication app : applications.all()) {
-            result.put(app.getAppUri(), app);
-        }
-        return result;
-    }
 }

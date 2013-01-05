@@ -15,9 +15,14 @@ package org.deephacks.westty.internal.core;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.inject.Inject;
 
+import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.config.WesttyApplication;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
@@ -50,6 +55,9 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
     @Inject
     private WesttyHandler requestHandler;
 
+    @Inject
+    private RuntimeContext ctx;
+
     private ExecutionHandler executionHandler;
 
     public ChannelPipeline getPipeline() throws Exception {
@@ -80,8 +88,13 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
 
     final class HttpDetector extends HttpRequestDecoder {
 
+        private ConcurrentHashMap<String, WesttyApplication> applications;
+
         @Override
         protected HttpMessage createMessage(String[] initialLine) throws Exception {
+            if (applications == null) {
+                applications = getApplications();
+            }
             String uri = initialLine[1];
             HttpRequestType requestType = null;
             if (uri.startsWith(jaxrsPath)) {
@@ -94,6 +107,15 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
 
             return new WesttyMessage(HttpVersion.valueOf(initialLine[2]),
                     HttpMethod.valueOf(initialLine[0]), initialLine[1], requestType);
+        }
+
+        private ConcurrentHashMap<String, WesttyApplication> getApplications() {
+            ConcurrentHashMap<String, WesttyApplication> result = new ConcurrentHashMap<String, WesttyApplication>();
+            List<WesttyApplication> apps = ctx.all(WesttyApplication.class);
+            for (WesttyApplication app : apps) {
+                result.put(app.getAppUri(), app);
+            }
+            return result;
         }
 
         @Override

@@ -22,13 +22,6 @@ public class EntityManagerDelegate implements EntityManager {
     private ThreadLocalEntityManager tlem;
 
     public void persist(Object entity) {
-        if (tlem == null) {
-            System.out.println("tlem null");
-        }
-        EntityManager em = tlem.get();
-        if (em == null) {
-            System.out.println("em null");
-        }
         tlem.get().persist(entity);
     }
 

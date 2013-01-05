@@ -42,8 +42,9 @@ public class WesttyJaxrsApplication extends Application {
         for (Class<?> cls : jaxrsExtension.getJaxrsClasses()) {
             Set<Bean<?>> beans = bm.getBeans(cls);
             for (Bean<?> bean : beans) {
-                CreationalContext cc = bm.createCreationalContext(bean);
-                instances.add(bean.create(cc));
+                CreationalContext cc = bm.createCreationalContext(null);
+                Object jaxrs = bean.create(cc);
+                instances.add(jaxrs);
             }
         }
         return instances;

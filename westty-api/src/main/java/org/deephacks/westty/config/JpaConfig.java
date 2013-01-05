@@ -71,7 +71,7 @@ public class JpaConfig {
 
     @Config(desc = URL)
     @NotNull
-    private String url = "jdbc:derby:memory:westty;create=true";
+    private String url = "jdbc:derby:memory:westty";
 
     @Config(desc = DRIVER)
     @NotNull
@@ -284,7 +284,7 @@ public class JpaConfig {
         Properties connectionProps = new Properties();
         connectionProps.put("user", user);
         connectionProps.put("password", password);
-        Connection conn = DriverManager.getConnection(url, connectionProps);
+        Connection conn = DriverManager.getConnection(url + ";create=true", connectionProps);
         conn.setAutoCommit(true);
         return conn;
     }

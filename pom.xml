@@ -70,11 +70,11 @@
     <module>westty-api</module>
     <module>westty-core</module>
     <module>westty-jpa</module>
+    <module>westty-job</module>
     <module>westty-websocket</module>
     <module>westty-example</module>
     <module>westty-docbkx</module>
   </modules>
-
   <build>
     <plugins>
       <plugin>
@@ -193,6 +193,12 @@
       <name>Maven Central Repository</name>
       <layout>default</layout>
       <url>http://repo2.maven.org/maven2</url>
+    </repository>
+    <repository>
+      <id>jboss</id>
+      <name>JBoss Repository</name>
+      <layout>default</layout>
+      <url>https://repository.jboss.org/nexus/content/groups/public</url>
     </repository>
   </repositories>
 
@@ -383,6 +389,12 @@
         <groupId>org.deephacks.tools4j</groupId>
         <artifactId>tools4j-config-api-admin</artifactId>
         <version>${version.tools4j.config}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.quartz-scheduler</groupId>
+        <artifactId>quartz</artifactId>
+        <version>2.1.5</version>
         <scope>compile</scope>
       </dependency>
       <dependency>
