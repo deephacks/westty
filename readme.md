@@ -1,7 +1,7 @@
 # westty
 
-Server engine using Weld and Netty for building web applications using REST, google-protobuf and WebSockets that 
-enable a pure and lightweight CDI programming model.
+Westty is a server engine based on foundation of Weld and Netty, enabling a pure and lightweight CDI 
+programming model for building web applications using REST, google-protobuf and WebSockets.
 
 * [Netty](http://netty.io)
 * [Weld](http://seamframework.org/Weld)
