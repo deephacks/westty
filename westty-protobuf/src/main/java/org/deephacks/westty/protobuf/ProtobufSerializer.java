@@ -60,6 +60,11 @@ public class ProtobufSerializer {
 
                 for (Descriptor desc : fd.getMessageTypes()) {
                     FieldDescriptor fdesc = desc.findFieldByName("protoType");
+                    if (fdesc == null) {
+                        throw new IllegalArgumentException(name
+                                + ".proto file must define protoType field "
+                                + "with unqiue number that identify proto type");
+                    }
                     String packageName = fdp.getOptions().getJavaPackage();
 
                     if (Strings.isNullOrEmpty(packageName)) {
