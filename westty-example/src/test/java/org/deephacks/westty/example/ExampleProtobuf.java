@@ -16,7 +16,7 @@ package org.deephacks.westty.example;
 import java.io.File;
 import java.net.InetSocketAddress;
 
-import org.deephacks.westty.example.CreateRequest.Create;
+import org.deephacks.westty.example.CreateMessages.CreateRequest;
 import org.deephacks.westty.protobuf.ProtobufRpcClient;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 
@@ -26,8 +26,9 @@ public class ExampleProtobuf {
         serializer.register(new File("src/main/resources/META-INF/create.desc"));
         ProtobufRpcClient client = new ProtobufRpcClient(new InetSocketAddress(7777), serializer);
         client.connect();
-        Create req = Create.newBuilder().setName("name").setPassword("pw").build();
+        CreateRequest req = CreateRequest.newBuilder().setName("name").setPassword("pw").build();
         client.write(req);
+        Thread.sleep(10000);
 
     }
 }

@@ -58,8 +58,6 @@ public class WesttyProtobufExtension implements Extension {
                 continue;
             }
             for (Class<?> param : method.getJavaMember().getParameterTypes()) {
-                Class<?> ec = param.getEnclosingClass();
-
                 protoToEndpoint.put(param, method.getJavaMember());
             }
         }
@@ -73,7 +71,7 @@ public class WesttyProtobufExtension implements Extension {
         return serializer;
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object invokeEndpoint(Object proto) {
         Class<?> cls = proto.getClass();
         Method method = protoToEndpoint.get(cls);

@@ -46,7 +46,10 @@ public class WesttyProtobufHandler extends SimpleChannelHandler {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        extension.invokeEndpoint(e.getMessage());
+        Object res = extension.invokeEndpoint(e.getMessage());
+        if (res != null) {
+            e.getChannel().write(res);
+        }
     }
 
     @Override

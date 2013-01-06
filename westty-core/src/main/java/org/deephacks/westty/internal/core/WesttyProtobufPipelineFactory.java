@@ -42,7 +42,7 @@ public class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         return Channels.pipeline(new LengthFieldBasedFrameDecoder(65536, 0, 2, 0, 2),
                 new WesttyProtobufDecoder(extension.getSerializer()), new LengthFieldPrepender(2),
-                new WesttyProtobufEncoder(), handler);
+                new WesttyProtobufEncoder(extension.getSerializer()), handler);
     }
 
     public static class WesttyProtobufDecoder extends OneToOneDecoder {
@@ -64,11 +64,18 @@ public class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
     }
 
     private static class WesttyProtobufEncoder extends OneToOneEncoder {
+        private ProtobufSerializer serializer;
+
+        public WesttyProtobufEncoder(ProtobufSerializer serializer) {
+            this.serializer = serializer;
+        }
+
         @Override
         protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg)
                 throws Exception {
             if (msg instanceof MessageLite) {
-                return wrappedBuffer(((MessageLite) msg).toByteArray());
+
+                return wrappedBuffer(serializer.write(msg));
             }
             if (msg instanceof MessageLite.Builder) {
                 return wrappedBuffer(((MessageLite.Builder) msg).build().toByteArray());

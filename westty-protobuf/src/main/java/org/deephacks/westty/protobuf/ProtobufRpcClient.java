@@ -100,13 +100,14 @@ public class ProtobufRpcClient {
 
         @Override
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-
+            System.out.println(e.getMessage());
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
             final Throwable cause = e.getCause();
             final Channel ch = ctx.getChannel();
+            cause.printStackTrace();
             if (cause instanceof ClosedChannelException) {
 
             } else if (cause instanceof IOException

@@ -13,15 +13,26 @@
  */
 package org.deephacks.westty.example;
 
-import org.deephacks.westty.example.CreateRequest.Create;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.deephacks.westty.example.CreateMessages.CreateRequest;
+import org.deephacks.westty.example.CreateMessages.CreateResponse;
+import org.deephacks.westty.jpa.Transactional;
 import org.deephacks.westty.protobuf.Protobuf;
 import org.deephacks.westty.protobuf.ProtobufMethod;
 
 @Protobuf("create")
 public class ProtobufEndpoint {
+    @Inject
+    private EntityManager em;
 
     @ProtobufMethod
-    public void execute(Create request) {
+    @Transactional
+    public CreateResponse execute(CreateRequest request) {
         System.out.println(request);
+        ExampleEntity entity = new ExampleEntity(request.getName(), "config prop, fixme");
+        em.persist(entity);
+        return CreateResponse.newBuilder().setMsg("success").build();
     }
 }
