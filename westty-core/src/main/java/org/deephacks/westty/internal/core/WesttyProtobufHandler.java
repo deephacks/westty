@@ -20,34 +20,33 @@ import java.nio.channels.ClosedChannelException;
 import javax.inject.Inject;
 
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WesttyProtobufHandler extends SimpleChannelHandler {
     @Inject
     private WesttyProtobufExtension extension;
+    private Logger log = LoggerFactory.getLogger(WesttyProtobufHandler.class);
 
     @Override
-    public void channelClosed(ChannelHandlerContext ctx, final ChannelStateEvent e)
+    public void handleUpstream(final ChannelHandlerContext ctx, final ChannelEvent e)
             throws Exception {
-
-        // Netty does not want to be shutdown from within a NIO thread.
-        final class ShutdownNetty extends Thread {
-            public void run() {
-                e.getChannel().getFactory().releaseExternalResources();
-            }
+        if (e instanceof ChannelStateEvent) {
+            log.debug(e.toString());
         }
-        new ShutdownNetty().start();
-
+        super.handleUpstream(ctx, e);
     }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
         Object res = extension.invokeEndpoint(e.getMessage());
-        if (res != null) {
+        if (res != null && e.getChannel().isConnected()) {
             e.getChannel().write(res);
         }
     }
@@ -56,16 +55,17 @@ public class WesttyProtobufHandler extends SimpleChannelHandler {
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
         final Throwable cause = e.getCause();
         final Channel ch = ctx.getChannel();
-        cause.printStackTrace();
         if (cause instanceof ClosedChannelException) {
-
+            log.warn("Attempt to write to closed channel " + ch);
         } else if (cause instanceof IOException
                 && "Connection reset by peer".equals(cause.getMessage())) {
-
+            // a client may have disconnected
         } else if (cause instanceof ConnectException
                 && "Connection refused".equals(cause.getMessage())) {
             // server not up, nothing to do 
         } else {
+            log.error("Unexpected exception downstream for " + ch, cause);
+            e.getChannel().close();
         }
     }
 }

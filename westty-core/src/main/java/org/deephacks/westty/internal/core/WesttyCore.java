@@ -84,8 +84,9 @@ public class WesttyCore {
             protoBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
-
             protoBootstrap.setPipelineFactory(protoFactory);
+            protoBootstrap.setOption("child.tcpNoDelay", true);
+            protoBootstrap.setOption("child.keepAlive", true);
             protoChannel = protoBootstrap.bind(new InetSocketAddress(config.getProtobufPort()));
 
         }

@@ -12,6 +12,7 @@ import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -27,16 +28,19 @@ import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.MessageLite;
 
-public class ProtobufRpcClient {
+public class WesttyProtobufClient {
     private final InetSocketAddress address;
     private ClientBootstrap bootstrap;
     private Channel channel;
     private ProtobufSerializer serializer;
+    private Logger log = LoggerFactory.getLogger(WesttyProtobufClient.class);
 
-    public ProtobufRpcClient(final InetSocketAddress address, ProtobufSerializer serializer) {
+    public WesttyProtobufClient(final InetSocketAddress address, ProtobufSerializer serializer) {
         this.address = address;
         this.serializer = serializer;
     }
@@ -49,9 +53,14 @@ public class ProtobufRpcClient {
         return channel;
     }
 
-    public void write(Object protoMsg) throws IOException {
+    public ChannelFuture write(Object protoMsg) throws IOException {
+
         byte[] bytes = serializer.write(protoMsg);
-        channel.write(ChannelBuffers.wrappedBuffer(bytes));
+        if (!channel.isOpen()) {
+            throw new IOException("Channel is not open");
+        }
+
+        return channel.write(ChannelBuffers.wrappedBuffer(bytes));
     }
 
     public void connect() throws IOException {
@@ -73,6 +82,18 @@ public class ProtobufRpcClient {
 
     }
 
+    public void disconnect() {
+        if (channel != null && channel.isConnected()) {
+            channel.close().awaitUninterruptibly();
+        }
+        final class ShutdownNetty extends Thread {
+            public void run() {
+                bootstrap.releaseExternalResources();
+            }
+        }
+        new ShutdownNetty().start();
+    }
+
     /**
      * Is client still connected to the RpcServer. 
      */
@@ -84,6 +105,15 @@ public class ProtobufRpcClient {
     }
 
     public class ClientHandler extends SimpleChannelHandler {
+
+        @Override
+        public void handleUpstream(final ChannelHandlerContext ctx, final ChannelEvent e)
+                throws Exception {
+            if (e instanceof ChannelStateEvent) {
+                log.debug(e.toString());
+            }
+            super.handleUpstream(ctx, e);
+        }
 
         @Override
         public void channelClosed(ChannelHandlerContext ctx, final ChannelStateEvent e)
@@ -107,16 +137,18 @@ public class ProtobufRpcClient {
         public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
             final Throwable cause = e.getCause();
             final Channel ch = ctx.getChannel();
-            cause.printStackTrace();
             if (cause instanceof ClosedChannelException) {
-
+                log.warn("Attempt to write to closed channel." + ch);
+                disconnect();
             } else if (cause instanceof IOException
                     && "Connection reset by peer".equals(cause.getMessage())) {
-
+                disconnect();
             } else if (cause instanceof ConnectException
                     && "Connection refused".equals(cause.getMessage())) {
                 // server not up, nothing to do 
             } else {
+                log.error("Unexpected exception.", e.getCause());
+                disconnect();
             }
         }
     }
