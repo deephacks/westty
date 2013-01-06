@@ -18,21 +18,32 @@ import javax.persistence.EntityManager;
 
 import org.deephacks.westty.example.CreateMessages.CreateRequest;
 import org.deephacks.westty.example.CreateMessages.CreateResponse;
+import org.deephacks.westty.example.DeleteMessages.DeleteRequest;
+import org.deephacks.westty.example.DeleteMessages.DeleteResponse;
 import org.deephacks.westty.jpa.Transactional;
 import org.deephacks.westty.protobuf.Protobuf;
 import org.deephacks.westty.protobuf.ProtobufMethod;
 
-@Protobuf("create")
+@Protobuf({ "create", "delete" })
 public class ProtobufEndpoint {
     @Inject
     private EntityManager em;
 
     @ProtobufMethod
     @Transactional
-    public CreateResponse execute(CreateRequest request) {
-        System.out.println(request);
+    public CreateResponse create(CreateRequest request) {
+        System.out.println("create " + request);
         ExampleEntity entity = new ExampleEntity(request.getName(), "config prop, fixme");
         em.persist(entity);
         return CreateResponse.newBuilder().setMsg("success").build();
+    }
+
+    @ProtobufMethod
+    @Transactional
+    public DeleteResponse delete(DeleteRequest request) {
+        System.out.println("delete " + request);
+        ExampleEntity entity = em.find(ExampleEntity.class, request.getName());
+        em.remove(entity);
+        return DeleteResponse.newBuilder().setMsg("success").build();
     }
 }

@@ -17,6 +17,7 @@ import java.io.File;
 import java.net.InetSocketAddress;
 
 import org.deephacks.westty.example.CreateMessages.CreateRequest;
+import org.deephacks.westty.example.DeleteMessages.DeleteRequest;
 import org.deephacks.westty.protobuf.ProtobufRpcClient;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 
@@ -24,10 +25,13 @@ public class ExampleProtobuf {
     public static void main(String[] args) throws Exception {
         ProtobufSerializer serializer = new ProtobufSerializer();
         serializer.register(new File("src/main/resources/META-INF/create.desc"));
+        serializer.register(new File("src/main/resources/META-INF/delete.desc"));
         ProtobufRpcClient client = new ProtobufRpcClient(new InetSocketAddress(7777), serializer);
         client.connect();
-        CreateRequest req = CreateRequest.newBuilder().setName("name").setPassword("pw").build();
-        client.write(req);
+        CreateRequest create = CreateRequest.newBuilder().setName("name").setPassword("pw").build();
+        DeleteRequest delete = DeleteRequest.newBuilder().setName("name").build();
+        client.write(create);
+        client.write(delete);
         Thread.sleep(10000);
 
     }
