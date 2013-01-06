@@ -53,13 +53,17 @@ public class WesttyCore {
         @Inject
         private ServerConfig config;
         @Inject
-        private WesttyPipelineFactory factory;
+        private WesttyPipelineFactory coreFactory;
+        @Inject
+        private WesttyProtobufPipelineFactory protoFactory;
         @Inject
         private WesttyJaxrsApplication jaxrsApps;
         @Inject
         private ResteasyDeployment deployment;
-        private Channel channel;
-        private ServerBootstrap bootstrap;
+        private Channel coreChannel;
+        private Channel protoChannel;
+        private ServerBootstrap coreBootstrap;
+        private ServerBootstrap protoBootstrap;
 
         public void start() {
             deployment.setApplication(jaxrsApps);
@@ -71,17 +75,28 @@ public class WesttyCore {
             deployment.setProviderFactory(resteasyFactory);
             deployment.start();
 
-            bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+            coreBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
-            bootstrap.setPipelineFactory(factory);
-            channel = bootstrap.bind(new InetSocketAddress(config.getPort()));
+            coreBootstrap.setPipelineFactory(coreFactory);
+            coreChannel = coreBootstrap.bind(new InetSocketAddress(config.getHttpPort()));
+
+            protoBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+                    Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
+                    config.getIoWorkerCount()));
+
+            protoBootstrap.setPipelineFactory(protoFactory);
+            protoChannel = protoBootstrap.bind(new InetSocketAddress(config.getProtobufPort()));
+
         }
 
         public void stop() {
-            channel.close().awaitUninterruptibly();
-            bootstrap.releaseExternalResources();
+            coreChannel.close().awaitUninterruptibly();
+            coreBootstrap.releaseExternalResources();
             deployment.stop();
+
+            protoChannel.close().awaitUninterruptibly();
+            protoBootstrap.releaseExternalResources();
         }
 
         /**

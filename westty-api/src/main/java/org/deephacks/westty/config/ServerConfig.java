@@ -32,7 +32,12 @@ public class ServerConfig {
     @Config(desc = "Http listening port.")
     @NotNull
     @Size(min = 0, max = 65535)
-    private Integer port = 8080;
+    private Integer httpPort = 8080;
+
+    @Config(desc = "Protobuf listening port.")
+    @NotNull
+    @Size(min = 0, max = 65535)
+    private Integer protoPort = 7777;
 
     @Config(desc = "Set the number of threads to use for the Executor. "
             + "See netty javadoc of OrderedMemoryAwareThreadPoolExecutor")
@@ -83,8 +88,12 @@ public class ServerConfig {
         return maxRequestSize;
     }
 
-    public Integer getPort() {
-        return port;
+    public Integer getHttpPort() {
+        return httpPort;
+    }
+
+    public Integer getProtobufPort() {
+        return protoPort;
     }
 
     public Integer getMaxHttpContentChunkLength() {

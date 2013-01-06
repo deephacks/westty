@@ -74,6 +74,7 @@
     <module>westty-websocket</module>
     <module>westty-example</module>
     <module>westty-docbkx</module>
+    <module>westty-protobuf</module>
   </modules>
   <build>
     <plugins>
@@ -254,6 +255,12 @@
         <version>${version.westty}</version>
       </dependency>
       <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-protobuf</artifactId>
+        <scope>provided</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty</artifactId>
         <version>3.3.1.Final</version>
@@ -395,6 +402,12 @@
         <groupId>org.quartz-scheduler</groupId>
         <artifactId>quartz</artifactId>
         <version>2.1.5</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>2.4.1</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

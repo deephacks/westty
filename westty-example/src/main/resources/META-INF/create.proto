@@ -1,0 +1,11 @@
+package example;
+
+option java_package = "org.deephacks.westty.example";
+option java_outer_classname = "CreateRequest";
+
+
+message Create {
+  optional uint32 protoType = 100;
+  required string name = 1;
+  required string password = 2;
+}

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.deephacks.westty</groupId>
+    <artifactId>westty-root</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>westty-protobuf</artifactId>
+  <name>Westty Protobuf</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>compile-protoc</id>
+            <phase>generate-sources</phase>
+            <configuration>
+              <tasks>
+                <mkdir dir="${generated.sourceDirectory}" />
+                <path id="proto.path">
+                  <fileset dir="src/main/protobuf">
+                    <include name="**/*.proto" />
+                  </fileset>
+                </path>
+                <pathconvert pathsep=" " property="proto.files" refid="proto.path" />
+                <exec executable="protoc" failonerror="true">
+                  <arg value="--java_out=${generated.sourceDirectory}" />
+                  <arg value="-I${project.basedir}/src/main/protobuf" />
+                  <arg line="${proto.files}" />
+                </exec>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

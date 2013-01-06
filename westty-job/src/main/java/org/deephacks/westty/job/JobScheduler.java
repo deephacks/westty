@@ -191,6 +191,7 @@ public class JobScheduler implements Extension {
             try {
                 Stopwatch s = new Stopwatch().start();
                 try {
+                    logger.debug("Executing.");
                     job.execute(new JobDataImpl(map));
                     map.putAsString(LAST_EXECUTION_TIMESTAMP, System.currentTimeMillis());
                 } catch (Exception e) {
