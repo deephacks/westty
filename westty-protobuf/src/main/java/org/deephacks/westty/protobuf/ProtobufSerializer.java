@@ -109,5 +109,4 @@ public class ProtobufSerializer {
         baos.write(bytes);
         return baos.toByteArray();
     }
-
 }

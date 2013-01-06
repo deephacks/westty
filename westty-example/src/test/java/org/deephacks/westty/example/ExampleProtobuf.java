@@ -14,38 +14,94 @@
 package org.deephacks.westty.example;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.deephacks.westty.Westty;
+import org.deephacks.westty.config.JpaConfig;
 import org.deephacks.westty.example.CreateMessages.CreateRequest;
+import org.deephacks.westty.example.CreateMessages.CreateResponse;
 import org.deephacks.westty.example.DeleteMessages.DeleteRequest;
+import org.deephacks.westty.example.DeleteMessages.DeleteResponse;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.protobuf.WesttyProtobufClient;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 
 public class ExampleProtobuf {
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
+
     public static void main(String[] args) throws Exception {
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.INFO);
+
+        new JpaConfig().dropInstall();
+
+        Westty westty = new Westty();
+        westty.start();
+
         ProtobufSerializer serializer = new ProtobufSerializer();
         serializer.register(new File("src/main/resources/META-INF/create.desc"));
         serializer.register(new File("src/main/resources/META-INF/delete.desc"));
-        run(serializer);
-        run(serializer);
-
+        int clients = 50;
+        CyclicBarrier barrier = new CyclicBarrier(clients);
+        for (int i = 0; i < clients; i++) {
+            executor.execute(new Test(i + "", serializer, barrier));
+        }
+        barrier.await();
+        System.out.println("done");
+        westty.stop();
     }
 
-    public static void run(ProtobufSerializer serializer) throws Exception {
-        WesttyProtobufClient client = new WesttyProtobufClient(new InetSocketAddress(7777),
-                serializer);
-        client.connect();
-        for (int i = 0; i < 1000; i++) {
-            CreateRequest create = CreateRequest.newBuilder().setName("name").setPassword("pw")
-                    .build();
-            DeleteRequest delete = DeleteRequest.newBuilder().setName("name").build();
-            client.write(create).awaitUninterruptibly();
-            client.write(delete).awaitUninterruptibly();
-        }
-        client.disconnect();
+    public static final class Test implements Runnable {
+        private ProtobufSerializer serializer;
+        private String name;
+        private CyclicBarrier barrier;
 
-        Thread.sleep(2000);
-        System.out.println("Disconnect");
+        public Test(String name, ProtobufSerializer serializer, CyclicBarrier barrier) {
+            this.serializer = serializer;
+            this.name = name;
+            this.barrier = barrier;
+        }
+
+        @Override
+        public void run() {
+            try {
+                WesttyProtobufClient client = new WesttyProtobufClient(new InetSocketAddress(7777),
+                        serializer);
+                client.connect();
+                for (int i = 0; i < 1000; i++) {
+                    CreateRequest create = CreateRequest.newBuilder().setName(name)
+                            .setPassword("pw").build();
+                    DeleteRequest delete = DeleteRequest.newBuilder().setName(name).build();
+                    CreateResponse cres = (CreateResponse) client.async(create);
+                    if (!cres.getMsg().contains(name)) {
+                        throw new RuntimeException();
+                    }
+                    DeleteResponse dres = (DeleteResponse) client.async(delete);
+                    if (!dres.getMsg().contains(name)) {
+                        throw new RuntimeException();
+                    }
+
+                }
+                client.disconnect();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
+                try {
+                    barrier.await();
+                    System.out.println(name + " done");
+                } catch (Exception e) {
+
+                }
+            }
+
+        }
 
     }
 }

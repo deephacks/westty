@@ -19,25 +19,47 @@ import org.deephacks.tools4j.config.admin.JaxrsConfigClient;
 import org.deephacks.westty.Westty;
 import org.deephacks.westty.config.JpaConfig;
 import org.deephacks.westty.config.WebConfig;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
-public class ExampleMain {
-    public static void main(String[] args) {
-
+public class ExampleConfig {
+    static {
+        // make sure loggin is initalized before anything else
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
         new JpaConfig().dropInstall();
+    }
 
-        Westty westty = new Westty();
+    private static final Westty westty = new Westty();
+
+    private File root = new File("./src/main/resource");
+    private JaxrsConfigClient client = new JaxrsConfigClient("localhost", 8080, "/jaxrs");
+
+    @BeforeClass
+    public static void beforeClass() {
         westty.start();
-        File file = new File("./src/main/resources");
-        JaxrsConfigClient client = new JaxrsConfigClient("localhost", 8080, "/jaxrs");
-        WebConfig config = new WebConfig();
-        config.setStaticRoot(file.getAbsolutePath());
-        client.merge(config);
+    }
 
+    @Before
+    public void before() {
+
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        westty.stop();
+    }
+
+    @Test
+    public void test_set_config() {
+        WebConfig config = new WebConfig();
+        config.setStaticRoot(root.getAbsolutePath());
+        client.merge(config);
     }
 }

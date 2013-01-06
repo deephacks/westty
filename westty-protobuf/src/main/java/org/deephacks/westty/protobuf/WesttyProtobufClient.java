@@ -6,7 +6,12 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -39,6 +44,8 @@ public class WesttyProtobufClient {
     private Channel channel;
     private ProtobufSerializer serializer;
     private Logger log = LoggerFactory.getLogger(WesttyProtobufClient.class);
+    private final Lock lock = new ReentrantLock();
+    private final Queue<Callback> callbacks = new ConcurrentLinkedQueue<Callback>();
 
     public WesttyProtobufClient(final InetSocketAddress address, ProtobufSerializer serializer) {
         this.address = address;
@@ -54,13 +61,27 @@ public class WesttyProtobufClient {
     }
 
     public ChannelFuture write(Object protoMsg) throws IOException {
-
         byte[] bytes = serializer.write(protoMsg);
         if (!channel.isOpen()) {
             throw new IOException("Channel is not open");
         }
-
         return channel.write(ChannelBuffers.wrappedBuffer(bytes));
+    }
+
+    public Object async(Object protoMsg) throws IOException {
+        byte[] bytes = serializer.write(protoMsg);
+        Callback callback = new Callback();
+        lock.lock();
+        try {
+            callbacks.add(callback);
+            if (!channel.isOpen()) {
+                throw new IOException("Channel is not open");
+            }
+            channel.write(ChannelBuffers.wrappedBuffer(bytes));
+        } finally {
+            lock.unlock();
+        }
+        return callback.get();
     }
 
     public void connect() throws IOException {
@@ -130,7 +151,8 @@ public class WesttyProtobufClient {
 
         @Override
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-            System.out.println(e.getMessage());
+
+            callbacks.poll().handle(e.getMessage());
         }
 
         @Override
@@ -195,4 +217,24 @@ public class WesttyProtobufClient {
         }
     }
 
+    static class Callback {
+
+        private final CountDownLatch latch = new CountDownLatch(1);
+
+        private Object response;
+
+        Object get() {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            return response;
+        }
+
+        void handle(Object response) {
+            this.response = response;
+            latch.countDown();
+        }
+    }
 }

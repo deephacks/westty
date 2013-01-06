@@ -32,18 +32,16 @@ public class ProtobufEndpoint {
     @ProtobufMethod
     @Transactional
     public CreateResponse create(CreateRequest request) {
-        System.out.println("create " + request);
         ExampleEntity entity = new ExampleEntity(request.getName(), "config prop, fixme");
         em.persist(entity);
-        return CreateResponse.newBuilder().setMsg("success").build();
+        return CreateResponse.newBuilder().setMsg("success: " + request.getName()).build();
     }
 
     @ProtobufMethod
     @Transactional
     public DeleteResponse delete(DeleteRequest request) {
-        System.out.println("delete " + request);
         ExampleEntity entity = em.find(ExampleEntity.class, request.getName());
         em.remove(entity);
-        return DeleteResponse.newBuilder().setMsg("success").build();
+        return DeleteResponse.newBuilder().setMsg("success: " + request.getName()).build();
     }
 }
