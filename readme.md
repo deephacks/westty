@@ -1,6 +1,7 @@
 # westty
 
-Server engine using Weld and Netty for building web applications using REST, google-protobuf and WebSockets.
+Server engine using Weld and Netty for building web applications using REST, google-protobuf and WebSockets that 
+enable a pure and lightweight CDI programming model.
 
 * [Netty](http://netty.io)
 * [Weld](http://seamframework.org/Weld)
@@ -13,4 +14,4 @@ Westty also support the following capabilities. Optional, no classpath pollution
 
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
-* [Quartz-CDI](http://quartz-scheduler.org)
+* [Quartz job scheduling](http://quartz-scheduler.org)
