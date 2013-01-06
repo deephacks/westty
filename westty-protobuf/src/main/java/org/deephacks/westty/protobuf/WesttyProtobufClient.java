@@ -60,7 +60,7 @@ public class WesttyProtobufClient {
         return channel;
     }
 
-    public ChannelFuture write(Object protoMsg) throws IOException {
+    public ChannelFuture callAsync(Object protoMsg) throws IOException {
         byte[] bytes = serializer.write(protoMsg);
         if (!channel.isOpen()) {
             throw new IOException("Channel is not open");
@@ -68,7 +68,7 @@ public class WesttyProtobufClient {
         return channel.write(ChannelBuffers.wrappedBuffer(bytes));
     }
 
-    public Object async(Object protoMsg) throws IOException {
+    public Object callSync(Object protoMsg) throws IOException {
         byte[] bytes = serializer.write(protoMsg);
         Callback callback = new Callback();
         lock.lock();
@@ -218,9 +218,7 @@ public class WesttyProtobufClient {
     }
 
     static class Callback {
-
         private final CountDownLatch latch = new CountDownLatch(1);
-
         private Object response;
 
         Object get() {

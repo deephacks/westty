@@ -79,11 +79,11 @@ public class ExampleProtobuf {
                     CreateRequest create = CreateRequest.newBuilder().setName(name)
                             .setPassword("pw").build();
                     DeleteRequest delete = DeleteRequest.newBuilder().setName(name).build();
-                    CreateResponse cres = (CreateResponse) client.async(create);
+                    CreateResponse cres = (CreateResponse) client.callSync(create);
                     if (!cres.getMsg().contains(name)) {
                         throw new RuntimeException();
                     }
-                    DeleteResponse dres = (DeleteResponse) client.async(delete);
+                    DeleteResponse dres = (DeleteResponse) client.callSync(delete);
                     if (!dres.getMsg().contains(name)) {
                         throw new RuntimeException();
                     }
