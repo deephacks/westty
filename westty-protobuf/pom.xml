@@ -25,36 +25,4 @@
       <artifactId>protobuf-java</artifactId>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>compile-protoc</id>
-            <phase>generate-sources</phase>
-            <configuration>
-              <tasks>
-                <mkdir dir="${generated.sourceDirectory}" />
-                <path id="proto.path">
-                  <fileset dir="src/main/protobuf">
-                    <include name="**/*.proto" />
-                  </fileset>
-                </path>
-                <pathconvert pathsep=" " property="proto.files" refid="proto.path" />
-                <exec executable="protoc" failonerror="true">
-                  <arg value="--java_out=${generated.sourceDirectory}" />
-                  <arg value="-I${project.basedir}/src/main/protobuf" />
-                  <arg line="${proto.files}" />
-                </exec>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 </project>

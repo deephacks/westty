@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 public class Varint32 {
     private int value;
     private ByteBuffer bytes;
+    private int size;
 
     public Varint32(int value) {
         this.value = value;
@@ -31,6 +32,13 @@ public class Varint32 {
                 value >>>= 7;
             }
         }
+    }
+
+    public int getSize() {
+        if (size == 0) {
+            size = computeRawVarint32Size(value);
+        }
+        return size;
     }
 
     private int computeRawVarint32Size(final int value) {

@@ -13,7 +13,6 @@
  */
 package org.deephacks.westty.protobuf;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -100,13 +99,15 @@ public class ProtobufSerializer {
     }
 
     public byte[] write(Object proto) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Message msg = (Message) proto;
         String protoName = msg.getDescriptorForType().getFullName();
         Integer num = protoToNum.get(protoName);
-        baos.write(new Varint32(num).write());
-        byte[] bytes = msg.toByteArray();
-        baos.write(bytes);
-        return baos.toByteArray();
+        byte[] msgBytes = msg.toByteArray();
+        Varint32 vint = new Varint32(num);
+        int vsize = vint.getSize();
+        byte[] bytes = new byte[vsize + msgBytes.length];
+        System.arraycopy(vint.write(), 0, bytes, 0, vsize);
+        System.arraycopy(msgBytes, 0, bytes, vsize, msgBytes.length);
+        return bytes;
     }
 }
