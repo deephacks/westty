@@ -1,0 +1,8 @@
+
+ 
+)src/main/resources/META-INF/failure.protoexample"8
+Failure
+	protoTypeè (
+msg (	
+code (B0
+org.deephacks.westty.protobufBFailureMessages

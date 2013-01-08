@@ -22,6 +22,7 @@ import org.deephacks.westty.example.DeleteMessages.DeleteRequest;
 import org.deephacks.westty.example.DeleteMessages.DeleteResponse;
 import org.deephacks.westty.jpa.Transactional;
 import org.deephacks.westty.protobuf.Protobuf;
+import org.deephacks.westty.protobuf.ProtobufException;
 import org.deephacks.westty.protobuf.ProtobufMethod;
 
 @Protobuf({ "create", "delete" })
@@ -31,7 +32,7 @@ public class ProtobufEndpoint {
 
     @ProtobufMethod
     @Transactional
-    public CreateResponse create(CreateRequest request) {
+    public CreateResponse create(CreateRequest request) throws ProtobufException {
         ExampleEntity entity = new ExampleEntity(request.getName(), "config prop, fixme");
         em.persist(entity);
         return CreateResponse.newBuilder().setMsg("success: " + request.getName()).build();
@@ -39,7 +40,7 @@ public class ProtobufEndpoint {
 
     @ProtobufMethod
     @Transactional
-    public DeleteResponse delete(DeleteRequest request) {
+    public DeleteResponse delete(DeleteRequest request) throws ProtobufException {
         ExampleEntity entity = em.find(ExampleEntity.class, request.getName());
         em.remove(entity);
         return DeleteResponse.newBuilder().setMsg("success: " + request.getName()).build();

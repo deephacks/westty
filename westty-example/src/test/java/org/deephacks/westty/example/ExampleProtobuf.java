@@ -13,7 +13,6 @@
  */
 package org.deephacks.westty.example;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CyclicBarrier;
@@ -22,10 +21,12 @@ import java.util.concurrent.Executors;
 
 import org.deephacks.westty.Westty;
 import org.deephacks.westty.config.JpaConfig;
+import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.example.CreateMessages.CreateRequest;
 import org.deephacks.westty.example.CreateMessages.CreateResponse;
 import org.deephacks.westty.example.DeleteMessages.DeleteRequest;
 import org.deephacks.westty.example.DeleteMessages.DeleteResponse;
+import org.deephacks.westty.protobuf.ProtobufException;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.protobuf.WesttyProtobufClient;
 import org.slf4j.LoggerFactory;
@@ -41,30 +42,34 @@ public class ExampleProtobuf {
         root.setLevel(Level.INFO);
 
         new JpaConfig().dropInstall();
-
         Westty westty = new Westty();
         westty.start();
 
         ProtobufSerializer serializer = new ProtobufSerializer();
-        serializer.register(new File("src/main/resources/META-INF/create.desc"));
-        serializer.register(new File("src/main/resources/META-INF/delete.desc"));
-        int clients = 50;
-        CyclicBarrier barrier = new CyclicBarrier(clients);
+        serializer.registerResource("META-INF/create.desc");
+        serializer.registerResource("META-INF/delete.desc");
+        serializer.registerResource("META-INF/failure.desc");
+        WesttyProtobufClient client = new WesttyProtobufClient(Executors.newCachedThreadPool(),
+                Executors.newCachedThreadPool(), serializer);
+        int clients = 2;
+        CyclicBarrier barrier = new CyclicBarrier(clients + 1);
         for (int i = 0; i < clients; i++) {
-            executor.execute(new Test(i + "", serializer, barrier));
+            executor.execute(new Test(Integer.toString(i), client, barrier));
         }
         barrier.await();
         System.out.println("done");
+        client.shutdown();
         westty.stop();
+
     }
 
     public static final class Test implements Runnable {
-        private ProtobufSerializer serializer;
+        private WesttyProtobufClient client;
         private String name;
         private CyclicBarrier barrier;
 
-        public Test(String name, ProtobufSerializer serializer, CyclicBarrier barrier) {
-            this.serializer = serializer;
+        public Test(String name, WesttyProtobufClient client, CyclicBarrier barrier) {
+            this.client = client;
             this.name = name;
             this.barrier = barrier;
         }
@@ -72,24 +77,27 @@ public class ExampleProtobuf {
         @Override
         public void run() {
             try {
-                WesttyProtobufClient client = new WesttyProtobufClient(new InetSocketAddress(7777),
-                        serializer);
-                client.connect();
+                int port = new ServerConfig().getProtobufPort();
+                int channel = client.connect(new InetSocketAddress(port));
                 for (int i = 0; i < 1000; i++) {
                     CreateRequest create = CreateRequest.newBuilder().setName(name)
                             .setPassword("pw").build();
                     DeleteRequest delete = DeleteRequest.newBuilder().setName(name).build();
-                    CreateResponse cres = (CreateResponse) client.callSync(create);
-                    if (!cres.getMsg().contains(name)) {
-                        throw new RuntimeException();
-                    }
-                    DeleteResponse dres = (DeleteResponse) client.callSync(delete);
-                    if (!dres.getMsg().contains(name)) {
-                        throw new RuntimeException();
+                    try {
+                        CreateResponse cres = (CreateResponse) client.callSync(channel, create);
+                        if (!cres.getMsg().contains(name)) {
+                            throw new RuntimeException();
+                        }
+                        DeleteResponse dres = (DeleteResponse) client.callSync(channel, delete);
+                        if (!dres.getMsg().contains(name)) {
+                            throw new RuntimeException();
+                        }
+                    } catch (ProtobufException e) {
+                        e.printStackTrace();
+                        return;
                     }
 
                 }
-                client.disconnect();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {

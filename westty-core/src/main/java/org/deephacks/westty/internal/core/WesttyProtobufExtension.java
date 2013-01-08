@@ -13,8 +13,8 @@
  */
 package org.deephacks.westty.internal.core;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -28,7 +28,10 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
+import org.deephacks.westty.protobuf.FailureMessages.Failure;
 import org.deephacks.westty.protobuf.Protobuf;
+import org.deephacks.westty.protobuf.ProtobufException;
+import org.deephacks.westty.protobuf.ProtobufException.FailureCode;
 import org.deephacks.westty.protobuf.ProtobufMethod;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 
@@ -47,9 +50,7 @@ public class WesttyProtobufExtension implements Extension {
 
         Protobuf proto = org.getAnnotation(Protobuf.class);
         for (String protodesc : proto.value()) {
-            URL url = Thread.currentThread().getContextClassLoader()
-                    .getResource("META-INF/" + protodesc + ".desc");
-            serializer.register(url);
+            serializer.registerResource("META-INF/" + protodesc + ".desc");
         }
 
         for (AnnotatedMethod<?> method : org.getMethods()) {
@@ -65,6 +66,7 @@ public class WesttyProtobufExtension implements Extension {
 
     public void start(@Observes AfterDeploymentValidation event, BeanManager bm) {
         beanManager = bm;
+        serializer.registerResource("META-INF/failure.desc");
     }
 
     public ProtobufSerializer getSerializer() {
@@ -81,13 +83,34 @@ public class WesttyProtobufExtension implements Extension {
         Bean protoBean = beanManager.resolve(protoBeans);
         CreationalContext cc = beanManager.createCreationalContext(protoBean);
         Object endpoint = beanManager.getReference(protoBean, Object.class, cc);
+        Object res = null;
         try {
-            return method.invoke(endpoint, proto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            res = method.invoke(endpoint, proto);
+        } catch (InvocationTargetException e) {
+            Throwable ex = e.getCause();
+            if (ex instanceof ProtobufException) {
+                ProtobufException pex = (ProtobufException) ex;
+                res = Failure.newBuilder().setCode(pex.getCode()).setMsg(pex.getProtobufMessage())
+                        .build();
+            } else if (ex instanceof IllegalArgumentException) {
+                res = Failure.newBuilder().setCode(FailureCode.BAD_REQUEST.getCode())
+                        .setMsg(ex.getMessage()).build();
+            } else if (ex instanceof UnsupportedOperationException) {
+                res = Failure.newBuilder().setCode(FailureCode.NOT_IMPLEMENTED.getCode())
+                        .setMsg(ex.getMessage()).build();
+            } else if (ex instanceof IllegalStateException) {
+                res = Failure.newBuilder().setCode(FailureCode.CONFLICT.getCode())
+                        .setMsg(ex.getMessage()).build();
+            } else if (ex instanceof Exception) {
+                res = Failure.newBuilder().setCode(FailureCode.INTERNAL_ERROR.getCode())
+                        .setMsg(ex.getMessage()).build();
+            }
+        } catch (Exception ex) {
+            res = Failure.newBuilder().setCode(FailureCode.INTERNAL_ERROR.getCode())
+                    .setMsg(ex.getMessage()).build();
         } finally {
             protoBean.destroy(endpoint, cc);
         }
+        return res;
     }
 }

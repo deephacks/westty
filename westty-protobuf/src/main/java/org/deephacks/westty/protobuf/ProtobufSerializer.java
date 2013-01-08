@@ -51,6 +51,11 @@ public class ProtobufSerializer {
         }
     }
 
+    public void registerResource(String protodesc) {
+        URL url = Thread.currentThread().getContextClassLoader().getResource(protodesc);
+        register(url);
+    }
+
     private void registerDesc(String name, InputStream in) {
         try {
             FileDescriptorSet descriptorSet = FileDescriptorSet.parseFrom(in);

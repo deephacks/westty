@@ -1,0 +1,10 @@
+package example;
+
+option java_package = "org.deephacks.westty.protobuf";
+option java_outer_classname = "FailureMessages";
+
+message Failure {
+  optional uint32 protoType = 1000;
+  required string msg = 1;
+  required uint32 code = 2;
+}
