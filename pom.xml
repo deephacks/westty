@@ -261,6 +261,12 @@
         <version>${version.westty}</version>
       </dependency>
       <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-job</artifactId>
+        <scope>provided</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty</artifactId>
         <version>3.3.1.Final</version>
