@@ -1,0 +1,31 @@
+#!/bin/sh
+
+if [ -z "$LAUNCHER_HOME" ] ; then
+  ## resolve links
+  PRG="$0"
+
+  # for relative symlinks
+  while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+      PRG="$link"
+    else
+      PRG="`dirname "$PRG"`/$link"
+    fi
+  done
+
+  saveddir=`pwd`
+
+  LAUNCHER_HOME=`dirname "$PRG"`/..
+
+  # make it fully qualified
+  LAUNCHER_HOME=`cd "$LAUNCHER_HOME" && pwd`
+
+  cd "$saveddir"
+fi
+
+exec java -classpath "${LAUNCHER_HOME}"/lib/westty-launcher.jar \
+  "-Dlauncher.home=${LAUNCHER_HOME}"  \
+  "-Dmain.class=org.deephacks.westty.Westty"  \
+  "-Dlib.dir=lib" org.deephacks.westty.Launcher "$@"

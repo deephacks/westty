@@ -1,0 +1,80 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.deephacks.westty</groupId>
+    <artifactId>westty-root</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>westty-dist</artifactId>
+  <name>Westty Distribution</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-job</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-protobuf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-jpa</artifactId>
+    </dependency>
+    <!-- TODO: not really needed -->
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>westty-launcher</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <finalName>westty-${project.version}</finalName>
+          <descriptors>
+            <descriptor>assembly.xml</descriptor>
+            <descriptor>src.xml</descriptor>
+          </descriptors>
+          <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-jars</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/jars</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-sources</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <classifier>sources</classifier>
+              <outputDirectory>${project.build.directory}/jars</outputDirectory>
+              <includeGroupIds>${project.groupId}</includeGroupIds>
+              <excludeArtifactIds>netty</excludeArtifactIds>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
