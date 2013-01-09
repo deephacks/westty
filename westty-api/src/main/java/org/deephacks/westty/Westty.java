@@ -25,7 +25,9 @@ public class Westty {
         }
     }
 
-    public Westty() {
+    public static void main(String[] args) {
+        Westty westty = new Westty();
+        westty.start();
     }
 
     public void start() {
