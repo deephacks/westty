@@ -70,6 +70,10 @@ public class JobScheduler implements Extension {
 
     public void init(@Observes BeforeBeanDiscovery event) {
         StdSchedulerFactory factory = new StdSchedulerFactory();
+        // TODO: These schemas should be registered by config extension
+        ctx.register(JobSchedulerConfig.class);
+        ctx.register(JobConfig.class);
+
         JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
         try {
             factory.initialize(config.getInputStream());
