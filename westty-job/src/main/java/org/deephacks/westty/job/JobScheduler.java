@@ -23,16 +23,17 @@ import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import org.deephacks.tools4j.config.RuntimeContext;
+import org.deephacks.tools4j.config.internal.core.ConfigCdiExtension;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Events;
 import org.deephacks.tools4j.config.model.Lookup;
@@ -55,25 +56,26 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
 public class JobScheduler implements Extension {
-    private Logger logger = LoggerFactory.getLogger(JobScheduler.class);
-    static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
-    private Scheduler scheduler;
-    private static BeanManager beanManager;
+    private static final Logger log = LoggerFactory.getLogger(JobScheduler.class);
     private static final String JOB_CLASS_KEY = "JOB_ID_KEY";
     private static final String LAST_EXECUTION_TIMESTAMP = "LAST_EXECUTION_TIMESTAMP";
+    private static final Logger logger = LoggerFactory.getLogger(JobScheduler.class);
+    private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
+    private static BeanManager beanManager;
+    private Scheduler scheduler;
+    /** config extension must first register schema, but ordering is not supported */
+    private ConfigCdiExtension configExtension = new ConfigCdiExtension();
     private static final Set<Class<? extends Job>> jobs = new HashSet<Class<? extends Job>>();
 
     public JobScheduler() throws SchedulerException {
         StdSchedulerFactory factory = new org.quartz.impl.StdSchedulerFactory();
         this.scheduler = factory.getScheduler();
+
     }
 
-    public void init(@Observes BeforeBeanDiscovery event) {
+    public void afterBeanDiscovery(@Observes AfterBeanDiscovery event, BeanManager manager) {
+        configExtension.afterBeanDiscovery(event, manager);
         StdSchedulerFactory factory = new StdSchedulerFactory();
-        // TODO: These schemas should be registered by config extension
-        ctx.register(JobSchedulerConfig.class);
-        ctx.register(JobConfig.class);
-
         JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
         try {
             factory.initialize(config.getInputStream());
@@ -81,6 +83,7 @@ public class JobScheduler implements Extension {
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     public void start(@Observes AfterDeploymentValidation event, BeanManager bm) {
@@ -118,6 +121,11 @@ public class JobScheduler implements Extension {
     }
 
     public void containerSchedule(@Observes ProcessAnnotatedType<?> pat) {
+        configExtension.processAnnotatedType(pat);
+        // extension wont give us config within same jar
+        // need to register schema manually
+        ctx.register(JobSchedulerConfig.class);
+        ctx.register(JobConfig.class);
         AnnotatedType<?> t = pat.getAnnotatedType();
         Schedule schedule = t.getAnnotation(Schedule.class);
         if (schedule == null) {
@@ -168,7 +176,7 @@ public class JobScheduler implements Extension {
     @PersistJobDataAfterExecution
     @DisallowConcurrentExecution
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static class JobDelegate implements org.quartz.Job {
+    static class JobDelegate implements org.quartz.Job {
 
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
