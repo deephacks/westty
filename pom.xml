@@ -52,7 +52,7 @@
 
   <properties>
     <version.westty>0.0.1-SNAPSHOT</version.westty>
-    <version.tools4j.config>0.0.3</version.tools4j.config>
+    <version.tools4j.config>0.0.4</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.6</version.java-compiler>
     <version.java-source>1.6</version.java-source>
@@ -378,7 +378,8 @@
         <groupId>org.deephacks.tools4j</groupId>
         <artifactId>tools4j-config-core</artifactId>
         <version>${version.tools4j.config}</version>
-        <scope>runtime</scope>
+        <!-- only to manually invoke config cdi extension -->
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.deephacks.tools4j</groupId>
