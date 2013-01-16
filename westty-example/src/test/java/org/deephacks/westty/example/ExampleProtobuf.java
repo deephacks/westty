@@ -43,7 +43,7 @@ public class ExampleProtobuf {
 
         new JpaConfig().dropInstall();
         Westty westty = new Westty();
-        westty.start();
+        westty.startup();
 
         ProtobufSerializer serializer = new ProtobufSerializer();
         serializer.registerResource("META-INF/create.desc");

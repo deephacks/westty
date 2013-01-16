@@ -32,7 +32,7 @@ public class ExampleJaxrs {
         new JpaConfig().dropInstall();
 
         Westty westty = new Westty();
-        westty.start();
+        westty.startup();
         File file = new File("./src/main/resources");
         JaxrsConfigClient client = new JaxrsConfigClient("localhost", 8080, "/jaxrs");
         WebConfig config = new WebConfig();

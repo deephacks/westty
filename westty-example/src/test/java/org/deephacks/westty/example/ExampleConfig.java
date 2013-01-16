@@ -43,7 +43,7 @@ public class ExampleConfig {
 
     @BeforeClass
     public static void beforeClass() {
-        westty.start();
+        westty.startup();
     }
 
     @Before
