@@ -23,17 +23,14 @@ import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import org.deephacks.tools4j.config.RuntimeContext;
-import org.deephacks.tools4j.config.internal.core.ConfigCdiExtension;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Events;
 import org.deephacks.tools4j.config.model.Lookup;
@@ -63,39 +60,28 @@ public class JobScheduler implements Extension {
     private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private static BeanManager beanManager;
     private Scheduler scheduler;
-    /** config extension must first register schema, but ordering is not supported */
-    private ConfigCdiExtension configExtension = new ConfigCdiExtension();
     private static final Set<Class<? extends Job>> jobs = new HashSet<Class<? extends Job>>();
 
-    public JobScheduler() throws SchedulerException {
-        StdSchedulerFactory factory = new org.quartz.impl.StdSchedulerFactory();
-        this.scheduler = factory.getScheduler();
-
+    public JobScheduler() {
     }
 
-    public void afterBeanDiscovery(@Observes AfterBeanDiscovery event, BeanManager manager) {
-        configExtension.afterBeanDiscovery(event, manager);
-        StdSchedulerFactory factory = new StdSchedulerFactory();
-        JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
+    public void start() {
         try {
-            factory.initialize(config.getInputStream());
-            scheduler = factory.getScheduler();
-        } catch (SchedulerException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public void start(@Observes AfterDeploymentValidation event, BeanManager bm) {
-        beanManager = bm;
-        try {
+            StdSchedulerFactory factory = new org.quartz.impl.StdSchedulerFactory();
+            JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
+            try {
+                factory.initialize(config.getInputStream());
+                scheduler = factory.getScheduler();
+            } catch (SchedulerException e) {
+                throw new RuntimeException(e);
+            }
             scheduler.start();
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void shutdown(@Observes BeforeShutdown event) {
+    public void shutdown() {
         try {
             scheduler.shutdown(true);
         } catch (SchedulerException e) {
@@ -120,48 +106,30 @@ public class JobScheduler implements Extension {
         }
     }
 
-    public void containerSchedule(@Observes ProcessAnnotatedType<?> pat) {
-        configExtension.processAnnotatedType(pat);
-        // extension wont give us config within same jar
-        // need to register schema manually
-        ctx.register(JobSchedulerConfig.class);
-        ctx.register(JobConfig.class);
-        AnnotatedType<?> t = pat.getAnnotatedType();
-        Schedule schedule = t.getAnnotation(Schedule.class);
-        if (schedule == null) {
-            return;
-        }
-        Class<? extends Job> cls = t.getJavaClass().asSubclass(Job.class);
-        jobs.add(cls);
-        try {
-            schedule(cls);
-        } catch (SchedulerException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void schedule(Class<? extends Job> cls) throws SchedulerException {
-        String id = cls.getName();
-        try {
-            getConfig(id);
-        } catch (AbortRuntimeException e) {
-            if (e.getEvent().getCode() == Events.CFG304) {
-                ctx.registerDefault(new JobConfig(id));
+    public void schedule() throws SchedulerException {
+        for (Class<? extends Job> cls : jobs) {
+            String id = cls.getName();
+            try {
+                getConfig(id);
+            } catch (AbortRuntimeException e) {
+                if (e.getEvent().getCode() == Events.CFG304) {
+                    ctx.registerDefault(new JobConfig(id));
+                }
             }
+            TriggerKey triggerKey = new TriggerKey(cls.getName());
+            JobKey jobKey = new JobKey(cls.getName());
+
+            JobDetail jobdetail = newJob(JobDelegate.class).usingJobData(JOB_CLASS_KEY, id)
+                    .withIdentity(jobKey).build();
+            String cron = getCron(cls);
+
+            Trigger trigger = newTrigger().withIdentity(triggerKey)
+                    .withSchedule(cronSchedule(cron)).forJob(jobdetail).build();
+            scheduler.scheduleJob(jobdetail, trigger);
         }
-        TriggerKey triggerKey = new TriggerKey(cls.getName());
-        JobKey jobKey = new JobKey(cls.getName());
-
-        JobDetail jobdetail = newJob(JobDelegate.class).usingJobData(JOB_CLASS_KEY, id)
-                .withIdentity(jobKey).build();
-        String cron = getCron(cls);
-
-        Trigger trigger = newTrigger().withIdentity(triggerKey).withSchedule(cronSchedule(cron))
-                .forJob(jobdetail).build();
-        scheduler.scheduleJob(jobdetail, trigger);
     }
 
-    public JobConfig getConfig(String id) {
+    private JobConfig getConfig(String id) {
         return ctx.get(id, JobConfig.class);
     }
 
@@ -214,5 +182,19 @@ public class JobScheduler implements Extension {
                 jobBean.destroy((Object) job, cc);
             }
         }
+    }
+
+    void afterDeploymentValidation(@Observes AfterDeploymentValidation event, BeanManager bm) {
+        beanManager = bm;
+    }
+
+    void processAnnotatedType(@Observes ProcessAnnotatedType<?> pat) {
+        AnnotatedType<?> t = pat.getAnnotatedType();
+        Schedule schedule = t.getAnnotation(Schedule.class);
+        if (schedule == null) {
+            return;
+        }
+        Class<? extends Job> cls = t.getJavaClass().asSubclass(Job.class);
+        jobs.add(cls);
     }
 }
