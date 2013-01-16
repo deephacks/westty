@@ -13,36 +13,46 @@
  */
 package org.deephacks.westty;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Westty {
+    private static final Logger log = LoggerFactory.getLogger(Westty.class);
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
-    private final static Object WESTTY;
-    static {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
-    }
+    private static Object WESTTY;
 
     public static void main(String[] args) {
         Westty westty = new Westty();
-        westty.start();
+        westty.startup();
     }
 
-    public void start() {
+    public synchronized void startup() {
+        log.info("Westty startup.");
+        if (WESTTY == null) {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            try {
+                WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException();
+            }
+        }
+
         try {
-            WESTTY.getClass().getMethod("start").invoke(WESTTY);
+            WESTTY.getClass().getMethod("startup").invoke(WESTTY);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        log.info("Westty ready.");
     }
 
-    public void stop() {
+    public synchronized void stop() {
+        log.info("Westty shutdown.");
         try {
-            WESTTY.getClass().getMethod("stop").invoke(WESTTY);
+            WESTTY.getClass().getMethod("shutdown").invoke(WESTTY);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            WESTTY = null;
         }
     }
 
