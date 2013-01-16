@@ -17,6 +17,10 @@
       <artifactId>westty-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-job</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
     </dependency>
