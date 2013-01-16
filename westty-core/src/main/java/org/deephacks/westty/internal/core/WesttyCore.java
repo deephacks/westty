@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.job.JobScheduler;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
@@ -36,16 +37,20 @@ import org.jboss.weld.environment.se.WeldContainer;
  * Main class for starting and stopping Westty.
  */
 public class WesttyCore {
+
     private static final WeldContainer container = new Weld().initialize();
     private static final Instance<WesttyEngine> instance = container.instance().select(
             WesttyEngine.class);
     private static final WesttyEngine westty = instance.get();
 
-    public void start() {
+    public WesttyCore() {
+    }
+
+    public void startup() {
         westty.start();
     }
 
-    public void stop() {
+    public void shutdown() {
         westty.stop();
     }
 
@@ -60,6 +65,8 @@ public class WesttyCore {
         private WesttyJaxrsApplication jaxrsApps;
         @Inject
         private ResteasyDeployment deployment;
+        @Inject
+        private JobScheduler scheduler;
         private Channel coreChannel;
         private Channel protoChannel;
         private ServerBootstrap coreBootstrap;
