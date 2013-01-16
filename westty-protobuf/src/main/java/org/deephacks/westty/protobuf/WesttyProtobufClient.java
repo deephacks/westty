@@ -72,7 +72,7 @@ public class WesttyProtobufClient {
         return channel.write(ChannelBuffers.wrappedBuffer(bytes));
     }
 
-    public Object callSync(Integer id, Object protoMsg) throws IOException, ProtobufException {
+    public Object callSync(Integer id, Object protoMsg) throws IOException, FailureMessageException {
         Channel channel = channelGroup.find(id);
         byte[] bytes = serializer.write(protoMsg);
         Callback callback = new Callback();
@@ -89,7 +89,7 @@ public class WesttyProtobufClient {
         Object res = callback.get();
         if (res instanceof Failure) {
             Failure failure = (Failure) res;
-            throw new ProtobufException(failure.getMsg(), failure.getCode());
+            throw new FailureMessageException(failure);
         }
         return res;
     }
