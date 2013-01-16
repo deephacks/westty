@@ -20,13 +20,27 @@
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
     </dependency>
+    <!-- bridge c3po logging to slf4j -->
     <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-core</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>1.7.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jboss.weld.se</groupId>
+      <artifactId>weld-se-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.tools4j</groupId>
+      <artifactId>tools4j-config-core</artifactId>
+      <!-- only to manually invoke config cdi extension -->
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 </project>
