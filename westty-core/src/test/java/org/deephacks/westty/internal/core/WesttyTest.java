@@ -26,6 +26,6 @@ public class WesttyTest {
 
     public static void main(String[] args) {
         WesttyCore westty = new WesttyCore();
-        westty.start();
+        westty.startup();
     }
 }
