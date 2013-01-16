@@ -19,14 +19,18 @@
       <pattern>%d{HH:mm:ss.SSS} %-5level[%file:%line] %msg%n</pattern>
     </layout>
   </appender>
-
-  <logger name="org.apache" level="WARN" additivity="true"/>
-  <logger name="org.hibernate" level="WARN" additivity="true"/>
-  <logger name="org.deephacks" level="WARN" additivity="true"/>
-  <logger name="org.jboss.weld" level="WARN" additivity="true"/>
-
-  <root level="info">
+  <!--
+      <logger name="org.apache" level="WARN" additivity="true"/>
+      <logger name="org.hibernate" level="WARN" additivity="true"/>
+      <logger name="org.jboss.weld" level="WARN" additivity="true"/>
+      <logger name="org.quartz" level="WARN" additivity="true"/>
+  -->
+  <logger name="org.deephacks" level="INFO" additivity="true"/>
+  <!-- default level -->
+  <root level="WARN">
     <appender-ref ref="FILE" />
     <!-- <appender-ref ref="STDOUT" /> -->
   </root>
+
+
 </configuration>
