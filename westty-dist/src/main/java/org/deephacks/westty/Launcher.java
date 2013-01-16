@@ -14,7 +14,6 @@
 package org.deephacks.westty;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -38,7 +37,7 @@ public class Launcher {
     /** Are we in debug mode, --debug */
     private boolean debug = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Launcher launcher = new Launcher();
         for (int i = 0; i < args.length; i++) {
             if ("--debug".equals(args[i].trim())) {
@@ -48,7 +47,7 @@ public class Launcher {
         launcher.run(args);
     }
 
-    public void run(String[] args) {
+    public void run(String[] args) throws Exception {
         String launcherHome = System.getProperty(LAUNCHER_HOME_PROP);
         if (launcherHome == null || "".equals(launcherHome)) {
             throw new IllegalArgumentException("set launcher.home system property");
@@ -64,20 +63,9 @@ public class Launcher {
         add(new File(launcherHome, libDir));
         setContextClassLoader();
         initLogback(new File(launcherHome + "/conf", "logback.xml"));
-        try {
-            Class<?> main = Thread.currentThread().getContextClassLoader().loadClass(mainClass);
-            main.getDeclaredMethod("main", String[].class).invoke(null, new Object[] { args });
-        } catch (InvocationTargetException e) {
-            Throwable ex = e.getTargetException();
-            if (ex instanceof RuntimeException) {
-                System.out.println(ex.getMessage());
-                if (debug) {
-                    ex.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        Class<?> main = Thread.currentThread().getContextClassLoader().loadClass(mainClass);
+        main.getDeclaredMethod("main", String[].class).invoke(null, new Object[] { args });
     }
 
     public void setContextClassLoader() {
