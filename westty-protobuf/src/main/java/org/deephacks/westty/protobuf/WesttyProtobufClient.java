@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.MessageLite;
 
 public class WesttyProtobufClient {
-    private ProtobufSerializer serializer;
+    private final ProtobufSerializer serializer;
     private static final Logger log = LoggerFactory.getLogger(WesttyProtobufClient.class);
     private final Lock lock = new ReentrantLock();
     private final Queue<Callback> callbacks = new ConcurrentLinkedQueue<Callback>();
@@ -56,11 +57,22 @@ public class WesttyProtobufClient {
 
     public WesttyProtobufClient(ExecutorService bossExecutor, ExecutorService workerExecutor,
             ProtobufSerializer serializer) {
-        this.serializer = serializer;
         this.factory = new NioClientSocketChannelFactory(bossExecutor, workerExecutor);
         this.serializer = serializer;
         this.decoder = new WesttyProtobufDecoder(serializer);
         this.encoder = new WesttyProtobufEncoder();
+    }
+
+    public WesttyProtobufClient(ProtobufSerializer serializer) {
+        this(Executors.newCachedThreadPool(), Executors.newCachedThreadPool(), serializer);
+    }
+
+    public WesttyProtobufClient() {
+        this(new ProtobufSerializer());
+    }
+
+    public void registerResource(String protodesc) {
+        serializer.registerResource(protodesc);
     }
 
     public ChannelFuture callAsync(Integer id, Object protoMsg) throws IOException {
