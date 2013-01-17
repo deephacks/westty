@@ -9,7 +9,7 @@ public class ShutdownHook {
     static void install(final Thread threadToJoin) {
         Thread thread = new ShutdownHookThread(threadToJoin);
         Runtime.getRuntime().addShutdownHook(thread);
-        log.info("Create shutdownhook: " + thread.getName());
+        log.debug("Create shutdownhook: " + thread.getName());
     }
 
     private static class ShutdownHookThread extends Thread {
@@ -22,15 +22,16 @@ public class ShutdownHook {
 
         @Override
         public void run() {
-            log.info("Shutdown hook starting: " + getName());
+            log.debug("Starting " + getName());
             shutdown(threadToJoin, 30000);
-            log.info("Shutdown hook finished: " + getName());
+            log.debug("Finished " + getName());
         }
     }
 
     public static void shutdown(final Thread t, final long joinwait) {
         if (t == null)
             return;
+        t.start();
         while (t.isAlive()) {
             try {
                 t.join(joinwait);
