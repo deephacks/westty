@@ -16,7 +16,7 @@
       <maxFileSize>50MB</maxFileSize>
     </triggeringPolicy>
     <layout class="ch.qos.logback.classic.PatternLayout">
-      <pattern>%d{HH:mm:ss.SSS} %-5level[%file:%line] %msg%n</pattern>
+      <pattern>%d %-5level[%c{20}:%line] %msg%n</pattern>
     </layout>
   </appender>
   <!--
@@ -26,6 +26,7 @@
       <logger name="org.quartz" level="WARN" additivity="true"/>
   -->
   <logger name="org.deephacks" level="INFO" additivity="true"/>
+  <logger name="org.jboss.weld.interceptor.util.InterceptionTypeRegistry" level="OFF" additivity="true"/>
   <!-- default level -->
   <root level="WARN">
     <appender-ref ref="FILE" />
