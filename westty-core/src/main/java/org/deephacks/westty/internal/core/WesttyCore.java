@@ -17,7 +17,6 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
@@ -32,26 +31,41 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Stopwatch;
 
 /**
  * Main class for starting and stopping Westty.
  */
 public class WesttyCore {
-
-    private static final WeldContainer container = new Weld().initialize();
-    private static final Instance<WesttyEngine> instance = container.instance().select(
-            WesttyEngine.class);
-    private static final WesttyEngine westty = instance.get();
+    private static final Logger log = LoggerFactory.getLogger(WesttyCore.class);
+    private WeldContainer container;
+    private WesttyEngine engine;
 
     public WesttyCore() {
     }
 
     public void startup() {
-        westty.start();
+        Stopwatch time = new Stopwatch().start();
+        log.info("Westty startup.");
+        container = new Weld().initialize();
+        log.info("Weld started.");
+        engine = container.instance().select(WesttyEngine.class).get();
+        engine.start();
+        ShutdownHook.install(new Thread("WesttyCore") {
+            @Override
+            public void run() {
+                shutdown();
+            }
+        });
+        log.info("Westty started in {} ms.", time.elapsedMillis());
     }
 
     public void shutdown() {
-        westty.stop();
+        engine.stop();
+        log.info("Westty shutdown.");
     }
 
     private static class WesttyEngine {
@@ -81,13 +95,14 @@ public class WesttyCore {
 
             deployment.setProviderFactory(resteasyFactory);
             deployment.start();
+            log.info("RestEasy started.");
 
             coreBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
             coreBootstrap.setPipelineFactory(coreFactory);
             coreChannel = coreBootstrap.bind(new InetSocketAddress(config.getHttpPort()));
-
+            log.info("Http listening on port {}.", config.getHttpPort());
             protoBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
@@ -95,16 +110,18 @@ public class WesttyCore {
             protoBootstrap.setOption("child.tcpNoDelay", true);
             protoBootstrap.setOption("child.keepAlive", true);
             protoChannel = protoBootstrap.bind(new InetSocketAddress(config.getProtobufPort()));
+            log.info("Protobuf listening on port {}.", config.getProtobufPort());
 
         }
 
         public void stop() {
+            log.debug("Closing channels.");
             coreChannel.close().awaitUninterruptibly();
             coreBootstrap.releaseExternalResources();
             deployment.stop();
-
             protoChannel.close().awaitUninterruptibly();
             protoBootstrap.releaseExternalResources();
+            log.debug("All channels closed.");
         }
 
         /**
