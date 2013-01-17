@@ -13,11 +13,7 @@
  */
 package org.deephacks.westty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class Westty {
-    private static final Logger log = LoggerFactory.getLogger(Westty.class);
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
     private static Object WESTTY;
 
@@ -27,7 +23,6 @@ public class Westty {
     }
 
     public synchronized void startup() {
-        log.info("Westty startup.");
         if (WESTTY == null) {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             try {
@@ -42,11 +37,9 @@ public class Westty {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        log.info("Westty ready.");
     }
 
     public synchronized void stop() {
-        log.info("Westty shutdown.");
         try {
             WESTTY.getClass().getMethod("shutdown").invoke(WESTTY);
         } catch (Exception e) {
