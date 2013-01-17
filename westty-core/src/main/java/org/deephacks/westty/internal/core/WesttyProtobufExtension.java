@@ -36,7 +36,6 @@ import org.deephacks.westty.protobuf.ProtobufMethod;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 
 public class WesttyProtobufExtension implements Extension {
-
     public static final ProtobufSerializer serializer = new ProtobufSerializer();
     private HashMap<Class<?>, Method> protoToEndpoint = new HashMap<Class<?>, Method>();
     private BeanManager beanManager;
@@ -50,7 +49,8 @@ public class WesttyProtobufExtension implements Extension {
 
         Protobuf proto = org.getAnnotation(Protobuf.class);
         for (String protodesc : proto.value()) {
-            serializer.registerResource("META-INF/" + protodesc + ".desc");
+            String resource = "META-INF/" + protodesc + ".desc";
+            serializer.registerResource(resource);
         }
 
         for (AnnotatedMethod<?> method : org.getMethods()) {
@@ -66,7 +66,6 @@ public class WesttyProtobufExtension implements Extension {
 
     public void start(@Observes AfterDeploymentValidation event, BeanManager bm) {
         beanManager = bm;
-        serializer.registerResource("META-INF/failure.desc");
     }
 
     public ProtobufSerializer getSerializer() {

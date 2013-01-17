@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
@@ -34,9 +36,11 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Message;
 
 public class ProtobufSerializer {
+    private static final Logger log = LoggerFactory.getLogger(ProtobufSerializer.class);
     private static final int BAD_REQUEST = 1;
     private HashMap<Integer, Method> numToMethod = new HashMap<Integer, Method>();
     private HashMap<String, Integer> protoToNum = new HashMap<String, Integer>();
+    private static final String UNRECOGNIZED_PROTOCOL_MSG = "Unrecognized protocol.";
 
     public ProtobufSerializer() {
         registerResource("META-INF/failure.desc");
@@ -93,6 +97,7 @@ public class ProtobufSerializer {
                             .loadClass(className);
                     protoToNum.put(desc.getFullName(), fdesc.getNumber());
                     numToMethod.put(fdesc.getNumber(), cls.getMethod("parseFrom", byte[].class));
+                    log.debug("Registered protobuf resource {}.", name);
                 }
             }
         } catch (Exception e) {
@@ -101,18 +106,23 @@ public class ProtobufSerializer {
     }
 
     public Object read(byte[] bytes) throws Exception {
-        ByteBuffer buf = ByteBuffer.wrap(bytes);
-        Varint32 vint = new Varint32(buf);
-        int protoTypeNum = vint.read();
-        buf = vint.getByteBuffer();
-        byte[] message = new byte[buf.remaining()];
-        buf.get(message);
-        Method m = numToMethod.get(protoTypeNum);
-        if (m == null) {
-            return Failure.newBuilder().setCode(BAD_REQUEST).setMsg("proto_type=" + protoTypeNum)
+        try {
+            ByteBuffer buf = ByteBuffer.wrap(bytes);
+            Varint32 vint = new Varint32(buf);
+            int protoTypeNum = vint.read();
+            buf = vint.getByteBuffer();
+            byte[] message = new byte[buf.remaining()];
+            buf.get(message);
+            Method m = numToMethod.get(protoTypeNum);
+            if (m == null) {
+                return Failure.newBuilder().setCode(BAD_REQUEST)
+                        .setMsg("proto_type=" + protoTypeNum).build();
+            }
+            return m.invoke(null, message);
+        } catch (Exception e) {
+            return Failure.newBuilder().setCode(BAD_REQUEST).setMsg(UNRECOGNIZED_PROTOCOL_MSG)
                     .build();
         }
-        return m.invoke(null, message);
     }
 
     public byte[] write(Object proto) throws IOException {
