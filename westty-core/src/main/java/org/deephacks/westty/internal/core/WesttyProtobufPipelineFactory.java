@@ -17,6 +17,7 @@ import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
 
 import javax.inject.Inject;
 
+import org.deephacks.westty.protobuf.FailureMessages.Failure;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -59,7 +60,14 @@ public class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
                 return msg;
             }
             ChannelBuffer buf = (ChannelBuffer) msg;
-            return serializer.read(buf.array());
+
+            Object decoded = serializer.read(buf.array());
+            if (decoded instanceof Failure) {
+                ctx.getChannel().write(decoded);
+                return null;
+            } else {
+                return decoded;
+            }
         }
     }
 

@@ -23,6 +23,8 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
+import org.deephacks.westty.protobuf.FailureMessages.Failure;
+
 import com.google.common.base.Strings;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
@@ -32,8 +34,13 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Message;
 
 public class ProtobufSerializer {
+    private static final int BAD_REQUEST = 1;
     private HashMap<Integer, Method> numToMethod = new HashMap<Integer, Method>();
     private HashMap<String, Integer> protoToNum = new HashMap<String, Integer>();
+
+    public ProtobufSerializer() {
+        registerResource("META-INF/failure.desc");
+    }
 
     public void register(URL protodesc) {
         try {
@@ -96,11 +103,16 @@ public class ProtobufSerializer {
     public Object read(byte[] bytes) throws Exception {
         ByteBuffer buf = ByteBuffer.wrap(bytes);
         Varint32 vint = new Varint32(buf);
-        int num = vint.read();
+        int protoTypeNum = vint.read();
         buf = vint.getByteBuffer();
         byte[] message = new byte[buf.remaining()];
         buf.get(message);
-        return numToMethod.get(num).invoke(null, message);
+        Method m = numToMethod.get(protoTypeNum);
+        if (m == null) {
+            return Failure.newBuilder().setCode(BAD_REQUEST).setMsg("proto_type=" + protoTypeNum)
+                    .build();
+        }
+        return m.invoke(null, message);
     }
 
     public byte[] write(Object proto) throws IOException {
