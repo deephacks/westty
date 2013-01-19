@@ -54,6 +54,7 @@ public class WesttySecurePipelineFactory implements ChannelPipelineFactory {
 
     public ChannelPipeline getPipeline() throws Exception {
         if (engine == null) {
+            sslContextFactory.init();
             engine = sslContextFactory.getServerContext().createSSLEngine();
             engine.setUseClientMode(false);
         }

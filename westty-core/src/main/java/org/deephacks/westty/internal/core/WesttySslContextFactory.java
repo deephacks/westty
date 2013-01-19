@@ -27,6 +27,9 @@ public class WesttySslContextFactory {
     private SSLContext clientContext;
 
     public WesttySslContextFactory() {
+    }
+
+    public void init() {
         String algorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm");
         if (algorithm == null) {
             algorithm = "SunX509";

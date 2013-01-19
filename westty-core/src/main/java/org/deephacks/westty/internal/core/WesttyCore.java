@@ -134,6 +134,10 @@ public class WesttyCore {
 
         private void startHttps() {
             int port = config.getHttpsPort();
+            if (!config.getSsl().getSslEnabled()) {
+                return;
+            }
+
             secureBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));

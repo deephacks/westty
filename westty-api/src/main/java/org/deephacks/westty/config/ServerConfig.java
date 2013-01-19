@@ -77,6 +77,9 @@ public class ServerConfig {
     @Config(desc = "Static web configuration.")
     private WebConfig web;
 
+    @Config(desc = "Ssl configuration.")
+    private SslConfig ssl;
+
     public ServerConfig() {
 
     }
@@ -121,4 +124,7 @@ public class ServerConfig {
         return web;
     }
 
+    public SslConfig getSsl() {
+        return ssl;
+    }
 }
