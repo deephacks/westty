@@ -13,6 +13,8 @@
  */
 package org.deephacks.westty.protobuf;
 
+import static org.deephacks.westty.protobuf.FailureMessageException.FailureCode.BAD_REQUEST;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,7 +39,6 @@ import com.google.protobuf.Message;
 
 public class ProtobufSerializer {
     private static final Logger log = LoggerFactory.getLogger(ProtobufSerializer.class);
-    private static final int BAD_REQUEST = 1;
     private HashMap<Integer, Method> numToMethod = new HashMap<Integer, Method>();
     private HashMap<String, Integer> protoToNum = new HashMap<String, Integer>();
     private static final String UNRECOGNIZED_PROTOCOL_MSG = "Unrecognized protocol.";
@@ -115,13 +116,13 @@ public class ProtobufSerializer {
             buf.get(message);
             Method m = numToMethod.get(protoTypeNum);
             if (m == null) {
-                return Failure.newBuilder().setCode(BAD_REQUEST)
+                return Failure.newBuilder().setCode(BAD_REQUEST.getCode())
                         .setMsg("proto_type=" + protoTypeNum).build();
             }
             return m.invoke(null, message);
         } catch (Exception e) {
-            return Failure.newBuilder().setCode(BAD_REQUEST).setMsg(UNRECOGNIZED_PROTOCOL_MSG)
-                    .build();
+            return Failure.newBuilder().setCode(BAD_REQUEST.getCode())
+                    .setMsg(UNRECOGNIZED_PROTOCOL_MSG).build();
         }
     }
 
