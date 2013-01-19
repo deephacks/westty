@@ -74,6 +74,8 @@ public class WesttyCore {
         @Inject
         private WesttyPipelineFactory coreFactory;
         @Inject
+        private WesttySecurePipelineFactory secureFactory;
+        @Inject
         private WesttyProtobufPipelineFactory protoFactory;
         @Inject
         private WesttyJaxrsApplication jaxrsApps;
@@ -81,12 +83,33 @@ public class WesttyCore {
         private ResteasyDeployment deployment;
         @Inject
         private JobScheduler scheduler;
-        private Channel coreChannel;
+        private Channel standardChannel;
+        private Channel secureChannel;
         private Channel protoChannel;
-        private ServerBootstrap coreBootstrap;
+        private ServerBootstrap standardBootstrap;
+        private ServerBootstrap secureBootstrap;
         private ServerBootstrap protoBootstrap;
 
         public void start() {
+            startRestEasy();
+            startHttp();
+            startHttps();
+            startProtobuf();
+        }
+
+        private void startProtobuf() {
+            int port = config.getProtobufPort();
+            protoBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+                    Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
+                    config.getIoWorkerCount()));
+            protoBootstrap.setPipelineFactory(protoFactory);
+            protoBootstrap.setOption("child.tcpNoDelay", true);
+            protoBootstrap.setOption("child.keepAlive", true);
+            protoChannel = protoBootstrap.bind(new InetSocketAddress(port));
+            log.info("Protobuf listening on port {}.", port);
+        }
+
+        private void startRestEasy() {
             deployment.setApplication(jaxrsApps);
             ResteasyJacksonProvider provider = new ResteasyJacksonProvider();
             provider.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -96,28 +119,34 @@ public class WesttyCore {
             deployment.setProviderFactory(resteasyFactory);
             deployment.start();
             log.info("RestEasy started.");
+        }
 
-            coreBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+        private void startHttp() {
+            int port = config.getHttpPort();
+            standardBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
-            coreBootstrap.setPipelineFactory(coreFactory);
-            coreChannel = coreBootstrap.bind(new InetSocketAddress(config.getHttpPort()));
-            log.info("Http listening on port {}.", config.getHttpPort());
-            protoBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+            standardBootstrap.setPipelineFactory(coreFactory);
+            standardChannel = standardBootstrap.bind(new InetSocketAddress(port));
+
+            log.info("Http listening on port {}.", port);
+        }
+
+        private void startHttps() {
+            int port = config.getHttpsPort();
+            secureBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
-            protoBootstrap.setPipelineFactory(protoFactory);
-            protoBootstrap.setOption("child.tcpNoDelay", true);
-            protoBootstrap.setOption("child.keepAlive", true);
-            protoChannel = protoBootstrap.bind(new InetSocketAddress(config.getProtobufPort()));
-            log.info("Protobuf listening on port {}.", config.getProtobufPort());
+            secureBootstrap.setPipelineFactory(secureFactory);
+            secureChannel = secureBootstrap.bind(new InetSocketAddress(port));
 
+            log.info("Https listening on port {}.", port);
         }
 
         public void stop() {
             log.debug("Closing channels.");
-            coreChannel.close().awaitUninterruptibly();
-            coreBootstrap.releaseExternalResources();
+            standardChannel.close().awaitUninterruptibly();
+            standardBootstrap.releaseExternalResources();
             deployment.stop();
             protoChannel.close().awaitUninterruptibly();
             protoBootstrap.releaseExternalResources();

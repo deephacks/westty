@@ -34,6 +34,11 @@ public class ServerConfig {
     @Size(min = 0, max = 65535)
     private Integer httpPort = 8080;
 
+    @Config(desc = "Https listening port.")
+    @NotNull
+    @Size(min = 0, max = 65535)
+    private Integer httpsPort = 8181;
+
     @Config(desc = "Protobuf listening port.")
     @NotNull
     @Size(min = 0, max = 65535)
@@ -90,6 +95,10 @@ public class ServerConfig {
 
     public Integer getHttpPort() {
         return httpPort;
+    }
+
+    public Integer getHttpsPort() {
+        return httpsPort;
     }
 
     public Integer getProtobufPort() {
