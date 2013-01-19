@@ -13,6 +13,8 @@
  */
 package org.deephacks.westty.config;
 
+import java.io.File;
+
 import javax.validation.constraints.NotNull;
 
 import org.deephacks.tools4j.config.Config;
@@ -22,7 +24,7 @@ import org.deephacks.tools4j.config.Id;
 @Config(name = WebConfig.ID, desc = WebConfig.DESC)
 @ConfigScope
 public class WebConfig {
-    private static final String userDir = System.getProperty("user.dir");
+    private static final String userDir = System.getProperty("launcher.home");
 
     @Id(desc = WebConfig.DESC)
     static final String DESC = "Westty static web configuration. Changes requires server restart.";
@@ -35,7 +37,7 @@ public class WebConfig {
 
     @Config(desc = "Path on file system where static web content is served from.")
     @NotNull
-    private String staticRoot = userDir;
+    private String staticRoot = userDir + File.separator + "html";
 
     public String getUri() {
         return uri;
