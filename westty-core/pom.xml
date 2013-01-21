@@ -21,6 +21,12 @@
       <artifactId>westty-job</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.deephacks.tools4j</groupId>
+      <artifactId>tools4j-config-provider-jpa20</artifactId>
+      <version>${version.tools4j.config}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
     </dependency>
