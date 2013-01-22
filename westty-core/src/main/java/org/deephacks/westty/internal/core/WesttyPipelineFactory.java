@@ -69,6 +69,7 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
         }
         ChannelPipeline pipeline = pipeline();
         pipeline.addLast("decoder", new HttpDetector());
+        decoder.setConfig(config);
         pipeline.addLast("westtyDecoder", decoder);
         pipeline.addLast("aggregator",
                 new HttpChunkAggregator(config.getMaxHttpContentChunkLength()));

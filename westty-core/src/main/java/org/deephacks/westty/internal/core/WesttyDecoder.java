@@ -34,7 +34,6 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 
 public class WesttyDecoder extends OneToOneDecoder {
     private final static Logger logger = Logger.getLogger(WesttyDecoder.class);
-    @Inject
     private ServerConfig config;
     @Inject
     private ResteasyDeployment deployment;
@@ -51,6 +50,10 @@ public class WesttyDecoder extends OneToOneDecoder {
             return handleJaxrsRequest(ctx, channel, msg);
         }
         return msg;
+    }
+
+    public void setConfig(ServerConfig config) {
+        this.config = config;
     }
 
     private Object handleJaxrsRequest(ChannelHandlerContext ctx, Channel channel, Object msg)
