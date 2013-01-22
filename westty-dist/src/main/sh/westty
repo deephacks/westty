@@ -25,7 +25,10 @@ if [ -z "$LAUNCHER_HOME" ] ; then
   cd "$saveddir"
 fi
 
+JAVA_OPTS=$JAVA_OPTS
+
 exec java -classpath "${LAUNCHER_HOME}"/lib/westty-launcher.jar \
   "-Dlauncher.home=${LAUNCHER_HOME}"  \
+  $JAVA_OPTS \
   "-Dmain.class=org.deephacks.westty.Westty"  \
   "-Dlib.dir=lib" org.deephacks.westty.Launcher "$@"
