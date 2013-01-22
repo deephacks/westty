@@ -10,6 +10,11 @@
       <includes>
         <include>**/*.jar</include>
       </includes>
+      <excludes>
+        <exclude>**/*sources.jar</exclude>
+        <exclude>**/*javadoc.jar</exclude>
+      </excludes>
+
     </fileSet>
     <fileSet>
       <directory>..</directory>

@@ -27,9 +27,9 @@ public class WebConfig {
     private static final String userDir = System.getProperty("launcher.home");
 
     @Id(desc = WebConfig.DESC)
-    static final String DESC = "Westty static web configuration. Changes requires server restart.";
-
     public static final String ID = "westty.web";
+
+    static final String DESC = "Westty static web configuration. Changes requires server restart.";
 
     @Config(desc = "URI where static web content is mounted.")
     @NotNull

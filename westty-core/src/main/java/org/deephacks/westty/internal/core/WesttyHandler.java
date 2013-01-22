@@ -61,7 +61,6 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
     @Inject
     private RequestDispatcher dispatcher;
 
-    @Inject
     private ServerConfig config;
 
     private String websocketPath;
@@ -72,6 +71,10 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
     private WebSocketServerHandshaker handshaker;
 
     public WesttyHandler() {
+    }
+
+    public void setConfig(ServerConfig config) {
+        this.config = config;
     }
 
     @Override

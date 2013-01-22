@@ -38,15 +38,11 @@ import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 public class WesttyPipelineFactory implements ChannelPipelineFactory {
 
     @Inject
-    private ServerConfig server;
-
-    @Inject
     private WesttyEncoder encoder;
 
     @Inject
     private WesttyDecoder decoder;
 
-    @Inject
     private ServerConfig config;
     private String websocketPath;
     private String staticPath;
@@ -75,26 +71,26 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("decoder", new HttpDetector());
         pipeline.addLast("westtyDecoder", decoder);
         pipeline.addLast("aggregator",
-                new HttpChunkAggregator(server.getMaxHttpContentChunkLength()));
+                new HttpChunkAggregator(config.getMaxHttpContentChunkLength()));
         pipeline.addLast("encoder", new HttpResponseEncoder());
         pipeline.addLast("westtyEncoder", encoder);
         if (executionHandler != null) {
             pipeline.addLast("executionHandler", executionHandler);
         }
+        requestHandler.setConfig(config);
         pipeline.addLast("handler", requestHandler);
 
         return pipeline;
     }
 
-    final class HttpDetector extends HttpRequestDecoder {
+    public void setConfig(ServerConfig config) {
+        this.config = config;
+    }
 
-        private ConcurrentHashMap<String, WesttyApplication> applications;
+    final class HttpDetector extends HttpRequestDecoder {
 
         @Override
         protected HttpMessage createMessage(String[] initialLine) throws Exception {
-            if (applications == null) {
-                applications = getApplications();
-            }
             String uri = initialLine[1];
             HttpRequestType requestType = null;
             if (uri.startsWith(jaxrsPath)) {

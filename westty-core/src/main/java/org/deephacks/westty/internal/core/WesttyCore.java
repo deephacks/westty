@@ -13,18 +13,22 @@
  */
 package org.deephacks.westty.internal.core;
 
+import static org.deephacks.westty.jpa.TransactionInterceptor.executeInTx;
+
 import java.net.InetSocketAddress;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.codehaus.jackson.map.DeserializationConfig;
+import org.deephacks.tools4j.config.RuntimeContext;
+import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.job.JobScheduler;
-import org.deephacks.westty.jpa.WesttyEntityManagerProvider;
+import org.deephacks.westty.jpa.WesttyPersistence;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
@@ -43,6 +47,7 @@ import com.google.common.base.Stopwatch;
  */
 public class WesttyCore {
     private static final Logger log = LoggerFactory.getLogger(WesttyCore.class);
+    private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private WeldContainer container;
     private WesttyEngine engine;
 
@@ -50,29 +55,56 @@ public class WesttyCore {
     }
 
     public void startup() {
-        Stopwatch time = new Stopwatch().start();
+
         log.info("Westty startup.");
-        EntityManager em = WesttyEntityManagerProvider.instance.createAndRegister();
-        container = new Weld().initialize();
-        log.info("Weld started.");
-        engine = container.instance().select(WesttyEngine.class).get();
-        engine.start();
-        ShutdownHook.install(new Thread("WesttyCore") {
+        Callable<Object> start = new Callable<Object>() {
+
             @Override
-            public void run() {
-                shutdown();
+            public Object call() throws Exception {
+                Stopwatch time = new Stopwatch().start();
+                container = new Weld().initialize();
+                log.info("Weld started.");
+                engine = container.instance().select(WesttyEngine.class).get();
+                engine.setConfig(ctx.singleton(ServerConfig.class));
+                engine.start();
+                ShutdownHook.install(new Thread("WesttyCore") {
+                    @Override
+                    public void run() {
+                        shutdown();
+                    }
+                });
+                log.info("Westty started in {} ms.", time.elapsedMillis());
+                return null;
             }
-        });
-        log.info("Westty started in {} ms.", time.elapsedMillis());
+        };
+        /**
+         * Do startup and shutdown using pipleline pattern that 
+         * discovers service loaders during bootstrap. This will
+         * also decouple westty core from jpa, job and other 
+         * future extensions. 
+         */
+        try {
+            if (WesttyPersistence.isEnabled()) {
+                executeInTx(start);
+            } else {
+                start.call();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            shutdown();
+        }
+
     }
 
     public void shutdown() {
-        engine.stop();
+        if (engine != null) {
+            engine.stop();
+        }
         log.info("Westty shutdown.");
     }
 
     private static class WesttyEngine {
-        @Inject
         private ServerConfig config;
         @Inject
         private WesttyPipelineFactory coreFactory;
@@ -92,6 +124,11 @@ public class WesttyCore {
         private ServerBootstrap standardBootstrap;
         private ServerBootstrap secureBootstrap;
         private ServerBootstrap protoBootstrap;
+
+        public void setConfig(ServerConfig config) {
+            this.config = config;
+
+        }
 
         public void start() {
             startRestEasy();
@@ -129,6 +166,7 @@ public class WesttyCore {
             standardBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
                     config.getIoWorkerCount()));
+            coreFactory.setConfig(config);
             standardBootstrap.setPipelineFactory(coreFactory);
             standardChannel = standardBootstrap.bind(new InetSocketAddress(port));
 
