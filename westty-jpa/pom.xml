@@ -44,5 +44,9 @@
       <groupId>com.jolbox</groupId>
       <artifactId>bonecp</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.sf.scannotation</groupId>
+      <artifactId>scannotation</artifactId>
+    </dependency>
   </dependencies>
 </project>

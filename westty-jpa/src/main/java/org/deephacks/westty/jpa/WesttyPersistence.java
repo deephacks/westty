@@ -1,29 +1,32 @@
 package org.deephacks.westty.jpa;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Entity;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
-import javax.persistence.PersistenceUtil;
-import javax.persistence.spi.LoadState;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceProviderResolverHolder;
 import javax.persistence.spi.PersistenceUnitInfo;
 
-import org.deephacks.tools4j.config.internal.core.jpa.JpaBean;
-import org.deephacks.tools4j.config.internal.core.jpa.JpaBeanPk;
-import org.deephacks.tools4j.config.internal.core.jpa.JpaBeanSingleton;
-import org.deephacks.tools4j.config.internal.core.jpa.JpaProperty;
-import org.deephacks.tools4j.config.internal.core.jpa.JpaPropertyPk;
-import org.deephacks.tools4j.config.internal.core.jpa.JpaRef;
 import org.deephacks.westty.Locations;
+import org.scannotation.AnnotationDB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WesttyPersistence {
-
+    private static final Logger log = LoggerFactory.getLogger(WesttyPersistence.class);
     public static final String PERSISTENCE_PROVIDER = "javax.persistence.spi.PeristenceProvider";
+    public static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 
     protected static final Set<PersistenceProvider> providers = new HashSet<PersistenceProvider>();
     /**
@@ -44,10 +47,12 @@ public class WesttyPersistence {
     }
 
     public static EntityManagerFactory createEntityManagerFactory() {
-        WesttyPersistenceUnitInfo unit = new WesttyPersistenceUnitInfo(WESTTY_JPA_PROPS);
-        unit.add(JpaProperty.class, JpaPropertyPk.class, JpaBean.class, JpaBeanPk.class,
-                JpaBeanSingleton.class, JpaRef.class);
-        return createEntityManagerFactory(unit);
+        final WesttyPersistenceUnitInfo unit = new WesttyPersistenceUnitInfo(WESTTY_JPA_PROPS);
+        final List<Class<?>> entities = getEntities();
+        unit.add(entities);
+        EntityManagerFactory emf = createEntityManagerFactory(unit);
+        log.debug("Created persistence unit with entities {}", entities);
+        return emf;
     }
 
     public static EntityManagerFactory createEntityManagerFactory(PersistenceUnitInfo info) {
@@ -71,45 +76,32 @@ public class WesttyPersistence {
                 .getPersistenceProviders();
     }
 
-    /**
-     * @return Returns a <code>PersistenceUtil</code> instance.
-     */
-    public static PersistenceUtil getPersistenceUtil() {
-        return util;
+    private static List<Class<?>> getEntities() {
+        try {
+            AnnotationDB db = new AnnotationDB();
+            List<Class<?>> entities = new ArrayList<Class<?>>();
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            URL[] jars = getPersistenceArchives(cl);
+            db.scanArchives(jars);
+            Map<String, Set<String>> annotationIndex = db.getAnnotationIndex();
+            for (String cls : annotationIndex.get(Entity.class.getName())) {
+                Class<?> entity = cl.loadClass(cls);
+                entities.add(entity);
+            }
+            return entities;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private static PersistenceUtil util =
-
-    new PersistenceUtil() {
-        public boolean isLoaded(Object entity, String attributeName) {
-            List<PersistenceProvider> providers = WesttyPersistence.getProviders();
-            for (PersistenceProvider provider : providers) {
-                final LoadState state = provider.getProviderUtil().isLoadedWithoutReference(entity,
-                        attributeName);
-                if (state == LoadState.UNKNOWN)
-                    continue;
-                return state == LoadState.LOADED;
-            }
-            for (PersistenceProvider provider : providers) {
-                final LoadState state = provider.getProviderUtil().isLoadedWithReference(entity,
-                        attributeName);
-                if (state == LoadState.UNKNOWN)
-                    continue;
-                return state == LoadState.LOADED;
-            }
-            return true;
+    private static URL[] getPersistenceArchives(ClassLoader cl) throws IOException {
+        final List<URL> result = new ArrayList<URL>();
+        final Enumeration<URL> urls = cl.getResources(PERSISTENCE_XML);
+        while (urls.hasMoreElements()) {
+            final JarURLConnection connection = (JarURLConnection) urls.nextElement()
+                    .openConnection();
+            result.add(connection.getJarFileURL());
         }
-
-        public boolean isLoaded(Object object) {
-            List<PersistenceProvider> providers = WesttyPersistence.getProviders();
-            for (PersistenceProvider provider : providers) {
-                final LoadState state = provider.getProviderUtil().isLoaded(object);
-                if (state == LoadState.UNKNOWN)
-                    continue;
-                return state == LoadState.LOADED;
-            }
-            return true;
-        }
-    };
-
+        return result.toArray(new URL[0]);
+    }
 }
