@@ -19,10 +19,12 @@ import java.util.concurrent.Executors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.job.JobScheduler;
+import org.deephacks.westty.jpa.WesttyEntityManagerProvider;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
@@ -50,6 +52,7 @@ public class WesttyCore {
     public void startup() {
         Stopwatch time = new Stopwatch().start();
         log.info("Westty startup.");
+        EntityManager em = WesttyEntityManagerProvider.instance.createAndRegister();
         container = new Weld().initialize();
         log.info("Weld started.");
         engine = container.instance().select(WesttyEngine.class).get();

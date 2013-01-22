@@ -15,13 +15,13 @@ import org.slf4j.LoggerFactory;
 
 @Transactional
 @Interceptor
-public class EntityTransactionInterceptor implements Serializable {
-    private Logger log = LoggerFactory.getLogger(EntityTransactionInterceptor.class);
+public class TransactionInterceptor implements Serializable {
+    private Logger log = LoggerFactory.getLogger(TransactionInterceptor.class);
 
     private static final long serialVersionUID = -1033443722024614083L;
     @Inject
     @Any
-    private ThreadLocalEntityManager tlem;
+    private WesttyEntityManagerProvider tlem;
 
     @AroundInvoke
     public Object aroundInvoke(InvocationContext ic) throws Exception {

@@ -16,10 +16,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
 
 @ApplicationScoped
-public class EntityManagerDelegate implements EntityManager {
+public class WesttyEntityManager implements EntityManager {
 
     @Inject
-    private ThreadLocalEntityManager tlem;
+    private WesttyEntityManagerProvider tlem;
 
     public void persist(Object entity) {
         tlem.get().persist(entity);
