@@ -98,9 +98,16 @@ public class WesttyPersistence {
         final List<URL> result = new ArrayList<URL>();
         final Enumeration<URL> urls = cl.getResources(PERSISTENCE_XML);
         while (urls.hasMoreElements()) {
-            final JarURLConnection connection = (JarURLConnection) urls.nextElement()
-                    .openConnection();
-            result.add(connection.getJarFileURL());
+            // either a jar or file in a dir
+            URL url = urls.nextElement();
+            File file = new File(url.getFile());
+            if (file.exists()) {
+                // navigate on directory above META-INF
+                url = file.getParentFile().getParentFile().toURI().toURL();
+            } else {
+                url = ((JarURLConnection) url.openConnection()).getJarFileURL();
+            }
+            result.add(url);
         }
         return result.toArray(new URL[0]);
     }
