@@ -17,7 +17,6 @@ import java.io.File;
 
 import org.deephacks.tools4j.config.admin.JaxrsConfigClient;
 import org.deephacks.westty.Westty;
-import org.deephacks.westty.config.JpaConfig;
 import org.deephacks.westty.config.WebConfig;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +24,23 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 public class ExampleJaxrs {
-    public static void main(String[] args) {
+    public static final String prop = "conf/jpa.properties";
+
+    public static void main(String[] args) throws Exception {
 
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
-        new JpaConfig().dropInstall();
 
-        Westty westty = new Westty();
-        westty.startup();
+        DdlExec.executeResource("META-INF/uninstall_derby.ddl", prop, true);
+        DdlExec.executeResource("META-INF/install_derby.ddl", prop, true);
+        DdlExec.executeResource("META-INF/uninstall.ddl", prop, true);
+        DdlExec.executeResource("META-INF/install.ddl", prop, true);
+
         File file = new File("./src/main/resources");
+        Westty westty = new Westty();
+        westty.setRootDir(file);
+        westty.startup();
+
         JaxrsConfigClient client = new JaxrsConfigClient("localhost", 8080, "/jaxrs");
         WebConfig config = new WebConfig();
         config.setStaticRoot(file.getAbsolutePath());
