@@ -19,8 +19,7 @@ public class TransactionInterceptor implements Serializable {
 
     private static final long serialVersionUID = -1033443722024614083L;
 
-    private static final WesttyEntityManagerProvider tlem = WesttyEntityManagerProvider
-            .getInstance();
+    private static final WesttyEntityManagerProvider provider = new WesttyEntityManagerProvider();
 
     @AroundInvoke
     public Object aroundInvoke(final InvocationContext ic) throws Exception {
@@ -34,7 +33,7 @@ public class TransactionInterceptor implements Serializable {
     }
 
     public static Object executeInTx(Callable<?> future) throws Exception {
-        EntityManager em = tlem.createAndRegister();
+        EntityManager em = provider.createEntityManager();
         Object result = null;
         try {
             em.getTransaction().begin();
@@ -53,11 +52,10 @@ public class TransactionInterceptor implements Serializable {
             throw e;
         } finally {
             if (em != null) {
-                tlem.unregister(em);
+                provider.removeEntityManager();
                 em.close();
             }
         }
         return result;
     }
-
 }
