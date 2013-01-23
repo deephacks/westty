@@ -13,6 +13,8 @@
  */
 package org.deephacks.westty;
 
+import java.io.File;
+
 public class Westty {
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
     private static Object WESTTY;
@@ -22,7 +24,7 @@ public class Westty {
         westty.startup();
     }
 
-    public synchronized void startup() {
+    public Westty() {
         if (WESTTY == null) {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             try {
@@ -31,22 +33,33 @@ public class Westty {
                 throw new RuntimeException();
             }
         }
+    }
 
-        try {
-            WESTTY.getClass().getMethod("startup").invoke(WESTTY);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void setRootDir(File file) {
+        call("setRootDir", file);
+    }
+
+    public synchronized void startup() {
+        call("startup");
     }
 
     public synchronized void stop() {
-        try {
-            WESTTY.getClass().getMethod("shutdown").invoke(WESTTY);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            WESTTY = null;
-        }
+        call("shutdown");
     }
 
+    private Object call(String method, Object... args) {
+        try {
+            if (args == null || args.length == 0) {
+                return WESTTY.getClass().getMethod(method).invoke(WESTTY);
+            } else {
+                Class<?>[] classes = new Class<?>[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    classes[i] = args[i].getClass();
+                }
+                return WESTTY.getClass().getMethod(method, classes).invoke(WESTTY, args);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -15,6 +15,7 @@ package org.deephacks.westty.internal.core;
 
 import static org.deephacks.westty.jpa.TransactionInterceptor.executeInTx;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.Lookup;
+import org.deephacks.westty.Locations;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.job.JobScheduler;
 import org.deephacks.westty.jpa.WesttyPersistence;
@@ -52,6 +54,11 @@ public class WesttyCore {
     private WesttyEngine engine;
 
     public WesttyCore() {
+    }
+
+    public void setRootDir(File dir) {
+        System.setProperty("launcher.home", dir.getAbsolutePath());
+        Locations.setRootDir(dir);
     }
 
     public void startup() {

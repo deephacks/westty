@@ -16,12 +16,19 @@ package org.deephacks.westty;
 import java.io.File;
 
 public class Locations {
-    public static final File ROOT_DIR = new File(System.getProperty("launcher.home"));
-    public static final String CONF = "conf";
-    public static final File CONF_DIR = new File(ROOT_DIR, CONF);
-    public static final String LIB = "lib";
-    public static final File LIB_DIR = new File(ROOT_DIR, LIB);
-    public static final String BIN = "bin";
-    public static final File BIN_DIR = new File(ROOT_DIR, BIN);
+    public static File ROOT_DIR = new File(System.getProperty("launcher.home"));
+    public static String CONF = "conf";
+    public static File CONF_DIR = new File(ROOT_DIR, CONF);
+    public static String LIB = "lib";
+    public static File LIB_DIR = new File(ROOT_DIR, LIB);
+    public static String BIN = "bin";
+    public static File BIN_DIR = new File(ROOT_DIR, BIN);
+
+    public static void setRootDir(File dir) {
+        ROOT_DIR = dir;
+        CONF_DIR = new File(ROOT_DIR, CONF);
+        LIB_DIR = new File(ROOT_DIR, LIB);
+        BIN_DIR = new File(ROOT_DIR, BIN);
+    }
 
 }

@@ -195,7 +195,7 @@ public class WesttyPersistenceUnitInfo implements PersistenceUnitInfo {
 
     @Override
     public List<String> getMappingFileNames() {
-        return new ArrayList<String>();
+        return null;
     }
 
     @Override
