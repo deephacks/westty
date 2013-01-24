@@ -23,8 +23,10 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-@ApplicationPath("jaxrs")
+@ApplicationPath(WesttyJaxrsApplication.JAXRS_CONTEXT_URI)
 public class WesttyJaxrsApplication extends Application {
+	/** relative uri for jaxrs endpoint for "see other" and "redirects" */
+	public static final String JAXRS_CONTEXT_URI = "/";
     @Inject
     private WesttyJaxrsExtension jaxrsExtension;
     @Inject
