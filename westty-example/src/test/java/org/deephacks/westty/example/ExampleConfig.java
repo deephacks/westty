@@ -42,7 +42,7 @@ public class ExampleConfig {
     private JaxrsConfigClient client = new JaxrsConfigClient("localhost", 8080, "/jaxrs");
 
     @BeforeClass
-    public static void beforeClass() {
+    public static void beforeClass() throws Throwable {
         westty.startup();
     }
 
@@ -52,7 +52,7 @@ public class ExampleConfig {
     }
 
     @AfterClass
-    public static void afterClass() {
+    public static void afterClass() throws Throwable {
         westty.stop();
     }
 

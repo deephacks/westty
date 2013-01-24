@@ -26,7 +26,7 @@ import ch.qos.logback.classic.Logger;
 public class ExampleJaxrs {
     public static final String prop = "conf/jpa.properties";
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Throwable {
 
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
