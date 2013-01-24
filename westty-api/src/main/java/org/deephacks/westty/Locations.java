@@ -45,6 +45,8 @@ public class Locations {
                     throw new IllegalStateException("Directory " + LAUNCHER_HOME
                             + " does not exist, defined by " + LAUNCHER_HOME_PROP
                             + " system property");
+                } else {
+                    ROOT_DIR = file;
                 }
             }
 
