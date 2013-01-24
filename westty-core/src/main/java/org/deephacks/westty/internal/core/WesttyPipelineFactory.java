@@ -139,4 +139,7 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
         WEBSOCKET, STATIC, JAXRS
     }
 
+    public void close() {
+        requestHandler.getClientChannels().close();
+    }
 }

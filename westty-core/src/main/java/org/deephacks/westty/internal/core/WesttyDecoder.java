@@ -33,11 +33,12 @@ import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 
 public class WesttyDecoder extends OneToOneDecoder {
+
     private final static Logger logger = Logger.getLogger(WesttyDecoder.class);
     private ServerConfig config;
     @Inject
     private ResteasyDeployment deployment;
-    private final String proto = "http";
+    private final String protocol = "http";
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, Channel channel, Object msg)
@@ -67,7 +68,7 @@ public class WesttyDecoder extends OneToOneDecoder {
         UriInfoImpl uriInfo = null;
         try {
             headers = NettyUtil.extractHttpHeaders(request);
-            uriInfo = NettyUtil.extractUriInfo(request, config.getJaxrs().getUri(), proto);
+            uriInfo = NettyUtil.extractUriInfo(request, WesttyJaxrsApplication.JAXRS_CONTEXT_URI, protocol);
             HttpRequest nettyRequest = new NettyHttpRequest(headers, uriInfo, request.getMethod()
                     .getName(), ((SynchronousDispatcher) deployment.getDispatcher()), response,
                     org.jboss.netty.handler.codec.http.HttpHeaders.is100ContinueExpected(request));

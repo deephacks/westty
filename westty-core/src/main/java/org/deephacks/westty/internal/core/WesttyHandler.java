@@ -29,10 +29,13 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.DefaultFileRegion;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.codec.frame.TooLongFrameException;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
@@ -65,7 +68,7 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
 
     private String websocketPath;
     private String staticRootPath;
-
+    private ChannelGroup clients = new DefaultChannelGroup("connected-clients");
     private boolean configCached = false;
 
     private WebSocketServerHandshaker handshaker;
@@ -75,6 +78,18 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
 
     public void setConfig(ServerConfig config) {
         this.config = config;
+    }
+
+    @Override
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+        clients.add(ctx.getChannel());
+        super.channelConnected(ctx, e);
+    }
+
+    @Override
+    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+        clients.remove(ctx.getChannel());
+        super.channelClosed(ctx, e);
     }
 
     @Override
@@ -225,5 +240,9 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
 
     private String getWebSocketLocation(HttpRequest req) {
         return "ws://" + req.getHeader(HttpHeaders.Names.HOST) + websocketPath;
+    }
+
+    public ChannelGroup getClientChannels() {
+        return clients;
     }
 }
