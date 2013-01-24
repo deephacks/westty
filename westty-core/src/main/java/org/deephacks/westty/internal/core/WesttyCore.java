@@ -197,11 +197,25 @@ public class WesttyCore {
 
         public void stop() {
             log.debug("Closing channels.");
-            standardChannel.close().awaitUninterruptibly();
-            standardBootstrap.releaseExternalResources();
-            deployment.stop();
-            protoChannel.close().awaitUninterruptibly();
-            protoBootstrap.releaseExternalResources();
+            if (coreFactory != null) {
+                coreFactory.close();
+            }
+            if (standardChannel != null) {
+                standardChannel.close().awaitUninterruptibly(5000);
+            }
+            if (standardBootstrap != null) {
+                standardBootstrap.releaseExternalResources();
+            }
+            if (deployment != null) {
+                deployment.stop();
+            }
+            if (protoChannel != null) {
+                protoChannel.close().awaitUninterruptibly(5000);
+            }
+            if (protoBootstrap != null) {
+                protoBootstrap.releaseExternalResources();
+            }
+
             log.debug("All channels closed.");
         }
 

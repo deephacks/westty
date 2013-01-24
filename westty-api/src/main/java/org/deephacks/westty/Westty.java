@@ -14,12 +14,13 @@
 package org.deephacks.westty;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
 public class Westty {
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
     private static Object WESTTY;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Throwable {
         Westty westty = new Westty();
         westty.startup();
     }
@@ -35,19 +36,19 @@ public class Westty {
         }
     }
 
-    public void setRootDir(File file) {
+    public void setRootDir(File file) throws Throwable {
         call("setRootDir", file);
     }
 
-    public synchronized void startup() {
+    public synchronized void startup() throws Throwable {
         call("startup");
     }
 
-    public synchronized void stop() {
+    public synchronized void stop() throws Throwable {
         call("shutdown");
     }
 
-    private Object call(String method, Object... args) {
+    private Object call(String method, Object... args) throws Throwable {
         try {
             if (args == null || args.length == 0) {
                 return WESTTY.getClass().getMethod(method).invoke(WESTTY);
@@ -58,6 +59,14 @@ public class Westty {
                 }
                 return WESTTY.getClass().getMethod(method, classes).invoke(WESTTY, args);
             }
+        } catch (InvocationTargetException e) {
+            Throwable t = e.getTargetException();
+            if (t instanceof ExceptionInInitializerError) {
+                ExceptionInInitializerError err = (ExceptionInInitializerError) t;
+                throw err.getCause();
+            }
+            throw t;
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
