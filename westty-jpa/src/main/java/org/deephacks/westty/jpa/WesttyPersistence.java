@@ -36,7 +36,7 @@ public class WesttyPersistence {
      */
     public static final String WESTTY_JPA_UNIT = "westty-jpa-unit";
 
-    public static final File WESTTY_JPA_PROPS = new File(Locations.CONF_DIR, "jpa.properties");
+    public static final File WESTTY_JPA_PROPS = new File(Locations.getConfDir(), "jpa.properties");
 
     public static boolean isEnabled() {
         if (WESTTY_JPA_PROPS.exists()) {

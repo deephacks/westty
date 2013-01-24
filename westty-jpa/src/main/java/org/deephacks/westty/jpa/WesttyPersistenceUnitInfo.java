@@ -34,7 +34,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 
 public class WesttyPersistenceUnitInfo implements PersistenceUnitInfo {
     public static final String WESTTY_JPA_UNIT = "westty-jpa-unit";
-    public static final File DEFAULT_PU = new File(Locations.CONF_DIR, "persistence.xml");
+    public static final File DEFAULT_PU = new File(Locations.getConfDir(), "persistence.xml");
     public static final String USER = "javax.persistence.jdbc.user";
     public static final String PASSWORD = "javax.persistence.jdbc.password";
     public static final String URL = "javax.persistence.jdbc.url";
@@ -206,7 +206,7 @@ public class WesttyPersistenceUnitInfo implements PersistenceUnitInfo {
     @Override
     public java.net.URL getPersistenceUnitRootUrl() {
         try {
-            return Locations.LIB_DIR.toURI().toURL();
+            return Locations.getLibDir().toURI().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
