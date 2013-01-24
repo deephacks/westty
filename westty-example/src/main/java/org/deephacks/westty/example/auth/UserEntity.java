@@ -1,4 +1,4 @@
-package org.deephacks.westty.example.login;
+package org.deephacks.westty.example.auth;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 @Entity
 @Table(name = "EXAMPLE_USERS")
@@ -16,10 +17,12 @@ public class UserEntity {
 
     @Column(name = "PASSWORD")
     private String password;
-
+    public UserEntity(){
+    	
+    }
     public UserEntity(String username, String password) {
-        this.username = username;
-        this.password = password;
+        this.username = Preconditions.checkNotNull(username);
+        this.password = Preconditions.checkNotNull(password);
     }
 
     public String getUsername() {

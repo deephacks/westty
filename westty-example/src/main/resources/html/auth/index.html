@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+<html>
+  <head>
+    <title>Auth</title>
+  </head>
+  <body>
+    Create Users
+    <p>
+      <form action="/jaxrs/auth-service/createUser" method="post">
+        username: <input type="text" name="username"><br>
+        password: <input type="password" name="password">
+        <input type="submit" value="Create user">
+      </form>
+    </p>
+    </hr>
+    Cookies
+    <p>
+      <form action="/jaxrs/auth-service/cookieLogin" method="post">
+        username: <input type="text" name="username"><br>
+        password: <input type="password" name="password">
+        <input type="submit" value="Login">
+      </form>
+    </p>
+    <p>
+      <form action="/jaxrs/auth-service/cookieProtected" method="post">
+        <input type="submit" value="access cookie secret">
+      </form>
+    </p>
+    </hr>
+    Sessions
+    <p>
+      <form action="/jaxrs/auth-service/sessionLogin" method="post">
+        username: <input type="text" name="username"><br>
+        password: <input type="password" name="password">
+        <input type="submit" value="Login">
+      </form>
+    </p>
+    <p>
+      <form action="/jaxrs/auth-service/sessionProtected" method="post">
+        <input type="submit" value="access session secret">
+      </form>
+    </p>
+  </body>
+</html>
+

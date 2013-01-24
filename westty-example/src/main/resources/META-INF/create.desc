@@ -1,5 +1,5 @@
 
-Ù
+â
 (src/main/resources/META-INF/create.protoexample"B
 CreateRequest
 	protoTyped (
@@ -7,5 +7,5 @@
 password (	"0
 CreateResponse
 	protoTypee (
-msg (	B.
-org.deephacks.westty.exampleBCreateMessages
+msg (	B7
+%org.deephacks.westty.example.protobufBCreateMessages

@@ -11,15 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.deephacks.westty.example;
+package org.deephacks.westty.example.protobuf;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.deephacks.westty.example.CreateMessages.CreateRequest;
-import org.deephacks.westty.example.CreateMessages.CreateResponse;
-import org.deephacks.westty.example.DeleteMessages.DeleteRequest;
-import org.deephacks.westty.example.DeleteMessages.DeleteResponse;
+import org.deephacks.westty.example.ExampleEntity;
+import org.deephacks.westty.example.protobuf.CreateMessages.CreateRequest;
+import org.deephacks.westty.example.protobuf.CreateMessages.CreateResponse;
+import org.deephacks.westty.example.protobuf.DeleteMessages.DeleteRequest;
+import org.deephacks.westty.example.protobuf.DeleteMessages.DeleteResponse;
 import org.deephacks.westty.jpa.Transactional;
 import org.deephacks.westty.protobuf.Protobuf;
 import org.deephacks.westty.protobuf.ProtobufException;

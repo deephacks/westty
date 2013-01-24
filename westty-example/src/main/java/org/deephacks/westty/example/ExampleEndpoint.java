@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 @Produces({ "application/json" })
 @Path("example")
 @Singleton
-public class JaxrsEndpoint {
-    private Logger log = LoggerFactory.getLogger(JaxrsEndpoint.class);
+public class ExampleEndpoint {
+    private Logger log = LoggerFactory.getLogger(ExampleEndpoint.class);
 
     @Inject
     private EntityManager em;

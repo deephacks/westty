@@ -1,4 +1,4 @@
-package org.deephacks.westty.example.login;
+package org.deephacks.westty.example.auth;
 
 import java.util.UUID;
 
