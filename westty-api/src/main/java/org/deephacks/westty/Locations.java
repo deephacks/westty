@@ -25,6 +25,7 @@ public class Locations {
     private static String CONF = "conf";
     private static String LIB = "lib";
     private static String BIN = "bin";
+    private static String HTML = "html";
 
     public static void setRootDir(File dir) {
         if (dir == null || !dir.exists()) {
@@ -69,4 +70,8 @@ public class Locations {
         return new File(root, BIN);
     }
 
+    public static File getHtmlDir() {
+        File root = getRootDir();
+        return new File(root, HTML);
+    }
 }

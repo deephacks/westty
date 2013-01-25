@@ -13,18 +13,16 @@
  */
 package org.deephacks.westty.config;
 
-import java.io.File;
-
 import javax.validation.constraints.NotNull;
 
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
+import org.deephacks.westty.Locations;
 
 @Config(name = WebConfig.ID, desc = WebConfig.DESC)
 @ConfigScope
 public class WebConfig {
-    private static final String userDir = System.getProperty("launcher.home");
 
     @Id(desc = WebConfig.DESC)
     public static final String ID = "westty.web";
@@ -37,7 +35,7 @@ public class WebConfig {
 
     @Config(desc = "Path on file system where static web content is served from.")
     @NotNull
-    private String staticRoot = userDir + File.separator + "html";
+    private String staticRoot = Locations.getHtmlDir().getAbsolutePath();
 
     public String getUri() {
         return uri;
