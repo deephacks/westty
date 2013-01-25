@@ -57,7 +57,6 @@ public class WesttyCore {
     }
 
     public void setRootDir(File dir) {
-        System.setProperty("launcher.home", dir.getAbsolutePath());
         Locations.setRootDir(dir);
     }
 
@@ -85,7 +84,7 @@ public class WesttyCore {
             }
         };
         /**
-         * Do startup and shutdown using pipleline pattern that 
+         * TODO: Do startup and shutdown using pipleline pattern that 
          * discovers service loaders during bootstrap. This will
          * also decouple westty core from jpa, job and other 
          * future extensions. 
