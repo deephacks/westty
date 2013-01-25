@@ -33,25 +33,25 @@ public class AuthService {
     @Inject
     private EntityManager em;
 
-   
     @Transactional
     @POST
     @Path("cookieLogin")
     @Consumes(APPLICATION_FORM_URLENCODED)
     public Response cookieLogin(@FormParam("username") String username,
             @FormParam("password") String password) {
-    	String sessionId = sessionLogin(username, password);
-    	NewCookie cookie = new NewCookie("sessionId", sessionId);
-    	return Response.seeOther(uri("/auth/index.html")).cookie(cookie).build();
+        String sessionId = sessionLogin(username, password);
+        NewCookie cookie = new NewCookie("sessionId", sessionId);
+        return Response.seeOther(uri("/auth/index.html")).cookie(cookie).build();
     }
-    
-    private static URI uri(String uri){
-    	try {
-			return new URI(uri);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
+
+    private static URI uri(String uri) {
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
+
     @Transactional
     @POST
     @Path("sessionLogin")
@@ -61,8 +61,8 @@ public class AuthService {
         return login(username, password);
     }
 
-	private String login(String username, String password) {
-		if (username == null) {
+    private String login(String username, String password) {
+        if (username == null) {
             throw new RuntimeException("Username must be provided");
         }
         if (password == null) {
@@ -82,7 +82,7 @@ public class AuthService {
             log.warn("Wrong password {}", password);
             throw new RuntimeException("Wrong password");
         }
-	}
+    }
 
     @Transactional
     @POST
@@ -99,14 +99,14 @@ public class AuthService {
 
         em.persist(new UserEntity(username, password));
     }
-    
+
     @Transactional
     @POST
     @Path("cookieProtected")
     @Consumes(APPLICATION_FORM_URLENCODED)
     public String cookieProtected(@CookieParam("sessionId") String sessionId) {
-    	validate(sessionId);
-    	return "success";    	
+        validate(sessionId);
+        return "success";
     }
 
     @Transactional
@@ -114,18 +114,20 @@ public class AuthService {
     @Path("sessionProtected")
     @Consumes(APPLICATION_FORM_URLENCODED)
     public String sessionProtected(@CookieParam("sessionId") String sessionId) {
-    	validate(sessionId);
-    	return "success";
+        validate(sessionId);
+        return "success";
     }
-    
-    private void validate(String sessionId){
-    	SessionEntity session = em.find(SessionEntity.class, sessionId);
-    	if(session == null){
-    		throw new RuntimeException("No session found");
-    	}
+
+    private void validate(String sessionId) {
+        if (sessionId == null) {
+            throw new RuntimeException("No session found");
+        }
+        SessionEntity session = em.find(SessionEntity.class, sessionId);
+        if (session == null) {
+            throw new RuntimeException("No session found");
+        }
     }
-    
-    
+
     @Provider
     public class AuthServiceExceptionHandler implements ExceptionMapper<Exception> {
 
