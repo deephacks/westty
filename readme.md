@@ -1,6 +1,6 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
-Westty is a server engine based on foundation of Weld and Netty, enabling a pure and lightweight CDI 
+Westty is a server engine built on foundation of Weld and Netty, enabling a lightweight CDI 
 programming model for building web applications using REST, google-protobuf and WebSockets.
 
 * [Netty](http://netty.io)
