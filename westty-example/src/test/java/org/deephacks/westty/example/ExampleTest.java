@@ -29,8 +29,7 @@ public class ExampleTest {
     private static final int port = 8080;
     private static final String prop = "conf/jpa.properties";
     private static final JaxrsClient client = new JaxrsClient(host, port);
-    private static final JaxrsConfigClient configClient = new JaxrsConfigClient(host, port,
-            "/jaxrs");
+    private static final JaxrsConfigClient configClient = new JaxrsConfigClient(host, port);
 
     private static final File westtyRootDir = computeMavenProjectRoot(ExampleTest.class,
             "src/main/resources");
