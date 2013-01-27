@@ -44,12 +44,6 @@ public class ServerConfig {
     @Size(min = 0, max = 65535)
     private Integer protoPort = 7777;
 
-    @Config(desc = "Set the number of threads to use for the Executor. "
-            + "See netty javadoc of OrderedMemoryAwareThreadPoolExecutor")
-    @NotNull
-    @Size(min = 1)
-    private Integer executorThreadCount = 16;
-
     @Config(desc = "Specify the worker count to use. "
             + "See netty javadoc NioServerSocketChannelFactory.")
     @Size(min = 1)
@@ -80,12 +74,11 @@ public class ServerConfig {
     @Config(desc = "Ssl configuration.")
     private SslConfig ssl;
 
+    @Config(desc = "Thread pool executor configuration.")
+    private ExecutorConfig executor;
+
     public ServerConfig() {
 
-    }
-
-    public Integer getExecutorThreadCount() {
-        return executorThreadCount;
     }
 
     public Integer getIoWorkerCount() {
@@ -126,5 +119,9 @@ public class ServerConfig {
 
     public SslConfig getSsl() {
         return ssl;
+    }
+
+    public ExecutorConfig getExecutor() {
+        return executor;
     }
 }

@@ -8,8 +8,8 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>westty-protobuf</artifactId>
-  <name>Westty Protobuf</name>
+  <artifactId>westty-datasource</artifactId>
+  <name>Westty DataSource</name>
 
   <dependencies>
     <dependency>
@@ -21,12 +21,8 @@
       <artifactId>westty-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
+      <groupId>com.jolbox</groupId>
+      <artifactId>bonecp</artifactId>
     </dependency>
   </dependencies>
 </project>

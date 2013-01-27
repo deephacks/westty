@@ -3,7 +3,6 @@ package org.deephacks.westty.jpa;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -15,170 +14,173 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
 
+import org.deephacks.tools4j.config.model.ThreadLocalManager;
+
 @ApplicationScoped
 public class WesttyEntityManager implements EntityManager {
 
-    @Inject
-    private WesttyEntityManagerProvider tlem;
-
     public void persist(Object entity) {
-        tlem.get().persist(entity);
+        get().persist(entity);
     }
 
     public <T> T merge(T entity) {
-        return tlem.get().merge(entity);
+        return get().merge(entity);
     }
 
     public void remove(Object entity) {
-        tlem.get().remove(entity);
+        get().remove(entity);
     }
 
     public <T> T find(Class<T> entityClass, Object primaryKey) {
-        return tlem.get().find(entityClass, primaryKey);
+        return get().find(entityClass, primaryKey);
     }
 
     public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties) {
-        return tlem.get().find(entityClass, primaryKey, properties);
+        return get().find(entityClass, primaryKey, properties);
     }
 
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode) {
-        return tlem.get().find(entityClass, primaryKey, lockMode);
+        return get().find(entityClass, primaryKey, lockMode);
     }
 
     public <T> T find(Class<T> entityClass, Object primaryKey, LockModeType lockMode,
             Map<String, Object> properties) {
-        return tlem.get().find(entityClass, primaryKey, lockMode, properties);
+        return get().find(entityClass, primaryKey, lockMode, properties);
     }
 
     public <T> T getReference(Class<T> entityClass, Object primaryKey) {
-        return tlem.get().getReference(entityClass, primaryKey);
+        return get().getReference(entityClass, primaryKey);
     }
 
     public void flush() {
-        tlem.get().flush();
+        get().flush();
     }
 
     public void setFlushMode(FlushModeType flushMode) {
-        tlem.get().setFlushMode(flushMode);
+        get().setFlushMode(flushMode);
     }
 
     public FlushModeType getFlushMode() {
-        return tlem.get().getFlushMode();
+        return get().getFlushMode();
     }
 
     public void lock(Object entity, LockModeType lockMode) {
-        tlem.get().lock(entity, lockMode);
+        get().lock(entity, lockMode);
     }
 
     public void lock(Object entity, LockModeType lockMode, Map<String, Object> properties) {
-        tlem.get().lock(entity, lockMode, properties);
+        get().lock(entity, lockMode, properties);
     }
 
     public void refresh(Object entity) {
-        tlem.get().refresh(entity);
+        get().refresh(entity);
     }
 
     public void refresh(Object entity, Map<String, Object> properties) {
-        tlem.get().refresh(entity, properties);
+        get().refresh(entity, properties);
     }
 
     public void refresh(Object entity, LockModeType lockMode) {
-        tlem.get().refresh(entity, lockMode);
+        get().refresh(entity, lockMode);
     }
 
     public void refresh(Object entity, LockModeType lockMode, Map<String, Object> properties) {
-        tlem.get().refresh(entity, lockMode, properties);
+        get().refresh(entity, lockMode, properties);
     }
 
     public void clear() {
-        tlem.get().clear();
+        get().clear();
     }
 
     public void detach(Object entity) {
-        tlem.get().detach(entity);
+        get().detach(entity);
     }
 
     public boolean contains(Object entity) {
-        return tlem.get().contains(entity);
+        return get().contains(entity);
     }
 
     public LockModeType getLockMode(Object entity) {
-        return tlem.get().getLockMode(entity);
+        return get().getLockMode(entity);
     }
 
     public void setProperty(String propertyName, Object value) {
-        tlem.get().setProperty(propertyName, value);
+        get().setProperty(propertyName, value);
     }
 
     public Map<String, Object> getProperties() {
-        return tlem.get().getProperties();
+        return get().getProperties();
     }
 
     public Query createQuery(String qlString) {
-        return tlem.get().createQuery(qlString);
+        return get().createQuery(qlString);
     }
 
     public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery) {
-        return tlem.get().createQuery(criteriaQuery);
+        return get().createQuery(criteriaQuery);
     }
 
     public <T> TypedQuery<T> createQuery(String qlString, Class<T> resultClass) {
-        return tlem.get().createQuery(qlString, resultClass);
+        return get().createQuery(qlString, resultClass);
     }
 
     public Query createNamedQuery(String name) {
-        return tlem.get().createNamedQuery(name);
+        return get().createNamedQuery(name);
     }
 
     public <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass) {
-        return tlem.get().createNamedQuery(name, resultClass);
+        return get().createNamedQuery(name, resultClass);
     }
 
     public Query createNativeQuery(String sqlString) {
-        return tlem.get().createNativeQuery(sqlString);
+        return get().createNativeQuery(sqlString);
     }
 
     public Query createNativeQuery(String sqlString, @SuppressWarnings("rawtypes") Class resultClass) {
-        return tlem.get().createNativeQuery(sqlString, resultClass);
+        return get().createNativeQuery(sqlString, resultClass);
     }
 
     public Query createNativeQuery(String sqlString, String resultSetMapping) {
-        return tlem.get().createNativeQuery(sqlString, resultSetMapping);
+        return get().createNativeQuery(sqlString, resultSetMapping);
     }
 
     public void joinTransaction() {
-        tlem.get().joinTransaction();
+        get().joinTransaction();
     }
 
     public <T> T unwrap(Class<T> cls) {
-        return tlem.get().unwrap(cls);
+        return get().unwrap(cls);
     }
 
     public Object getDelegate() {
-        return tlem.get().getDelegate();
+        return get().getDelegate();
     }
 
     public void close() {
-        tlem.get().close();
+        get().close();
     }
 
     public boolean isOpen() {
-        return tlem.get().isOpen();
+        return get().isOpen();
     }
 
     public EntityTransaction getTransaction() {
-        return tlem.get().getTransaction();
+        return get().getTransaction();
     }
 
     public EntityManagerFactory getEntityManagerFactory() {
-        return tlem.get().getEntityManagerFactory();
+        return get().getEntityManagerFactory();
     }
 
     public CriteriaBuilder getCriteriaBuilder() {
-        return tlem.get().getCriteriaBuilder();
+        return get().getCriteriaBuilder();
     }
 
     public Metamodel getMetamodel() {
-        return tlem.get().getMetamodel();
+        return get().getMetamodel();
+    }
+
+    private EntityManager get() {
+        return ThreadLocalManager.peek(EntityManager.class);
     }
 }

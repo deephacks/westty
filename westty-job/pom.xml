@@ -17,6 +17,14 @@
       <artifactId>westty-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-datasource</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
     </dependency>

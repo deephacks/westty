@@ -1,4 +1,4 @@
-package org.deephacks.westty.jpa;
+package org.deephacks.westty.datasource;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -38,9 +38,15 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@org.deephacks.westty.datasource.DataSource
 public class WesttyDataSource implements DataSource {
 
-    private final DataSource ds;
+    private DataSource ds;
+
+    /** weld requirement, do not use*/
+    public WesttyDataSource() {
+
+    }
 
     public WesttyDataSource(DataSource ds) {
         this.ds = ds;
@@ -524,6 +530,7 @@ public class WesttyDataSource implements DataSource {
             stmt.setAsciiStream(parameterIndex, x, length);
         }
 
+        @SuppressWarnings("deprecation")
         public void setUnicodeStream(int parameterIndex, InputStream x, int length)
                 throws SQLException {
             stmt.setUnicodeStream(parameterIndex, x, length);
@@ -1003,6 +1010,7 @@ public class WesttyDataSource implements DataSource {
             return stmt.getDouble(parameterIndex);
         }
 
+        @SuppressWarnings("deprecation")
         public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException {
             return stmt.getBigDecimal(parameterIndex, scale);
         }

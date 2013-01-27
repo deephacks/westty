@@ -17,12 +17,12 @@
       <artifactId>westty-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-datasource</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate.javax.persistence</groupId>
@@ -35,14 +35,6 @@
     <dependency>
       <groupId>org.deephacks.tools4j</groupId>
       <artifactId>tools4j-config-api-runtime</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-provider-jpa20</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.jolbox</groupId>
-      <artifactId>bonecp</artifactId>
     </dependency>
     <dependency>
       <groupId>net.sf.scannotation</groupId>

@@ -18,7 +18,7 @@
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-job</artifactId>
+      <artifactId>westty-spi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.deephacks.tools4j</groupId>
@@ -63,14 +63,6 @@
       <artifactId>javassist</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
-    </dependency>
-    <dependency>
       <groupId>ch.qos.cal10n</groupId>
       <artifactId>cal10n-api</artifactId>
     </dependency>
@@ -85,18 +77,6 @@
     <dependency>
       <groupId>org.deephacks.tools4j</groupId>
       <artifactId>tools4j-config-admin-jaxrs</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-websocket</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-protobuf</artifactId>
     </dependency>
   </dependencies>
 </project>

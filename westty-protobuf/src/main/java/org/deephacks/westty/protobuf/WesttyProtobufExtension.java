@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.deephacks.westty.internal.core;
+package org.deephacks.westty.protobuf;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,11 +29,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
-import org.deephacks.westty.protobuf.Protobuf;
-import org.deephacks.westty.protobuf.ProtobufException;
 import org.deephacks.westty.protobuf.ProtobufException.FailureCode;
-import org.deephacks.westty.protobuf.ProtobufMethod;
-import org.deephacks.westty.protobuf.ProtobufSerializer;
 
 public class WesttyProtobufExtension implements Extension {
     public static final ProtobufSerializer serializer = new ProtobufSerializer();

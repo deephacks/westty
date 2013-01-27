@@ -45,6 +45,9 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.quartz.core.QuartzScheduler;
+import org.quartz.core.QuartzSchedulerResources;
+import org.quartz.impl.StdScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +55,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
-public class JobScheduler implements Extension {
+public class JobScheduler extends StdSchedulerFactory implements Extension {
     private static final Logger log = LoggerFactory.getLogger(JobScheduler.class);
     private static final String JOB_CLASS_KEY = "JOB_ID_KEY";
     private static final String LAST_EXECUTION_TIMESTAMP = "LAST_EXECUTION_TIMESTAMP";
@@ -66,12 +69,13 @@ public class JobScheduler implements Extension {
     }
 
     public void start() {
+
         try {
-            StdSchedulerFactory factory = new org.quartz.impl.StdSchedulerFactory();
             JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
             try {
-                factory.initialize(config.getInputStream());
-                scheduler = factory.getScheduler();
+                QuartzSchedulerResources res = new QuartzSchedulerResources();
+                QuartzScheduler qs = new QuartzScheduler(res, 1000, 1000);
+                scheduler = new StdScheduler(qs);
             } catch (SchedulerException e) {
                 throw new RuntimeException(e);
             }
@@ -197,4 +201,5 @@ public class JobScheduler implements Extension {
         Class<? extends Job> cls = t.getJavaClass().asSubclass(Job.class);
         jobs.add(cls);
     }
+
 }

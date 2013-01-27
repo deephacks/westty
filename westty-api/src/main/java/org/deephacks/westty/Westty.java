@@ -15,6 +15,7 @@ package org.deephacks.westty;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
 
 public class Westty {
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
@@ -38,6 +39,10 @@ public class Westty {
 
     public void setRootDir(File file) throws Throwable {
         call("setRootDir", file);
+    }
+
+    public void setProperties(Properties props) throws Throwable {
+        call("setProperties", props);
     }
 
     public synchronized void startup() throws Throwable {

@@ -8,25 +8,13 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>westty-protobuf</artifactId>
-  <name>Westty Protobuf</name>
+  <artifactId>westty-spi</artifactId>
+  <name>Westty SPI</name>
 
   <dependencies>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-spi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
     </dependency>
   </dependencies>
 </project>

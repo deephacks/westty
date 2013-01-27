@@ -11,14 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.deephacks.westty.internal.core;
+package org.deephacks.westty.protobuf;
 
 import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
 
 import javax.inject.Inject;
 
+import org.deephacks.westty.executor.Executor;
+import org.deephacks.westty.executor.WesttyExecutor;
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
-import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -29,6 +30,7 @@ import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.jboss.netty.handler.execution.ExecutionHandler;
 
 import com.google.protobuf.MessageLite;
 
@@ -38,12 +40,20 @@ public class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
 
     @Inject
     private WesttyProtobufHandler handler;
+    @Inject
+    @Executor
+    private WesttyExecutor executor;
+
+    private ExecutionHandler executionHandler;
 
     @Override
     public ChannelPipeline getPipeline() throws Exception {
+        if (executionHandler == null) {
+            this.executionHandler = new ExecutionHandler(executor);
+        }
         return Channels.pipeline(new LengthFieldBasedFrameDecoder(65536, 0, 2, 0, 2),
                 new WesttyProtobufDecoder(extension.getSerializer()), new LengthFieldPrepender(2),
-                new WesttyProtobufEncoder(extension.getSerializer()), handler);
+                new WesttyProtobufEncoder(extension.getSerializer()), executionHandler, handler);
     }
 
     public static class WesttyProtobufDecoder extends OneToOneDecoder {

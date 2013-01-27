@@ -13,10 +13,9 @@
  */
 package org.deephacks.westty.internal.core;
 
-import static org.deephacks.westty.jpa.TransactionInterceptor.executeInTx;
-
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
@@ -29,8 +28,9 @@ import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.westty.Locations;
 import org.deephacks.westty.config.ServerConfig;
-import org.deephacks.westty.job.JobScheduler;
-import org.deephacks.westty.jpa.WesttyPersistence;
+import org.deephacks.westty.executor.Executor;
+import org.deephacks.westty.executor.WesttyExecutor;
+import org.deephacks.westty.executor.WesttyExecutorFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
@@ -52,12 +52,17 @@ public class WesttyCore {
     private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private WeldContainer container;
     private WesttyEngine engine;
+    private static Properties props;
 
     public WesttyCore() {
     }
 
     public void setRootDir(File dir) {
         Locations.setRootDir(dir);
+    }
+
+    public void setProperties(Properties props) {
+        WesttyCore.props = props;
     }
 
     public void startup() {
@@ -117,13 +122,9 @@ public class WesttyCore {
         @Inject
         private WesttySecurePipelineFactory secureFactory;
         @Inject
-        private WesttyProtobufPipelineFactory protoFactory;
-        @Inject
         private WesttyJaxrsApplication jaxrsApps;
         @Inject
         private ResteasyDeployment deployment;
-        @Inject
-        private JobScheduler scheduler;
         private Channel standardChannel;
         private Channel secureChannel;
         private Channel protoChannel;
@@ -134,6 +135,13 @@ public class WesttyCore {
         public void setConfig(ServerConfig config) {
             this.config = config;
 
+        }
+
+        @Produces
+        @ApplicationScoped
+        @Executor
+        public WesttyExecutor getExecutor() {
+            return WesttyExecutorFactory.create(config.getExecutor());
         }
 
         public void start() {

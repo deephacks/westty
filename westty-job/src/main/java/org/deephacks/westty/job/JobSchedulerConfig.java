@@ -45,7 +45,7 @@ public class JobSchedulerConfig {
     private String instanceId = "AUTO";
 
     @Config(desc = PROP_THREAD_POOL_CLASS)
-    private String threadPoolClass = "org.quartz.simpl.SimpleThreadPool";
+    private String threadPoolClass = "org.deephacks.westty.job.JobThreadPool";
 
     private static final String PROP_THREAD_POOL_THREAD_COUNT = PROP_THREAD_POOL_PREFIX
             + ".threadCount";

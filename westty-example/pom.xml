@@ -17,28 +17,24 @@
       <artifactId>jaxrs-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-jpa</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-protobuf</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.weld.se</groupId>

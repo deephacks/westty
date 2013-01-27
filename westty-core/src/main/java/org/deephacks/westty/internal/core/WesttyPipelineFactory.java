@@ -23,6 +23,8 @@ import javax.inject.Inject;
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.config.WesttyApplication;
+import org.deephacks.westty.executor.Executor;
+import org.deephacks.westty.executor.WesttyExecutor;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
@@ -33,7 +35,6 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.execution.ExecutionHandler;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
 public class WesttyPipelineFactory implements ChannelPipelineFactory {
 
@@ -52,6 +53,10 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
     private WesttyHandler requestHandler;
 
     @Inject
+    @Executor
+    private WesttyExecutor executor;
+
+    @Inject
     private RuntimeContext ctx;
 
     private ExecutionHandler executionHandler;
@@ -61,11 +66,7 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
         staticPath = config.getWeb().getUri();
         jaxrsPath = config.getJaxrs().getUri();
         if (executionHandler == null) {
-            if (config.getExecutorThreadCount() > 0) {
-                this.executionHandler = new ExecutionHandler(
-                        new OrderedMemoryAwareThreadPoolExecutor(config.getExecutorThreadCount(),
-                                0L, 0L));
-            }
+            this.executionHandler = new ExecutionHandler(executor);
         }
         ChannelPipeline pipeline = pipeline();
         pipeline.addLast("decoder", new HttpDetector());
