@@ -7,12 +7,12 @@ programming model for building web applications.
 * [Weld](http://seamframework.org/Weld)
 * [tools4j-config](https://github.com/deephacks/tools4j-config)
 
-Westty have a modular and extendable [SPI](http://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) design and provide the following optional drop-in modules. No classpath pollution.
+Westty have a modular and extendable [SPI](http://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) design and provide the following drop-in modules. These are optional and does not pollute the runtime classpath if not used.
 
 * [DataSource] (http://docs.oracle.com/javase/6/docs/api/javax/sql/DataSource.html)
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
 * [RestEasy](http://www.jboss.org/resteasy)
-* [The WebSocket Protocol](http://tools.ietf.org/html/rfc6455)
-* [google-protobuf](http://code.google.com/p/protobuf)
+* [WebSockets](http://tools.ietf.org/html/rfc6455)
+* [Google Protocol Buffers](http://code.google.com/p/protobuf)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
-* [Quartz job scheduling](http://quartz-scheduler.org)
+* [Quartz Job Scheduling](http://quartz-scheduler.org)
