@@ -53,7 +53,9 @@ public class TransactionInterceptor implements Serializable {
         } finally {
             if (em != null) {
                 provider.removeEntityManager();
-                em.close();
+                if (em.isOpen()) {
+                    em.close();
+                }
             }
         }
         return result;
