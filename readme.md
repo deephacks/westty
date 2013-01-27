@@ -13,6 +13,6 @@ Westty have a modular and extendable [SPI](http://docs.oracle.com/javase/tutoria
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
 * [RestEasy](http://www.jboss.org/resteasy)
 * [WebSockets](http://tools.ietf.org/html/rfc6455)
-* [Google Protocol Buffers](http://code.google.com/p/protobuf)
+* [Google Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [Quartz Job Scheduling](http://quartz-scheduler.org)
