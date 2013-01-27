@@ -1,6 +1,6 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
-Westty is a server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
+Westty is a NIO server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
 programming model for building web applications. Westty consumes around 20mb of JVM heap space.
 
 * [Netty](http://netty.io)
