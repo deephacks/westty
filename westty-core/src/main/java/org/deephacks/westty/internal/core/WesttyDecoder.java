@@ -16,7 +16,6 @@ package org.deephacks.westty.internal.core;
 import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
 
-import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.internal.core.WesttyPipelineFactory.HttpRequestType;
 import org.deephacks.westty.internal.core.WesttyPipelineFactory.WesttyMessage;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
@@ -34,7 +33,6 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 public class WesttyDecoder extends OneToOneDecoder {
 
     private final static Logger logger = Logger.getLogger(WesttyDecoder.class);
-    private ServerConfig config;
     @Inject
     private ResteasyDeployment deployment;
     private final String protocol = "http";
@@ -52,10 +50,6 @@ public class WesttyDecoder extends OneToOneDecoder {
         return msg;
     }
 
-    public void setConfig(ServerConfig config) {
-        this.config = config;
-    }
-
     private Object handleJaxrsRequest(ChannelHandlerContext ctx, Channel channel, Object msg)
             throws Exception {
         org.jboss.netty.handler.codec.http.HttpRequest request = (org.jboss.netty.handler.codec.http.HttpRequest) msg;
@@ -67,7 +61,8 @@ public class WesttyDecoder extends OneToOneDecoder {
         UriInfoImpl uriInfo = null;
         try {
             headers = NettyUtil.extractHttpHeaders(request);
-            uriInfo = NettyUtil.extractUriInfo(request, WesttyJaxrsApplication.JAXRS_CONTEXT_URI, protocol);
+            uriInfo = NettyUtil.extractUriInfo(request, WesttyJaxrsApplication.JAXRS_CONTEXT_URI,
+                    protocol);
             HttpRequest nettyRequest = new NettyHttpRequest(headers, uriInfo, request.getMethod()
                     .getName(), ((SynchronousDispatcher) deployment.getDispatcher()), response,
                     org.jboss.netty.handler.codec.http.HttpHeaders.is100ContinueExpected(request));

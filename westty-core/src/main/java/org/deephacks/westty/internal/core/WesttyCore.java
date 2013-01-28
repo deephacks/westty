@@ -95,12 +95,7 @@ public class WesttyCore {
          * future extensions. 
          */
         try {
-            if (WesttyPersistence.isEnabled()) {
-                executeInTx(start);
-            } else {
-                start.call();
-            }
-
+            start.call();
         } catch (Exception e) {
             e.printStackTrace();
             shutdown();
@@ -127,16 +122,15 @@ public class WesttyCore {
         private ResteasyDeployment deployment;
         private Channel standardChannel;
         private Channel secureChannel;
-        private Channel protoChannel;
         private ServerBootstrap standardBootstrap;
         private ServerBootstrap secureBootstrap;
-        private ServerBootstrap protoBootstrap;
 
         public void setConfig(ServerConfig config) {
             this.config = config;
 
         }
 
+        @SuppressWarnings("unused")
         @Produces
         @ApplicationScoped
         @Executor
@@ -148,19 +142,6 @@ public class WesttyCore {
             startRestEasy();
             startHttp();
             startHttps();
-            startProtobuf();
-        }
-
-        private void startProtobuf() {
-            int port = config.getProtobufPort();
-            protoBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                    Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
-                    config.getIoWorkerCount()));
-            protoBootstrap.setPipelineFactory(protoFactory);
-            protoBootstrap.setOption("child.tcpNoDelay", true);
-            protoBootstrap.setOption("child.keepAlive", true);
-            protoChannel = protoBootstrap.bind(new InetSocketAddress(port));
-            log.info("Protobuf listening on port {}.", port);
         }
 
         private void startRestEasy() {
@@ -213,14 +194,15 @@ public class WesttyCore {
             if (standardBootstrap != null) {
                 standardBootstrap.releaseExternalResources();
             }
+            if (secureChannel != null) {
+                standardChannel.close().awaitUninterruptibly(5000);
+            }
+            if (secureBootstrap != null) {
+                standardBootstrap.releaseExternalResources();
+            }
+
             if (deployment != null) {
                 deployment.stop();
-            }
-            if (protoChannel != null) {
-                protoChannel.close().awaitUninterruptibly(5000);
-            }
-            if (protoBootstrap != null) {
-                protoBootstrap.releaseExternalResources();
             }
 
             log.debug("All channels closed.");

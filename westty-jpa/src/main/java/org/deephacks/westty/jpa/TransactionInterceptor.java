@@ -8,7 +8,6 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
 
-import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ public class TransactionInterceptor implements Serializable {
                 if (em.getTransaction().isActive()) {
                     em.getTransaction().rollback();
                 }
-            } catch (HibernateException e1) {
+            } catch (Exception e1) {
                 log.error("Error rolling back tx. ", e1);
             }
             throw e;

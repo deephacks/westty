@@ -28,7 +28,7 @@ public class WesttyJaxrsApplication extends Application {
 	/** relative uri for jaxrs endpoint for "see other" and "redirects" */
 	public static final String JAXRS_CONTEXT_URI = "/";
     @Inject
-    private WesttyJaxrsExtension jaxrsExtension;
+    private WesttyCdiExtension jaxrsExtension;
     @Inject
     private BeanManager bm;
 

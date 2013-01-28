@@ -1,6 +1,13 @@
 package org.deephacks.westty.spi;
 
-public interface WesttyConnector extends WesttyModule {
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 
-    public Object NettyChannelPipelineFactory();
+public interface WesttyConnector {
+
+    public Object startup(ExecutorService bossExecutor, ExecutorService ioExecutor, Properties props);
+
+    public void shutdown();
+
+    public int getLoadOrder();
 }
