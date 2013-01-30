@@ -29,6 +29,8 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
@@ -55,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
+@Singleton
 public class JobScheduler extends StdSchedulerFactory implements Extension {
     private static final Logger log = LoggerFactory.getLogger(JobScheduler.class);
     private static final String JOB_CLASS_KEY = "JOB_ID_KEY";
@@ -64,14 +67,17 @@ public class JobScheduler extends StdSchedulerFactory implements Extension {
     private static BeanManager beanManager;
     private Scheduler scheduler;
     private static final Set<Class<? extends Job>> jobs = new HashSet<Class<? extends Job>>();
+    private final JobThreadPool threadPool;
+    private final JobSchedulerConfig config;
 
-    public JobScheduler() {
+    @Inject
+    public JobScheduler(JobThreadPool threadPool, JobSchedulerConfig config) {
+        this.threadPool = threadPool;
+        this.config = config;
     }
 
     public void start() {
-
         try {
-            JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
             try {
                 QuartzSchedulerResources res = new QuartzSchedulerResources();
                 QuartzScheduler qs = new QuartzScheduler(res, 1000, 1000);

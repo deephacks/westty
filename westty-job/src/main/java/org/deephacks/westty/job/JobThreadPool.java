@@ -3,12 +3,18 @@ package org.deephacks.westty.job;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
 
+@Singleton
 public class JobThreadPool implements ThreadPool {
-    private ThreadPoolExecutor executor;
 
+    private final ThreadPoolExecutor executor;
+
+    @Inject
     public JobThreadPool(ThreadPoolExecutor executor) {
         this.executor = executor;
     }

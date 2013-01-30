@@ -15,10 +15,11 @@ package org.deephacks.westty.protobuf;
 
 import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
 
-import javax.inject.Inject;
+import java.util.concurrent.ThreadPoolExecutor;
 
-import org.deephacks.westty.executor.Executor;
-import org.deephacks.westty.executor.WesttyExecutor;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -34,15 +35,16 @@ import org.jboss.netty.handler.execution.ExecutionHandler;
 
 import com.google.protobuf.MessageLite;
 
+@Singleton
 public class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
     @Inject
     private WesttyProtobufExtension extension;
 
     @Inject
     private WesttyProtobufHandler handler;
+
     @Inject
-    @Executor
-    private WesttyExecutor executor;
+    private ThreadPoolExecutor executor;
 
     private ExecutionHandler executionHandler;
 

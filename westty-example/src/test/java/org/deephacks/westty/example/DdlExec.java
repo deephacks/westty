@@ -1,83 +1,50 @@
 package org.deephacks.westty.example;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Properties;
 
-import org.deephacks.westty.jpa.WesttyPersistenceUnitInfo;
+import javax.inject.Inject;
+import javax.sql.DataSource;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
 public class DdlExec {
+    @Inject
+    private DataSource datasource;
 
-    public static void executeResource(String ddl, String properties, boolean ignoreSqlEx)
-            throws SQLException, IOException {
+    public void executeResource(String ddl, boolean ignoreSqlEx) throws SQLException, IOException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
         URL ddlUrl = cl.getResource(ddl);
-        URL propUrl = cl.getResource(properties);
-
-        Properties p = new Properties();
-        try {
-            p.load(propUrl.openStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        String username = p.getProperty(WesttyPersistenceUnitInfo.USER);
-        String password = p.getProperty(WesttyPersistenceUnitInfo.PASSWORD);
-        String url = p.getProperty(WesttyPersistenceUnitInfo.URL);
         List<String> lines = Resources.readLines(ddlUrl, Charsets.UTF_8);
-
-        execute(lines, url, username, password, ignoreSqlEx);
+        execute(lines, ignoreSqlEx);
     }
 
-    public static void execute(File file, File properties, boolean ignoreSqlEx)
-            throws SQLException, IOException {
-        Properties p = new Properties();
-        try {
-            p.load(new FileInputStream(properties));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        String username = p.getProperty(WesttyPersistenceUnitInfo.USER);
-        String password = p.getProperty(WesttyPersistenceUnitInfo.PASSWORD);
-        String url = p.getProperty(WesttyPersistenceUnitInfo.URL);
-        execute(file, url, username, password, ignoreSqlEx);
+    public void execute(File file, boolean ignoreSqlEx) throws SQLException, IOException {
+        execute(file, ignoreSqlEx);
     }
 
-    public static void execute(List<String> commands, String url, String username, String password,
-            boolean ignoreSqlEx) throws SQLException, IOException {
-        Connection c = getConnection(url, username, password);
+    public void execute(List<String> commands, boolean ignoreSqlEx) throws SQLException,
+            IOException {
+        Connection c = datasource.getConnection();
         execute(commands, c, ignoreSqlEx);
     }
 
-    public static void execute(File file, String url, String username, String password,
-            boolean ignoreSqlEx) throws SQLException, IOException {
-        Connection c = getConnection(url, username, password);
+    public void execute(File file, String url, String username, String password, boolean ignoreSqlEx)
+            throws SQLException, IOException {
+        Connection c = datasource.getConnection();
         execute(file, c, ignoreSqlEx);
     }
 
-    private static Connection getConnection(String url, String username, String password)
-            throws SQLException {
-        Properties connectionProps = new Properties();
-        connectionProps.put("user", username);
-        connectionProps.put("password", password);
-        Connection conn = DriverManager.getConnection(url, connectionProps);
-        conn.setAutoCommit(true);
-        return conn;
-    }
-
-    private static void execute(File f, Connection c, boolean ignoreSqlEx) throws SQLException,
+    private void execute(File f, Connection c, boolean ignoreSqlEx) throws SQLException,
             IOException {
         try {
             try {
@@ -104,7 +71,7 @@ public class DdlExec {
         }
     }
 
-    private static void execute(List<String> commands, Connection c, boolean ignoreSqlEx)
+    private void execute(List<String> commands, Connection c, boolean ignoreSqlEx)
             throws SQLException, IOException {
         try {
             try {

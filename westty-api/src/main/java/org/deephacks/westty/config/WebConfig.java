@@ -18,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
-import org.deephacks.westty.Locations;
 
 @Config(name = WebConfig.ID, desc = WebConfig.DESC)
 @ConfigScope
@@ -33,23 +32,11 @@ public class WebConfig {
     @NotNull
     private String uri = "/";
 
-    @Config(desc = "Path on file system where static web content is served from.")
-    @NotNull
-    private String staticRoot = Locations.getHtmlDir().getAbsolutePath();
-
     public String getUri() {
         return uri;
     }
 
     public void setUri(String uri) {
         this.uri = uri;
-    }
-
-    public String getStaticRoot() {
-        return staticRoot;
-    }
-
-    public void setStaticRoot(String staticRoot) {
-        this.staticRoot = staticRoot;
     }
 }

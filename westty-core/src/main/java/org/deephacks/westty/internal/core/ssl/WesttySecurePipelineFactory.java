@@ -1,27 +1,20 @@
-/**
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.deephacks.westty.internal.core;
+package org.deephacks.westty.internal.core.ssl;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLEngine;
 
+import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.config.WesttyApplication;
 import org.deephacks.westty.internal.core.WesttyEncoderDecoder.WesttyDecoder;
 import org.deephacks.westty.internal.core.WesttyEncoderDecoder.WesttyEncoder;
+import org.deephacks.westty.internal.core.WesttyHandler;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
@@ -32,8 +25,12 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.execution.ExecutionHandler;
+import org.jboss.netty.handler.ssl.SslHandler;
 
-public class WesttyPipelineFactory implements ChannelPipelineFactory {
+public class WesttySecurePipelineFactory implements ChannelPipelineFactory {
+
+    @Inject
+    private ServerConfig server;
 
     @Inject
     private WesttyEncoder encoder;
@@ -41,8 +38,8 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
     @Inject
     private WesttyDecoder decoder;
 
+    @Inject
     private ServerConfig config;
-    private String websocketPath;
     private String staticPath;
     private String jaxrsPath;
 
@@ -52,51 +49,71 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
     @Inject
     private ThreadPoolExecutor executor;
 
+    @Inject
+    private RuntimeContext ctx;
+    @Inject
+    private WesttySslContextFactory sslContextFactory;
+
     private ExecutionHandler executionHandler;
 
+    private SSLEngine engine;
+
     public ChannelPipeline getPipeline() throws Exception {
-        websocketPath = config.getWebsocket().getUri();
+        if (engine == null) {
+            sslContextFactory.init();
+            engine = sslContextFactory.getServerContext().createSSLEngine();
+            engine.setUseClientMode(false);
+        }
         staticPath = config.getWeb().getUri();
         jaxrsPath = config.getJaxrs().getUri();
         if (executionHandler == null) {
             this.executionHandler = new ExecutionHandler(executor);
         }
         ChannelPipeline pipeline = pipeline();
+        pipeline.addLast("ssl", new SslHandler(engine));
         pipeline.addLast("decoder", new HttpDetector());
         pipeline.addLast("westtyDecoder", decoder);
         pipeline.addLast("aggregator",
-                new HttpChunkAggregator(config.getMaxHttpContentChunkLength()));
+                new HttpChunkAggregator(server.getMaxHttpContentChunkLength()));
         pipeline.addLast("encoder", new HttpResponseEncoder());
         pipeline.addLast("westtyEncoder", encoder);
+        pipeline.addLast("handshake", new WesttySecureHandler());
         if (executionHandler != null) {
             pipeline.addLast("executionHandler", executionHandler);
         }
-        requestHandler.setConfig(config);
         pipeline.addLast("handler", requestHandler);
 
         return pipeline;
     }
 
-    public void setConfig(ServerConfig config) {
-        this.config = config;
-    }
-
     final class HttpDetector extends HttpRequestDecoder {
+
+        private ConcurrentHashMap<String, WesttyApplication> applications;
 
         @Override
         protected HttpMessage createMessage(String[] initialLine) throws Exception {
+            if (applications == null) {
+                applications = getApplications();
+            }
             String uri = initialLine[1];
             HttpRequestType requestType = null;
             if (uri.startsWith(jaxrsPath)) {
                 requestType = HttpRequestType.JAXRS;
-            } else if (uri.startsWith(websocketPath)) {
-                requestType = HttpRequestType.WEBSOCKET;
             } else if (uri.startsWith(staticPath)) {
                 requestType = HttpRequestType.STATIC;
             }
 
             return new WesttyMessage(HttpVersion.valueOf(initialLine[2]),
                     HttpMethod.valueOf(initialLine[0]), initialLine[1], requestType);
+        }
+
+        private ConcurrentHashMap<String, WesttyApplication> getApplications() {
+            ConcurrentHashMap<String, WesttyApplication> result = new ConcurrentHashMap<String, WesttyApplication>();
+            List<WesttyApplication> apps = ctx.all(WesttyApplication.class);
+            for (WesttyApplication app : apps) {
+                result.put(app.getAppUri(), app);
+            }
+            return result;
         }
 
         @Override
@@ -121,9 +138,5 @@ public class WesttyPipelineFactory implements ChannelPipelineFactory {
 
     static enum HttpRequestType {
         WEBSOCKET, STATIC, JAXRS
-    }
-
-    public void close() {
-        requestHandler.getClientChannels().close();
     }
 }

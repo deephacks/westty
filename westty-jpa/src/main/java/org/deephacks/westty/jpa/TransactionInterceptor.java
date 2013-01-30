@@ -3,6 +3,7 @@ package org.deephacks.westty.jpa;
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 
+import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
@@ -18,6 +19,9 @@ public class TransactionInterceptor implements Serializable {
 
     private static final long serialVersionUID = -1033443722024614083L;
 
+    @Inject
+    private WesttyJpaModule jpaModule;
+
     @AroundInvoke
     public Object aroundInvoke(final InvocationContext ic) throws Exception {
         return executeInTx(new Callable<Object>() {
@@ -29,8 +33,8 @@ public class TransactionInterceptor implements Serializable {
         });
     }
 
-    public static Object executeInTx(Callable<?> future) throws Exception {
-        EntityManager em = WesttyJpaModule.createEntityManager();
+    public Object executeInTx(Callable<?> future) throws Exception {
+        EntityManager em = jpaModule.createEntityManager();
         Object result = null;
         try {
             em.getTransaction().begin();

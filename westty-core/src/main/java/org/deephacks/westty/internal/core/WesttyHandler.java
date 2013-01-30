@@ -22,6 +22,7 @@ import java.io.RandomAccessFile;
 
 import javax.inject.Inject;
 
+import org.deephacks.westty.WesttyProperties;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.internal.core.WesttyPipelineFactory.HttpRequestType;
 import org.deephacks.westty.internal.core.WesttyPipelineFactory.WesttyMessage;
@@ -63,7 +64,9 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
 
     @Inject
     private RequestDispatcher dispatcher;
-
+    @Inject
+    private WesttyProperties properties;
+   
     private ServerConfig config;
 
     private String websocketPath;
@@ -96,7 +99,7 @@ public class WesttyHandler extends SimpleChannelUpstreamHandler {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         if (!configCached) {
             websocketPath = config.getWebsocket().getUri();
-            staticRootPath = config.getWeb().getStaticRoot();
+            staticRootPath = properties.getHtmlDir().getAbsolutePath();
             configCached = true;
         }
         if (e.getMessage() instanceof NettyHttpRequest) {

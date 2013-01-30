@@ -13,6 +13,7 @@
  */
 package org.deephacks.westty.internal.core;
 
+import org.deephacks.westty.Westty;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
@@ -24,8 +25,8 @@ public class WesttyTest {
         root.setLevel(Level.INFO);
     }
 
-    public static void main(String[] args) {
-        WesttyCore westty = new WesttyCore();
+    public static void main(String[] args) throws Throwable {
+        Westty westty = new Westty();
         westty.startup();
     }
 }

@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,56 +31,44 @@ import javax.sql.DataSource;
 
 import org.deephacks.tools4j.config.model.ThreadLocalManager;
 import org.deephacks.tools4j.config.model.ThreadLocalScope;
-import org.deephacks.westty.Locations;
-import org.deephacks.westty.datasource.WesttyDataSourceModule;
+import org.deephacks.westty.WesttyProperties;
+import org.deephacks.westty.datasource.WesttyDataSource;
 import org.deephacks.westty.spi.WesttyModule;
 import org.scannotation.AnnotationDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-
-public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, PersistenceUnitInfo {
-    public static final int LOAD_ORDER = 200;
-    public static final File DEFAULT_PU = new File(Locations.getConfDir(), "persistence.xml");
-    public static final String USER = "javax.persistence.jdbc.user";
-    public static final String PASSWORD = "javax.persistence.jdbc.password";
-    public static final String URL = "javax.persistence.jdbc.url";
-    public static final String DRIVER = "javax.persistence.jdbc.driver";
-    public static final String PROVIDER = "javax.persistence.provider";
-    public static final String TX_TYPE = "javax.persistence.transactionType";
-    public static final String JPA_UNIT = "westty.jpa.unit";
-    public static final String PERSISTENCE_XML = "META-INF/persistence.xml";
-
+@Singleton
+public class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo, ThreadLocalScope {
     private static final Logger log = LoggerFactory.getLogger(WesttyJpaModule.class);
 
-    private String unitName;
-    private String txType;
-    private String provider;
-    private static Properties PROPS;
-    private static List<Class<?>> CLASSES = new ArrayList<Class<?>>();
-    private static EntityManagerFactory emf;
+    public static final int LOAD_ORDER = 200;
 
-    @Override
-    public void startup(Properties props) {
-        WesttyJpaModule.PROPS = props;
-        this.unitName = getProperty(JPA_UNIT);
-        this.txType = getProperty(TX_TYPE);
-        this.provider = getProperty(PROVIDER);
-        WesttyJpaModule.emf = createEntityManagerFactory();
+    private static final String PERSISTENCE_XML = "persistence.xml";
+
+    private final WesttyProperties properties;
+    private final WesttyJpaProperties jpaProperties;
+    private final WesttyDataSource dataSource;
+
+    private List<Class<?>> classes = new ArrayList<Class<?>>();
+    private static EntityManagerFactory EMF;
+
+    @Inject
+    public WesttyJpaModule(WesttyProperties properties, WesttyDataSource dataSource) {
+        this.properties = properties;
+        this.jpaProperties = new WesttyJpaProperties(properties);
+        this.dataSource = dataSource;
+        EMF = createEntityManagerFactory();
     }
 
-    private String getProperty(String name) {
-        String value = PROPS.getProperty(name);
-        if (Strings.isNullOrEmpty(value)) {
-            throw new IllegalArgumentException(name + " property is not defined.");
-        }
-        return value;
+    @Override
+    public void startup() {
+
     }
 
     @Override
     public void shutdown() {
-        WesttyJpaModule.emf.close();
+        EMF.close();
     }
 
     @Override
@@ -97,30 +87,30 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
     }
 
     public void add(Class<?> cls) {
-        CLASSES.add(cls);
+        classes.add(cls);
     }
 
     public void add(Class<?>... cls) {
-        CLASSES.addAll(Arrays.asList(cls));
+        classes.addAll(Arrays.asList(cls));
     }
 
     public void add(Collection<Class<?>> cls) {
-        CLASSES.addAll(cls);
+        classes.addAll(cls);
     }
 
     @Override
     public String getPersistenceUnitName() {
-        return unitName;
+        return jpaProperties.getJpaUnit();
     }
 
     @Override
     public String getPersistenceProviderClassName() {
-        return provider;
+        return jpaProperties.getProvider();
     }
 
     @Override
     public PersistenceUnitTransactionType getTransactionType() {
-        return PersistenceUnitTransactionType.valueOf(txType);
+        return PersistenceUnitTransactionType.valueOf(jpaProperties.getTxType());
     }
 
     @Override
@@ -130,7 +120,7 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
 
     @Override
     public DataSource getNonJtaDataSource() {
-        return WesttyDataSourceModule.get();
+        return dataSource;
     }
 
     @Override
@@ -146,7 +136,7 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
     @Override
     public java.net.URL getPersistenceUnitRootUrl() {
         try {
-            return Locations.getLibDir().toURI().toURL();
+            return properties.getLibDir().toURI().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -155,7 +145,7 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
     @Override
     public List<String> getManagedClassNames() {
         List<String> classNames = new ArrayList<String>();
-        for (Class<?> cls : CLASSES) {
+        for (Class<?> cls : classes) {
             classNames.add(cls.getCanonicalName());
         }
         return classNames;
@@ -178,7 +168,7 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
 
     @Override
     public Properties getProperties() {
-        return PROPS;
+        return properties.getProperties();
     }
 
     @Override
@@ -205,8 +195,8 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
         return ThreadLocalManager.peek(EntityManager.class);
     }
 
-    static EntityManager createEntityManager() {
-        final EntityManager em = emf.createEntityManager();
+    EntityManager createEntityManager() {
+        final EntityManager em = EMF.createEntityManager();
         ThreadLocalManager.push(EntityManager.class, em);
         return em;
     }
@@ -224,7 +214,7 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
         EntityManagerFactory emf = null;
         List<PersistenceProvider> providers = getProviders();
         for (PersistenceProvider provider : providers) {
-            emf = provider.createContainerEntityManagerFactory(this, getJpaProperties());
+            emf = provider.createContainerEntityManagerFactory(this, jpaProperties);
             if (emf != null) {
                 break;
             }
@@ -235,18 +225,6 @@ public class WesttyJpaModule extends ThreadLocalScope implements WesttyModule, P
         }
         log.debug("Created persistence unit with entities {}", entities);
         return emf;
-    }
-
-    private Properties getJpaProperties() {
-        Properties jpa = new Properties();
-        jpa.setProperty(USER, WesttyDataSourceModule.getUsername());
-        jpa.setProperty(PASSWORD, WesttyDataSourceModule.getPassword());
-        jpa.setProperty(URL, WesttyDataSourceModule.getUrl());
-        jpa.setProperty(DRIVER, WesttyDataSourceModule.getDriver());
-        jpa.setProperty(TX_TYPE, txType);
-        jpa.setProperty(PROVIDER, provider);
-        return jpa;
-
     }
 
     private static List<PersistenceProvider> getProviders() {

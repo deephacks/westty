@@ -1,1 +1,1 @@
-org.deephacks.westty.jpa.WesttyEntityManagerProvider
+org.deephacks.westty.jpa.WesttyJpaModule

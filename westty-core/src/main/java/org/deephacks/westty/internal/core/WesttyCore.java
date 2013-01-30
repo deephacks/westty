@@ -26,11 +26,8 @@ import javax.inject.Inject;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.Lookup;
-import org.deephacks.westty.Locations;
 import org.deephacks.westty.config.ServerConfig;
-import org.deephacks.westty.executor.Executor;
-import org.deephacks.westty.executor.WesttyExecutor;
-import org.deephacks.westty.executor.WesttyExecutorFactory;
+import org.deephacks.westty.internal.core.ssl.WesttySecurePipelineFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
@@ -52,17 +49,20 @@ public class WesttyCore {
     private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private WeldContainer container;
     private WesttyEngine engine;
-    private static Properties props;
+    private File rootDir;
+    private Properties properties = new Properties();
 
     public WesttyCore() {
     }
 
     public void setRootDir(File dir) {
-        Locations.setRootDir(dir);
+        this.rootDir = dir;
     }
 
     public void setProperties(Properties props) {
-        WesttyCore.props = props;
+        for (String key : props.stringPropertyNames()) {
+            properties.setProperty(key, props.getProperty(key));
+        }
     }
 
     public void startup() {
@@ -128,14 +128,6 @@ public class WesttyCore {
         public void setConfig(ServerConfig config) {
             this.config = config;
 
-        }
-
-        @SuppressWarnings("unused")
-        @Produces
-        @ApplicationScoped
-        @Executor
-        public WesttyExecutor getExecutor() {
-            return WesttyExecutorFactory.create(config.getExecutor());
         }
 
         public void start() {
