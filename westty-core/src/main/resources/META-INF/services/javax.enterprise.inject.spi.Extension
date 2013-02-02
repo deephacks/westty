@@ -1,1 +1,1 @@
-org.deephacks.westty.internal.core.WesttyCdiExtension
+org.deephacks.westty.internal.core.extension.WesttyCoreExtensionImpl

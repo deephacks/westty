@@ -21,7 +21,7 @@ import org.deephacks.westty.example.protobuf.CreateMessages.CreateRequest;
 import org.deephacks.westty.example.protobuf.CreateMessages.CreateResponse;
 import org.deephacks.westty.example.protobuf.DeleteMessages.DeleteRequest;
 import org.deephacks.westty.example.protobuf.DeleteMessages.DeleteResponse;
-import org.deephacks.westty.jpa.Transactional;
+import org.deephacks.westty.persistence.Transactional;
 import org.deephacks.westty.protobuf.Protobuf;
 import org.deephacks.westty.protobuf.ProtobufException;
 import org.deephacks.westty.protobuf.ProtobufMethod;

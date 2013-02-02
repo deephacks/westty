@@ -13,67 +13,62 @@
  */
 package org.deephacks.westty;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Properties;
 
 public class Westty {
-    private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
-    private static Object WESTTY;
+	private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
+	private static Object WESTTY;
 
-    public static void main(String[] args) throws Throwable {
-        Westty westty = new Westty();
-        westty.startup();
-    }
+	public static void main(String[] args) throws Throwable {
+		Westty westty = new Westty();
+		westty.startup();
+	}
 
-    public Westty() {
-        if (WESTTY == null) {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            try {
-                WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException();
-            }
-        }
-    }
+	public Westty() {
+		if (WESTTY == null) {
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			try {
+				WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
+			} catch (Exception e) {
+				throw new RuntimeException();
+			}
+		}
+	}
 
-    public void setRootDir(File file) throws Throwable {
-        call("setRootDir", file);
-    }
+	public synchronized void startup() throws Throwable {
+		call("startup");
+	}
 
-    public void setProperties(Properties props) throws Throwable {
-        call("setProperties", props);
-    }
+	public synchronized <V> V getInstance(Class<V> cls) throws Throwable {
+		return (V) call("getInstance", cls);
+	}
 
-    public synchronized void startup() throws Throwable {
-        call("startup");
-    }
+	public synchronized void stop() throws Throwable {
+		call("shutdown");
+	}
 
-    public synchronized void stop() throws Throwable {
-        call("shutdown");
-    }
+	private Object call(String method, Object... args) throws Throwable {
+		try {
+			if (args == null || args.length == 0) {
+				return WESTTY.getClass().getMethod(method).invoke(WESTTY);
+			} else {
+				Class<?>[] classes = new Class<?>[args.length];
+				for (int i = 0; i < args.length; i++) {
+					classes[i] = args[i].getClass();
+				}
+				return WESTTY.getClass().getMethod(method, classes)
+						.invoke(WESTTY, args);
+			}
+		} catch (InvocationTargetException e) {
+			Throwable t = e.getTargetException();
+			if (t instanceof ExceptionInInitializerError) {
+				ExceptionInInitializerError err = (ExceptionInInitializerError) t;
+				throw err.getCause();
+			}
+			throw t;
 
-    private Object call(String method, Object... args) throws Throwable {
-        try {
-            if (args == null || args.length == 0) {
-                return WESTTY.getClass().getMethod(method).invoke(WESTTY);
-            } else {
-                Class<?>[] classes = new Class<?>[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    classes[i] = args[i].getClass();
-                }
-                return WESTTY.getClass().getMethod(method, classes).invoke(WESTTY, args);
-            }
-        } catch (InvocationTargetException e) {
-            Throwable t = e.getTargetException();
-            if (t instanceof ExceptionInInitializerError) {
-                ExceptionInInitializerError err = (ExceptionInInitializerError) t;
-                throw err.getCause();
-            }
-            throw t;
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

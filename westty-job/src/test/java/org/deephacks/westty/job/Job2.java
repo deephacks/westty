@@ -29,6 +29,6 @@ public class Job2 implements Job {
             i = Integer.parseInt(str);
         }
         map.put(key, "" + ++i);
-        logger.debug("" + i);
+        logger.info("" + i);
     }
 }

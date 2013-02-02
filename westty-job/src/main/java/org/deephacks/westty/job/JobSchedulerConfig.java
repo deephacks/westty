@@ -13,21 +13,23 @@
  */
 package org.deephacks.westty.job;
 
-import static org.quartz.impl.StdSchedulerFactory.PROP_JOB_STORE_CLASS;
-import static org.quartz.impl.StdSchedulerFactory.PROP_JOB_STORE_USE_PROP;
-import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_ID;
-import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
-import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_SKIP_UPDATE_CHECK;
-import static org.quartz.impl.StdSchedulerFactory.PROP_THREAD_POOL_CLASS;
-import static org.quartz.impl.StdSchedulerFactory.PROP_THREAD_POOL_PREFIX;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
-import org.deephacks.westty.config.JpaConfig;
+import org.deephacks.westty.internal.job.JobConnectionProvider;
+import org.deephacks.westty.internal.job.JobThreadPool;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.core.QuartzScheduler;
+import org.quartz.core.QuartzSchedulerResources;
+import org.quartz.impl.StdJobRunShellFactory;
+import org.quartz.impl.StdScheduler;
+import org.quartz.impl.jdbcjobstore.JobStoreTX;
+import org.quartz.impl.jdbcjobstore.Semaphore;
+import org.quartz.impl.jdbcjobstore.UpdateLockRowSemaphore;
+import org.quartz.simpl.CascadingClassLoadHelper;
+import org.quartz.spi.ThreadExecutor;
+import org.quartz.utils.DBConnectionManager;
 
 @Config(name = JobSchedulerConfig.ID, desc = JobSchedulerConfig.DESC)
 @ConfigScope
@@ -38,81 +40,78 @@ public class JobSchedulerConfig {
     @Id(desc = JobSchedulerConfig.DESC)
     public static final String ID = "westty.job";
 
-    @Config(desc = PROP_SCHED_INSTANCE_NAME)
-    private String instanceName = "QuartzScheduler";
+    @Config(desc = "See org.quartz.scheduler.instanceName")
+    private String instanceName = "WesttyQuartzScheduler";
 
-    @Config(desc = PROP_SCHED_INSTANCE_ID)
+    @Config(desc = "See org.quartz.scheduler.instanceId")
     private String instanceId = "AUTO";
 
-    @Config(desc = PROP_THREAD_POOL_CLASS)
-    private String threadPoolClass = "org.deephacks.westty.job.JobThreadPool";
-
-    private static final String PROP_THREAD_POOL_THREAD_COUNT = PROP_THREAD_POOL_PREFIX
-            + ".threadCount";
-
-    @Config(desc = PROP_THREAD_POOL_THREAD_COUNT)
-    private Integer threadCount = 25;
-
-    @Config(desc = PROP_JOB_STORE_CLASS)
-    private String jobStoreClass = "org.quartz.impl.jdbcjobstore.JobStoreTX";
-
-    private static final String DRIVER_DELEGATE_CLASS = "org.quartz.jobStore.driverDelegateClass";
-    @Config(desc = DRIVER_DELEGATE_CLASS)
-    private String driverDelegateClass = "org.quartz.impl.jdbcjobstore.CloudscapeDelegate";
-
-    @Config(desc = PROP_JOB_STORE_USE_PROP)
-    private Boolean useProperties = false;
-
-    private static final String PROP_IS_CLUSTERED = "org.quartz.jobStore.isClustered";
-    @Config(desc = PROP_IS_CLUSTERED)
+    @Config(desc = "See org.quartz.jobStore.isClustered")
     private Boolean isClustered = true;
 
-    private static final String PROP_CLUSTER_CHECK_INTERVAL = "org.quartz.jobStore.clusterCheckinInterval";
-    @Config(desc = PROP_CLUSTER_CHECK_INTERVAL)
-    private Integer clusterCheckinInterval = 20000;
+    @Config(desc = "See org.quartz.scheduler.idleWaitTime")
+    private Long idleTimeWait = 5000L;
 
-    private static final String PROP_DATASOURCE = "org.quartz.jobStore.dataSource";
-    @Config(desc = PROP_DATASOURCE)
-    private String dataSource = "jobDataSource";
+    @Config(desc = "See org.quartz.scheduler.dbFailureRetryInterval")
+    private Long dbFailureRetryInterval = 15000L;
 
-    @Config(desc = "")
-    private JpaConfig jpa;
+    @Config(desc = "See org.quartz.jobStore.clusterCheckinInterval")
+    private Long clusterCheckinInterval = 7500L;
 
-    private static final String PROP_DATASOURCE_DRIVER = "org.quartz.dataSource.%s.driver";
-    private static final String PROP_URL = "org.quartz.dataSource.%s.URL";
-    private static final String PROP_USER = "org.quartz.dataSource.%s.user";
-    private static final String PROP_PASSWORD = "org.quartz.dataSource.%s.password";
-    private static final String PROP_MAX_CONNECTIONS = "org.quartz.dataSource.%s.maxConnections";
-    private static final String PROP_VALIDATION_QUERY = "org.quartz.dataSource.%s.validationQuery";
+    @Config(desc = "See org.quartz.scheduler.batchTriggerAcquisitionMaxCount")
+    private Integer batchTriggerAcquisitionMaxCount = 10;
 
-    private static final String NL = System.getProperty("line.separator");
+    @Config(desc = "See org.quartz.scheduler.batchTriggerAcquisitionFireAheadTimeWindow")
+    private Long batchTriggerAcquisitionFireAheadTimeWindow = 0L;
 
-    public InputStream getInputStream() {
-        StringBuilder str = new StringBuilder();
-        str.append(PROP_SCHED_SKIP_UPDATE_CHECK).append("=").append("true").append(NL);
-        str.append(PROP_SCHED_INSTANCE_NAME).append("=").append(instanceName).append(NL);
-        str.append(PROP_SCHED_INSTANCE_ID).append("=").append(instanceId).append(NL);
-        str.append(PROP_THREAD_POOL_CLASS).append("=").append(threadPoolClass).append(NL);
-        str.append(PROP_THREAD_POOL_THREAD_COUNT).append("=").append(threadCount).append(NL);
-        str.append(PROP_JOB_STORE_CLASS).append("=").append(jobStoreClass).append(NL);
-        str.append(DRIVER_DELEGATE_CLASS).append("=").append(driverDelegateClass).append(NL);
-        str.append(PROP_IS_CLUSTERED).append("=").append(isClustered).append(NL);
-        str.append(PROP_JOB_STORE_USE_PROP).append("=").append(useProperties).append(NL);
-        str.append(PROP_CLUSTER_CHECK_INTERVAL).append("=").append(clusterCheckinInterval)
-                .append(NL);
-        str.append(PROP_DATASOURCE).append("=").append(dataSource).append(NL);
-        String val = String.format(PROP_DATASOURCE_DRIVER, dataSource);
-        str.append(val).append("=").append(jpa.getDriver()).append(NL);
-        val = String.format(PROP_URL, dataSource);
-        str.append(val).append("=").append(jpa.getUrl()).append(NL);
-        val = String.format(PROP_USER, dataSource);
-        str.append(val).append("=").append(jpa.getUser()).append(NL);
-        val = String.format(PROP_PASSWORD, dataSource);
-        str.append(val).append("=").append(jpa.getPassword()).append(NL);
-        val = String.format(PROP_MAX_CONNECTIONS, dataSource);
-        str.append(val).append("=").append("5").append(NL);
-        val = String.format(PROP_VALIDATION_QUERY, dataSource);
-        str.append(val).append("=").append("select 0 from dual").append(NL);
-        return new ByteArrayInputStream(str.toString().getBytes());
+    public Scheduler getScheduler(ThreadExecutor executor, JobConnectionProvider provider,
+            JobThreadPool threadPool) throws SchedulerException {
+
+        DBConnectionManager manager = DBConnectionManager.getInstance();
+        manager.addConnectionProvider(provider.getDataSourceName(), provider);
+
+        CascadingClassLoadHelper cl = new CascadingClassLoadHelper();
+
+        QuartzSchedulerResources resources = new QuartzSchedulerResources();
+        resources.setInstanceId(instanceId);
+        resources.setName(instanceName);
+        resources.setMakeSchedulerThreadDaemon(true);
+        resources.setThreadName(instanceName);
+        resources.setThreadPool(threadPool);
+        resources.setThreadExecutor(executor);
+        resources.setRunUpdateCheck(false);
+        resources.setMaxBatchSize(batchTriggerAcquisitionMaxCount);
+        resources.setBatchTimeWindow(batchTriggerAcquisitionFireAheadTimeWindow);
+
+        QuartzScheduler qs = new QuartzScheduler(resources, idleTimeWait, dbFailureRetryInterval);
+        Scheduler scheduler = new StdScheduler(qs);
+
+        StdJobRunShellFactory jobShell = new StdJobRunShellFactory();
+        resources.setJobRunShellFactory(jobShell);
+
+        JobStoreTX store = new JobStoreTX();
+        store.setLockHandler(getLockStrategy());
+        store.setLockOnInsert(true);
+        store.setInstanceName(instanceName);
+        store.setInstanceId(instanceId);
+        store.setIsClustered(isClustered);
+        store.setClusterCheckinInterval(clusterCheckinInterval);
+        store.setTxIsolationLevelSerializable(true);
+        store.setDataSource(provider.getDataSourceName());
+        resources.setJobStore(store);
+
+        cl.initialize();
+        jobShell.initialize(scheduler);
+        store.initialize(cl, qs.getSchedulerSignaler());
+
+        return scheduler;
+
     }
+
+    public Semaphore getLockStrategy() {
+        UpdateLockRowSemaphore lock = new UpdateLockRowSemaphore();
+        lock.setSchedName(instanceName);
+        return lock;
+    }
+
 }

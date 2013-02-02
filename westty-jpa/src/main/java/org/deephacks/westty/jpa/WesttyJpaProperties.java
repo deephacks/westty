@@ -1,18 +1,13 @@
 package org.deephacks.westty.jpa;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.enterprise.inject.Alternative;
-import javax.inject.Singleton;
 
-import org.deephacks.westty.WesttyProperties;
-import org.deephacks.westty.WesttyPropertyExtension;
 import org.deephacks.westty.datasource.WesttyDataSourceProperties;
-
-import com.google.common.io.Closeables;
+import org.deephacks.westty.properties.WesttyProperties;
+import org.deephacks.westty.properties.WesttyPropertyBuilder;
 
 @Alternative
 public class WesttyJpaProperties extends Properties {
@@ -24,6 +19,7 @@ public class WesttyJpaProperties extends Properties {
     public static final String PROVIDER = "javax.persistence.provider";
     public static final String TX_TYPE = "javax.persistence.transactionType";
     public static final String JPA_UNIT = "westty.jpa.unit";
+    public static final String JPA_PROPERTIES_FILE = "jpa.properties";
 
     public WesttyJpaProperties() {
     }
@@ -33,6 +29,24 @@ public class WesttyJpaProperties extends Properties {
         for (String key : source.stringPropertyNames()) {
             setProperty(key, source.getProperty(key));
         }
+    }
+
+    @WesttyPropertyBuilder(priority = 1000)
+    public static void build(WesttyProperties properties) {
+        WesttyDataSourceProperties ds = new WesttyDataSourceProperties(properties);
+        WesttyJpaProperties jpa = new WesttyJpaProperties();
+        jpa.setJpaUnit("westty-jpa-unit");
+        jpa.setUsername(ds.getUsername());
+        jpa.setPassword(ds.getPassword());
+        jpa.setUrl("jdbc:derby:memory:westty");
+        jpa.setDriver(ds.getDriver());
+        jpa.setProvider("org.hibernate.ejb.HibernatePersistence");
+        jpa.setTxType("RESOURCE_LOCAL");
+        // jpa.setProperty("hibernate.hbm2ddl.auto", "validate");
+        jpa.setProperty("hibernate.show_sql", "false");
+        jpa.setProperty("hibernate.dialect", "org.hibernate.dialect.DerbyDialect");
+        properties.add(jpa);
+        properties.loadProperties(new File(properties.getConfDir(), JPA_PROPERTIES_FILE));
     }
 
     public String getJpaUnit() {
@@ -91,49 +105,4 @@ public class WesttyJpaProperties extends Properties {
         setProperty(TX_TYPE, txType);
     }
 
-    @Singleton
-    public static class WesttyJpaDefaultProperties implements WesttyPropertyExtension {
-        private static final String JPA_PROPERTIES_FILE = "jpa.properties";
-
-        @Override
-        public void extendProperties(WesttyProperties properties) {
-            WesttyDataSourceProperties ds = new WesttyDataSourceProperties(properties);
-            WesttyJpaProperties jpa = new WesttyJpaProperties();
-            jpa.setJpaUnit("westty-jpa-unit");
-            jpa.setUsername(ds.getUsername());
-            jpa.setPassword(ds.getPassword());
-            jpa.setUrl(ds.getUrl());
-            jpa.setDriver(ds.getDriver());
-            jpa.setProvider("org.hibernate.ejb.HibernatePersistence");
-            jpa.setTxType("RESOURCE_LOCAL");
-            jpa.setProperty("hibernate.hbm2ddl.auto", "validate");
-            jpa.setProperty("hibernate.show_sql", "false");
-            jpa.setProperty("hibernate.dialect", "org.hibernate.dialect.DerbyDialect");
-            properties.add(jpa);
-            properties.loadProperties(new File(properties.getConfDir(), JPA_PROPERTIES_FILE));
-        }
-
-        @Override
-        public int priority() {
-            return 10;
-        }
-    }
-
-    public static Properties loadProperties(File file) {
-        Properties props = new Properties();
-        if (!file.exists()) {
-            return props;
-        }
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(file);
-            props.load(in);
-            return props;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            Closeables.closeQuietly(in);
-        }
-
-    }
 }

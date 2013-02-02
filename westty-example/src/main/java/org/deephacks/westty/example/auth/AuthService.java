@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.deephacks.westty.jpa.Transactional;
+import org.deephacks.westty.persistence.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class AuthService {
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     @Inject
     private EntityManager em;
 
@@ -97,7 +98,7 @@ public class AuthService {
             throw new RuntimeException("Password must be provided");
         }
 
-        em.persist(new UserEntity(username, password));
+        //        em.persist(new UserEntity(username, password));
     }
 
     @Transactional

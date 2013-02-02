@@ -20,9 +20,9 @@ import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.introspect.VisibilityChecker;
-import org.deephacks.tools4j.config.internal.admin.jaxrs.JaxrsConfigError;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Event;
+import org.deephacks.westty.jaxrs.JaxrsConfigError;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;

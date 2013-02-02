@@ -16,7 +16,7 @@ package org.deephacks.westty.job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Schedule("0/2 * * * * ?")
+@Schedule("0/10 * * * * ?")
 public class Job1 implements Job {
     private Logger logger = LoggerFactory.getLogger(Job1.class);
     private String key = "test";
@@ -29,6 +29,6 @@ public class Job1 implements Job {
             i = Integer.parseInt(str);
         }
         map.put(key, "" + ++i);
-        logger.debug("" + i);
+        logger.info("" + i);
     }
 }

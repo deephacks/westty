@@ -1,36 +1,42 @@
 package org.deephacks.westty.job;
 
-import javax.enterprise.inject.Instance;
+import java.io.IOException;
+import java.sql.SQLException;
 
-import org.deephacks.tools4j.config.RuntimeContext;
-import org.deephacks.tools4j.config.model.Lookup;
-import org.deephacks.westty.config.JpaConfig;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
+import org.deephacks.westty.test.SQLExec;
+import org.deephacks.westty.test.WesttyJUnit4Runner;
+import org.deephacks.westty.test.WesttyTestBootstrap;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
+@RunWith(WesttyJUnit4Runner.class)
 public class JobTest {
 
-    static {
+    @WesttyTestBootstrap
+    private static void bootstrap() throws SQLException, IOException {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.WARN);
-        RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
-        ctx.register(JpaConfig.class);
-        ctx.register(JobSchedulerConfig.class);
-        ctx.register(JobConfig.class);
-        JpaConfig jpa = ctx.singleton(JpaConfig.class);
-        jpa.dropInstall();
+        root.setLevel(Level.INFO);
+        SQLExec bootstrap = new SQLExec("westty", "westty", "jdbc:derby:memory:westty;create=true");
+        bootstrap.executeResource("META-INF/install_job_derby.ddl", false);
+    }
+
+    @Before
+    public void before() throws Exception {
 
     }
-    private static final WeldContainer container = new Weld().initialize();
-    private static final Instance<JobScheduler> instance = container.instance().select(
-            JobScheduler.class);
 
-    public static void main(String[] args) throws Exception {
+    public void after() {
 
+    }
+
+    @Test
+    public void test() throws Exception {
+        Thread.sleep(1000);
     }
 
 }

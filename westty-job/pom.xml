@@ -22,33 +22,30 @@
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-core</artifactId>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-datasource</artifactId>
     </dependency>
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
     </dependency>
-    <!-- bridge c3po logging to slf4j -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <version>1.7.2</version>
-    </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.weld.se</groupId>
-      <artifactId>weld-se-core</artifactId>
-      <scope>test</scope>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>5.1.18</version>
+      <scope>runtime</scope>
     </dependency>
-    <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-core</artifactId>
-      <!-- only to manually invoke config cdi extension -->
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 </project>

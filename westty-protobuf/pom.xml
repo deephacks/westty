@@ -21,10 +21,6 @@
       <artifactId>westty-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
     </dependency>

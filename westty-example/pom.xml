@@ -13,18 +13,17 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-api</artifactId>
-      <type>test-jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>jaxrs-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.tools4j</groupId>
+      <artifactId>tools4j-config-provider-jpa20</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
@@ -34,6 +33,15 @@
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-protobuf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-websocket</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-jaxrs</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -42,20 +50,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-core</artifactId>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-api-runtime</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-admin-jaxrs</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>

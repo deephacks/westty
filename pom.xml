@@ -73,10 +73,11 @@
     <module>westty-datasource</module>
     <module>westty-jpa</module>
     <module>westty-job</module>
+    <module>westty-jaxrs</module>
     <module>westty-websocket</module>
+    <module>westty-protobuf</module>
     <module>westty-example</module>
     <module>westty-docbkx</module>
-    <module>westty-protobuf</module>
   </modules>
   <build>
     <plugins>
@@ -248,21 +249,26 @@
       </dependency>
       <dependency>
         <groupId>org.deephacks.westty</groupId>
-        <artifactId>westty-api</artifactId>
-        <version>${version.westty}</version>
-        <type>test-jar</type>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.deephacks.westty</groupId>
         <artifactId>westty-spi</artifactId>
         <scope>compile</scope>
         <version>${version.westty}</version>
       </dependency>
       <dependency>
         <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-jaxrs</artifactId>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.westty</groupId>
         <artifactId>westty-core</artifactId>
         <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-core</artifactId>
+        <version>${version.westty}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.deephacks.westty</groupId>
@@ -442,12 +448,6 @@
       <dependency>
         <groupId>org.deephacks.tools4j</groupId>
         <artifactId>tools4j-config-api-model</artifactId>
-        <version>${version.tools4j.config}</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.deephacks.tools4j</groupId>
-        <artifactId>tools4j-config-admin-jaxrs</artifactId>
         <version>${version.tools4j.config}</version>
         <scope>compile</scope>
       </dependency>

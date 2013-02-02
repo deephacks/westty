@@ -13,12 +13,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-spi</artifactId>
     </dependency>
   </dependencies>
 </project>

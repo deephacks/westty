@@ -1,11 +1,14 @@
 package org.deephacks.westty.spi;
 
-import java.util.Properties;
-
 public interface WesttyModule {
+
     public void startup();
 
     public void shutdown();
 
-    public int getLoadOrder();
+    /**
+     * Values are treated like a prioritized list of tasks;
+     * where 1 is top priority and higher values follows.
+     */
+    public int priority();
 }

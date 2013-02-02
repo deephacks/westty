@@ -22,9 +22,11 @@ public class WesttyExecutor extends OrderedMemoryAwareThreadPoolExecutor {
 
     @Inject
     public WesttyExecutor(ExecutorConfig config) {
-        super(config.getCorePoolSize(), config.getMaxChannelMemorySize(), config
-                .getMaxTotalMemorySize(), config.getKeepAliveTime(), TimeUnit.SECONDS,
-                new WesttyThreadFactory());
+        super(10, 100000, 100000, 100, TimeUnit.SECONDS, new WesttyThreadFactory());
+        //        super(config.getCorePoolSize(), config.getMaxChannelMemorySize(), config
+        //                .getMaxTotalMemorySize(), config.getKeepAliveTime(), TimeUnit.SECONDS,
+        //                new WesttyThreadFactory());
+
     }
 
     public <T> Future<T> submit(Runnable task, T result) {

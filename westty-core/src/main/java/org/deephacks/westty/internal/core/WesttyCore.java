@@ -13,33 +13,33 @@
  */
 package org.deephacks.westty.internal.core;
 
-import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
-import org.codehaus.jackson.map.DeserializationConfig;
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.Lookup;
-import org.deephacks.westty.config.ServerConfig;
-import org.deephacks.westty.internal.core.ssl.WesttySecurePipelineFactory;
+import org.deephacks.westty.internal.core.extension.WesttyConfigBootstrap;
+import org.deephacks.westty.internal.core.http.WesttyHttpPipelineFactory;
+import org.deephacks.westty.internal.core.https.WesttySecurePipelineFactory;
+import org.deephacks.westty.persistence.Transactional;
+import org.deephacks.westty.spi.WesttyIoExecutors;
+import org.deephacks.westty.spi.WesttyModule;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJacksonProvider;
-import org.jboss.resteasy.spi.ResteasyDeployment;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Lists;
 
 /**
  * Main class for starting and stopping Westty.
@@ -48,54 +48,23 @@ public class WesttyCore {
     private static final Logger log = LoggerFactory.getLogger(WesttyCore.class);
     private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private WeldContainer container;
-    private WesttyEngine engine;
-    private File rootDir;
-    private Properties properties = new Properties();
-
-    public WesttyCore() {
-    }
-
-    public void setRootDir(File dir) {
-        this.rootDir = dir;
-    }
-
-    public void setProperties(Properties props) {
-        for (String key : props.stringPropertyNames()) {
-            properties.setProperty(key, props.getProperty(key));
-        }
-    }
+    private Starter engine;
 
     public void startup() {
-
         log.info("Westty startup.");
-        Callable<Object> start = new Callable<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                Stopwatch time = new Stopwatch().start();
-                container = new Weld().initialize();
-                log.info("Weld started.");
-                engine = container.instance().select(WesttyEngine.class).get();
-                engine.setConfig(ctx.singleton(ServerConfig.class));
-                engine.start();
-                ShutdownHook.install(new Thread("WesttyCore") {
-                    @Override
-                    public void run() {
-                        shutdown();
-                    }
-                });
-                log.info("Westty started in {} ms.", time.elapsedMillis());
-                return null;
-            }
-        };
-        /**
-         * TODO: Do startup and shutdown using pipleline pattern that 
-         * discovers service loaders during bootstrap. This will
-         * also decouple westty core from jpa, job and other 
-         * future extensions. 
-         */
         try {
-            start.call();
+            Stopwatch time = new Stopwatch().start();
+            container = new Weld().initialize();
+            log.info("Weld started.");
+            engine = container.instance().select(Starter.class).get();
+            engine.start();
+            ShutdownHook.install(new Thread("WesttyCore") {
+                @Override
+                public void run() {
+                    shutdown();
+                }
+            });
+            log.info("Westty started in {} ms.", time.elapsedMillis());
         } catch (Exception e) {
             e.printStackTrace();
             shutdown();
@@ -110,50 +79,88 @@ public class WesttyCore {
         log.info("Westty shutdown.");
     }
 
-    private static class WesttyEngine {
-        private ServerConfig config;
+    public Object getInstance(Class<?> cls) {
+        return container.instance().select(cls).get();
+    }
+
+    public static class Starter {
         @Inject
-        private WesttyPipelineFactory coreFactory;
+        private WesttyEngine engine;
+
+        public Starter() {
+
+        }
+
+        public void start() {
+            engine.start();
+        }
+
+        public void stop() {
+            engine.stop();
+        }
+    }
+
+    @Singleton
+    private static class WesttyEngine {
+        private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
+        @Inject
+        private WesttyHttpPipelineFactory coreFactory;
         @Inject
         private WesttySecurePipelineFactory secureFactory;
         @Inject
-        private WesttyJaxrsApplication jaxrsApps;
+        private WesttyConfigBootstrap configBootstrap;
         @Inject
-        private ResteasyDeployment deployment;
+        private WesttyIoExecutors executors;
+        @Inject
+        private Instance<WesttyModule> modules;
+
         private Channel standardChannel;
         private Channel secureChannel;
         private ServerBootstrap standardBootstrap;
         private ServerBootstrap secureBootstrap;
 
-        public void setConfig(ServerConfig config) {
-            this.config = config;
+        public WesttyEngine() {
 
         }
 
+        @Transactional
         public void start() {
-            startRestEasy();
-            startHttp();
-            startHttps();
+            ctx.register(configBootstrap.getSchemas());
+            ctx.registerDefault(configBootstrap.getDefaults());
+            for (WesttyModule module : sortModules()) {
+                log.info("Starting WesttyModule {}", module.getClass().getName());
+                module.startup();
+                log.info("WesttyModule ready {}", module.getClass().getName());
+            }
+            startInternal();
         }
 
-        private void startRestEasy() {
-            deployment.setApplication(jaxrsApps);
-            ResteasyJacksonProvider provider = new ResteasyJacksonProvider();
-            provider.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ResteasyProviderFactory resteasyFactory = ResteasyProviderFactory.getInstance();
-            resteasyFactory.registerProviderInstance(provider);
+        public void startInternal() {
+            startHttp();
+            // startHttps();
+        }
 
-            deployment.setProviderFactory(resteasyFactory);
-            deployment.start();
-            log.info("RestEasy started.");
+        private ArrayList<WesttyModule> sortModules() {
+            ArrayList<WesttyModule> result = Lists.newArrayList(modules);
+            Collections.sort(result, new Comparator<WesttyModule>() {
+
+                @Override
+                public int compare(WesttyModule m1, WesttyModule m2) {
+                    if (m1.priority() < m2.priority()) {
+                        return -1;
+                    }
+                    return 1;
+                }
+            });
+            return result;
         }
 
         private void startHttp() {
-            int port = config.getHttpPort();
+
+            int ioWorkerCount = 4;
+            int port = 8080;
             standardBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                    Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
-                    config.getIoWorkerCount()));
-            coreFactory.setConfig(config);
+                    executors.getBoss(), executors.getWorker(), ioWorkerCount));
             standardBootstrap.setPipelineFactory(coreFactory);
             standardChannel = standardBootstrap.bind(new InetSocketAddress(port));
 
@@ -161,18 +168,20 @@ public class WesttyCore {
         }
 
         private void startHttps() {
-            int port = config.getHttpsPort();
-            if (!config.getSsl().getSslEnabled()) {
-                return;
-            }
-
-            secureBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                    Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
-                    config.getIoWorkerCount()));
-            secureBootstrap.setPipelineFactory(secureFactory);
-            secureChannel = secureBootstrap.bind(new InetSocketAddress(port));
-
-            log.info("Https listening on port {}.", port);
+            // int port = config.getHttpsPort();
+            // if (!config.getSsl().getSslEnabled()) {
+            // return;
+            // }
+            //
+            // secureBootstrap = new ServerBootstrap(new
+            // NioServerSocketChannelFactory(
+            // Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
+            // config.getIoWorkerCount()));
+            // // secureBootstrap.setPipelineFactory(secureFactory);
+            // secureChannel = secureBootstrap.bind(new
+            // InetSocketAddress(port));
+            //
+            // log.info("Https listening on port {}.", port);
         }
 
         public void stop() {
@@ -193,21 +202,7 @@ public class WesttyCore {
                 standardBootstrap.releaseExternalResources();
             }
 
-            if (deployment != null) {
-                deployment.stop();
-            }
-
             log.debug("All channels closed.");
-        }
-
-        /**
-         * ResteasyDeployment is not injectable. 
-         */
-        @SuppressWarnings("unused")
-        @Produces
-        @ApplicationScoped
-        public ResteasyDeployment createResteasyDeployment() {
-            return new ResteasyDeployment();
         }
     }
 }

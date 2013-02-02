@@ -39,11 +39,6 @@ public class ServerConfig {
     @Size(min = 0, max = 65535)
     private Integer httpsPort = 8181;
 
-    @Config(desc = "Protobuf listening port.")
-    @NotNull
-    @Size(min = 0, max = 65535)
-    private Integer protoPort = 7777;
-
     @Config(desc = "Specify the worker count to use. "
             + "See netty javadoc NioServerSocketChannelFactory.")
     @Size(min = 1)
@@ -61,9 +56,6 @@ public class ServerConfig {
     @NotNull
     @Size(min = 16384)
     private Integer maxHttpContentChunkLength = 65536;
-
-    @Config(desc = "JAXRS configuration.")
-    private JaxrsConfig jaxrs;
 
     @Config(desc = "Websocket configuration.")
     private WebSocketConfig websocket;
@@ -97,16 +89,8 @@ public class ServerConfig {
         return httpsPort;
     }
 
-    public Integer getProtobufPort() {
-        return protoPort;
-    }
-
     public Integer getMaxHttpContentChunkLength() {
         return maxHttpContentChunkLength;
-    }
-
-    public JaxrsConfig getJaxrs() {
-        return jaxrs;
     }
 
     public WebSocketConfig getWebsocket() {

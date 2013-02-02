@@ -3,7 +3,7 @@ package org.deephacks.westty.internal.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ShutdownHook {
+class ShutdownHook {
     private static final Logger log = LoggerFactory.getLogger(ShutdownHook.class);
 
     static void install(final Thread threadToJoin) {

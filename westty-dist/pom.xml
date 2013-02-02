@@ -14,30 +14,6 @@
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-provider-jpa20</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-datasource</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-jpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-job</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.deephacks.westty</groupId>
-      <artifactId>westty-protobuf</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
