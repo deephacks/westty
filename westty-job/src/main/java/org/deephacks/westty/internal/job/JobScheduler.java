@@ -105,7 +105,7 @@ public class JobScheduler extends StdSchedulerFactory {
 
     public void schedule() throws SchedulerException {
         for (Class<? extends Job> cls : JobExtension.getJobs()) {
-            String id = cls.getName();
+            String id = cls.getSimpleName();
             try {
                 ctx.get(id, JobConfig.class);
             } catch (AbortRuntimeException e) {
@@ -127,7 +127,7 @@ public class JobScheduler extends StdSchedulerFactory {
     }
 
     private String getCron(Class<? extends Job> cls) {
-        String cron = ctx.get(cls.getName(), JobConfig.class).cronExpression;
+        String cron = ctx.get(cls.getSimpleName(), JobConfig.class).cronExpression;
         if (Strings.isNullOrEmpty(cron)) {
             cron = cls.getAnnotation(Schedule.class).value();
         }
