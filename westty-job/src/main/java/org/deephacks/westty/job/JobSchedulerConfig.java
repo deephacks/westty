@@ -16,20 +16,8 @@ package org.deephacks.westty.job;
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
-import org.deephacks.westty.internal.job.JobConnectionProvider;
-import org.deephacks.westty.internal.job.JobThreadPool;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.core.QuartzScheduler;
-import org.quartz.core.QuartzSchedulerResources;
-import org.quartz.impl.StdJobRunShellFactory;
-import org.quartz.impl.StdScheduler;
-import org.quartz.impl.jdbcjobstore.JobStoreTX;
 import org.quartz.impl.jdbcjobstore.Semaphore;
 import org.quartz.impl.jdbcjobstore.UpdateLockRowSemaphore;
-import org.quartz.simpl.CascadingClassLoadHelper;
-import org.quartz.spi.ThreadExecutor;
-import org.quartz.utils.DBConnectionManager;
 
 @Config(name = JobSchedulerConfig.ID, desc = JobSchedulerConfig.DESC)
 @ConfigScope
@@ -64,54 +52,75 @@ public class JobSchedulerConfig {
     @Config(desc = "See org.quartz.scheduler.batchTriggerAcquisitionFireAheadTimeWindow")
     private Long batchTriggerAcquisitionFireAheadTimeWindow = 0L;
 
-    public Scheduler getScheduler(ThreadExecutor executor, JobConnectionProvider provider,
-            JobThreadPool threadPool) throws SchedulerException {
-
-        DBConnectionManager manager = DBConnectionManager.getInstance();
-        manager.addConnectionProvider(provider.getDataSourceName(), provider);
-
-        CascadingClassLoadHelper cl = new CascadingClassLoadHelper();
-
-        QuartzSchedulerResources resources = new QuartzSchedulerResources();
-        resources.setInstanceId(instanceId);
-        resources.setName(instanceName);
-        resources.setMakeSchedulerThreadDaemon(true);
-        resources.setThreadName(instanceName);
-        resources.setThreadPool(threadPool);
-        resources.setThreadExecutor(executor);
-        resources.setRunUpdateCheck(false);
-        resources.setMaxBatchSize(batchTriggerAcquisitionMaxCount);
-        resources.setBatchTimeWindow(batchTriggerAcquisitionFireAheadTimeWindow);
-
-        QuartzScheduler qs = new QuartzScheduler(resources, idleTimeWait, dbFailureRetryInterval);
-        Scheduler scheduler = new StdScheduler(qs);
-
-        StdJobRunShellFactory jobShell = new StdJobRunShellFactory();
-        resources.setJobRunShellFactory(jobShell);
-
-        JobStoreTX store = new JobStoreTX();
-        store.setLockHandler(getLockStrategy());
-        store.setLockOnInsert(true);
-        store.setInstanceName(instanceName);
-        store.setInstanceId(instanceId);
-        store.setIsClustered(isClustered);
-        store.setClusterCheckinInterval(clusterCheckinInterval);
-        store.setTxIsolationLevelSerializable(true);
-        store.setDataSource(provider.getDataSourceName());
-        resources.setJobStore(store);
-
-        cl.initialize();
-        jobShell.initialize(scheduler);
-        store.initialize(cl, qs.getSchedulerSignaler());
-
-        return scheduler;
-
-    }
-
     public Semaphore getLockStrategy() {
         UpdateLockRowSemaphore lock = new UpdateLockRowSemaphore();
         lock.setSchedName(instanceName);
         return lock;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public Boolean getIsClustered() {
+        return isClustered;
+    }
+
+    public void setIsClustered(Boolean isClustered) {
+        this.isClustered = isClustered;
+    }
+
+    public Long getIdleTimeWait() {
+        return idleTimeWait;
+    }
+
+    public void setIdleTimeWait(Long idleTimeWait) {
+        this.idleTimeWait = idleTimeWait;
+    }
+
+    public Long getDbFailureRetryInterval() {
+        return dbFailureRetryInterval;
+    }
+
+    public void setDbFailureRetryInterval(Long dbFailureRetryInterval) {
+        this.dbFailureRetryInterval = dbFailureRetryInterval;
+    }
+
+    public Long getClusterCheckinInterval() {
+        return clusterCheckinInterval;
+    }
+
+    public void setClusterCheckinInterval(Long clusterCheckinInterval) {
+        this.clusterCheckinInterval = clusterCheckinInterval;
+    }
+
+    public Integer getBatchTriggerAcquisitionMaxCount() {
+        return batchTriggerAcquisitionMaxCount;
+    }
+
+    public void setBatchTriggerAcquisitionMaxCount(Integer batchTriggerAcquisitionMaxCount) {
+        this.batchTriggerAcquisitionMaxCount = batchTriggerAcquisitionMaxCount;
+    }
+
+    public Long getBatchTriggerAcquisitionFireAheadTimeWindow() {
+        return batchTriggerAcquisitionFireAheadTimeWindow;
+    }
+
+    public void setBatchTriggerAcquisitionFireAheadTimeWindow(
+            Long batchTriggerAcquisitionFireAheadTimeWindow) {
+        this.batchTriggerAcquisitionFireAheadTimeWindow = batchTriggerAcquisitionFireAheadTimeWindow;
     }
 
 }

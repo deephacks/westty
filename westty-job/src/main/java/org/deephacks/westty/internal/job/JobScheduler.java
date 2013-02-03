@@ -46,7 +46,14 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.quartz.core.QuartzScheduler;
+import org.quartz.core.QuartzSchedulerResources;
+import org.quartz.impl.StdJobRunShellFactory;
+import org.quartz.impl.StdScheduler;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.jdbcjobstore.JobStoreTX;
+import org.quartz.simpl.CascadingClassLoadHelper;
+import org.quartz.utils.DBConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +61,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
 @Singleton
-public class JobScheduler extends StdSchedulerFactory {
+class JobScheduler extends StdSchedulerFactory {
     private static final Logger log = LoggerFactory.getLogger(JobScheduler.class);
     private static final String JOB_CLASS_KEY = "JOB_ID_KEY";
     private static final String LAST_EXECUTION_TIMESTAMP = "LAST_EXECUTION_TIMESTAMP";
@@ -73,7 +80,44 @@ public class JobScheduler extends StdSchedulerFactory {
 
     public void start() throws SchedulerException {
         JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
-        scheduler = config.getScheduler(executor, provider, threadPool);
+
+        DBConnectionManager manager = DBConnectionManager.getInstance();
+        manager.addConnectionProvider(provider.getDataSourceName(), provider);
+
+        CascadingClassLoadHelper cl = new CascadingClassLoadHelper();
+
+        QuartzSchedulerResources resources = new QuartzSchedulerResources();
+        resources.setInstanceId(config.getInstanceId());
+        resources.setName(config.getInstanceName());
+        resources.setMakeSchedulerThreadDaemon(true);
+        resources.setThreadName(config.getInstanceName());
+        resources.setThreadPool(threadPool);
+        resources.setThreadExecutor(executor);
+        resources.setRunUpdateCheck(false);
+        resources.setMaxBatchSize(config.getBatchTriggerAcquisitionMaxCount());
+        resources.setBatchTimeWindow(config.getBatchTriggerAcquisitionFireAheadTimeWindow());
+
+        QuartzScheduler qs = new QuartzScheduler(resources, config.getIdleTimeWait(),
+                config.getDbFailureRetryInterval());
+        scheduler = new StdScheduler(qs);
+
+        StdJobRunShellFactory jobShell = new StdJobRunShellFactory();
+        resources.setJobRunShellFactory(jobShell);
+
+        JobStoreTX store = new JobStoreTX();
+        store.setLockHandler(config.getLockStrategy());
+        store.setLockOnInsert(true);
+        store.setInstanceName(config.getInstanceName());
+        store.setInstanceId(config.getInstanceId());
+        store.setIsClustered(config.getIsClustered());
+        store.setClusterCheckinInterval(config.getClusterCheckinInterval());
+        store.setTxIsolationLevelSerializable(true);
+        store.setDataSource(provider.getDataSourceName());
+        resources.setJobStore(store);
+
+        cl.initialize();
+        jobShell.initialize(scheduler);
+        store.initialize(cl, qs.getSchedulerSignaler());
 
         try {
             scheduler.start();
@@ -122,7 +166,9 @@ public class JobScheduler extends StdSchedulerFactory {
 
             Trigger trigger = newTrigger().withIdentity(triggerKey)
                     .withSchedule(cronSchedule(cron)).forJob(jobdetail).build();
-            scheduler.scheduleJob(jobdetail, trigger);
+            if (!scheduler.checkExists(jobKey)) {
+                scheduler.scheduleJob(jobdetail, trigger);
+            }
         }
     }
 
