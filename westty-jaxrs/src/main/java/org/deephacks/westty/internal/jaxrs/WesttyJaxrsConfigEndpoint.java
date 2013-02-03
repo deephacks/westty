@@ -56,6 +56,7 @@ public class WesttyJaxrsConfigEndpoint {
 
     @GET
     @Path("/")
+    @Transactional
     public Map<String, Schema> getSchema() {
         return ctx.getSchemas();
     }
@@ -100,6 +101,7 @@ public class WesttyJaxrsConfigEndpoint {
     @POST
     @Consumes({ APPLICATION_JSON })
     @Path("create")
+    @Transactional
     public void create(final JaxrsConfigBean jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
         ctx.create(bean);
@@ -141,6 +143,7 @@ public class WesttyJaxrsConfigEndpoint {
      */
     @DELETE
     @Path("delete/{schema}/{id}")
+    @Transactional
     public void delete(@PathParam("schema") final String schema, @PathParam("id") final String id) {
         BeanId beanId = BeanId.create(id, schema);
         ctx.delete(beanId);
