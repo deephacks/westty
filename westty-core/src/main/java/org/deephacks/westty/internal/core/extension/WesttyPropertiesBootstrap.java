@@ -95,7 +95,7 @@ public class WesttyPropertiesBootstrap extends WesttyCoreExtension {
             public WesttyProperties create(CreationalContext<WesttyProperties> ctx) {
 
                 ArrayList<Method> list = sortPropertyBuilders();
-                WesttyProperties prop = WesttyProperties.create();
+                WesttyProperties prop = new WesttyProperties();
                 for (Method m : list) {
                     try {
                         m.invoke(null, prop);

@@ -207,7 +207,7 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
         EntityManagerFactory emf = null;
         List<PersistenceProvider> providers = getProviders();
         for (PersistenceProvider provider : providers) {
-            emf = provider.createContainerEntityManagerFactory(this, jpaProperties);
+            emf = provider.createContainerEntityManagerFactory(this, jpaProperties.getProperties());
             if (emf != null) {
                 break;
             }

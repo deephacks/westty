@@ -1,7 +1,6 @@
 package org.deephacks.westty.jpa;
 
 import java.io.File;
-import java.util.Properties;
 
 import javax.enterprise.inject.Alternative;
 
@@ -10,7 +9,7 @@ import org.deephacks.westty.properties.WesttyProperties;
 import org.deephacks.westty.properties.WesttyPropertyBuilder;
 
 @Alternative
-public class WesttyJpaProperties extends Properties {
+public class WesttyJpaProperties extends WesttyDataSourceProperties {
     private static final long serialVersionUID = 1667859287794861790L;
     public static final String USER = "javax.persistence.jdbc.user";
     public static final String PASSWORD = "javax.persistence.jdbc.password";
@@ -21,20 +20,14 @@ public class WesttyJpaProperties extends Properties {
     public static final String JPA_UNIT = "westty.jpa.unit";
     public static final String JPA_PROPERTIES_FILE = "jpa.properties";
 
-    public WesttyJpaProperties() {
-    }
-
     public WesttyJpaProperties(WesttyProperties properties) {
-        Properties source = properties.getProperties();
-        for (String key : source.stringPropertyNames()) {
-            setProperty(key, source.getProperty(key));
-        }
+        super(properties);
     }
 
     @WesttyPropertyBuilder(priority = 1000)
     public static void build(WesttyProperties properties) {
         WesttyDataSourceProperties ds = new WesttyDataSourceProperties(properties);
-        WesttyJpaProperties jpa = new WesttyJpaProperties();
+        WesttyJpaProperties jpa = new WesttyJpaProperties(properties);
         jpa.setJpaUnit("westty-jpa-unit");
         jpa.setUsername(ds.getUsername());
         jpa.setPassword(ds.getPassword());
@@ -45,7 +38,6 @@ public class WesttyJpaProperties extends Properties {
         // jpa.setProperty("hibernate.hbm2ddl.auto", "validate");
         jpa.setProperty("hibernate.show_sql", "false");
         jpa.setProperty("hibernate.dialect", "org.hibernate.dialect.DerbyDialect");
-        properties.add(jpa);
         properties.loadProperties(new File(properties.getConfDir(), JPA_PROPERTIES_FILE));
     }
 
@@ -63,6 +55,7 @@ public class WesttyJpaProperties extends Properties {
 
     public void setUsername(String username) {
         setProperty(USER, username);
+        super.setUsername(username);
     }
 
     public String getPassword() {
@@ -71,6 +64,7 @@ public class WesttyJpaProperties extends Properties {
 
     public void setPassword(String password) {
         setProperty(PASSWORD, password);
+        super.setPassword(password);
     }
 
     public String getUrl() {
@@ -79,6 +73,7 @@ public class WesttyJpaProperties extends Properties {
 
     public void setUrl(String url) {
         setProperty(URL, url);
+        super.setUrl(url);
     }
 
     public String getDriver() {
@@ -87,6 +82,7 @@ public class WesttyJpaProperties extends Properties {
 
     public void setDriver(String driver) {
         setProperty(DRIVER, driver);
+        super.setDriver(driver);
     }
 
     public String getProvider() {
@@ -104,5 +100,4 @@ public class WesttyJpaProperties extends Properties {
     public void setTxType(String txType) {
         setProperty(TX_TYPE, txType);
     }
-
 }

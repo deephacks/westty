@@ -31,13 +31,14 @@ public class WesttyProperties {
     public static final String BIN = "bin";
     public static final String HTML = "html";
 
-    private Properties properties = new Properties();
+    private final Properties properties;
 
-    private WesttyProperties() {
+    public WesttyProperties() {
+        properties = new Properties();
     }
 
-    public static WesttyProperties create() {
-        return new WesttyProperties();
+    public WesttyProperties(WesttyProperties properties) {
+        this.properties = properties.getProperties();
     }
 
     @WesttyPropertyBuilder
@@ -58,12 +59,8 @@ public class WesttyProperties {
 
     public void add(Properties prop) {
         for (String key : prop.stringPropertyNames()) {
-            properties.setProperty(key, prop.getProperty(key));
+            setProperty(key, prop.getProperty(key));
         }
-    }
-
-    public void add(WesttyProperties prop) {
-        add(prop.getProperties());
     }
 
     public void loadProperties(File file) {
@@ -89,12 +86,16 @@ public class WesttyProperties {
         return properties;
     }
 
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
     public String getProperty(String key) {
         return properties.getProperty(key);
     }
 
     public void setLibDir(File dir) {
-        properties.setProperty(LIB_DIR_PROP, dir.getAbsolutePath());
+        setProperty(LIB_DIR_PROP, dir.getAbsolutePath());
     }
 
     public File getLibDir() {
@@ -102,7 +103,7 @@ public class WesttyProperties {
     }
 
     public void setConfDir(File dir) {
-        properties.setProperty(CONF_DIR_PROP, dir.getAbsolutePath());
+        setProperty(CONF_DIR_PROP, dir.getAbsolutePath());
     }
 
     public File getConfDir() {
@@ -110,7 +111,7 @@ public class WesttyProperties {
     }
 
     public void setBinDir(File dir) {
-        properties.setProperty(BIN_DIR_PROP, dir.getAbsolutePath());
+        setProperty(BIN_DIR_PROP, dir.getAbsolutePath());
     }
 
     public File getBinDir() {
@@ -118,7 +119,7 @@ public class WesttyProperties {
     }
 
     public void setHtmlDir(File dir) {
-        properties.setProperty(HTML_DIR_PROP, dir.getAbsolutePath());
+        setProperty(HTML_DIR_PROP, dir.getAbsolutePath());
     }
 
     public File getHtmlDir() {
@@ -126,16 +127,11 @@ public class WesttyProperties {
     }
 
     private String getPropertyOrEmpty(String key) {
-        String value = properties.getProperty(key);
+        String value = getProperty(key);
         if (Strings.isNullOrEmpty(value)) {
             return "";
         }
         return value;
-    }
-
-    @Override
-    public String toString() {
-        return properties.toString();
     }
 
 }
