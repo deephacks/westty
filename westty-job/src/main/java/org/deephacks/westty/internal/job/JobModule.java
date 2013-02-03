@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.deephacks.westty.spi.WesttyModule;
 import org.quartz.SchedulerException;
 
-public class JobModule implements WesttyModule {
+class JobModule implements WesttyModule {
     @Inject
     private JobScheduler scheduler;
 

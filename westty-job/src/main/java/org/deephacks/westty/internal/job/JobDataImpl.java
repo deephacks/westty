@@ -16,7 +16,7 @@ package org.deephacks.westty.internal.job;
 import org.deephacks.westty.job.JobData;
 import org.quartz.JobDataMap;
 
-public class JobDataImpl implements JobData {
+class JobDataImpl implements JobData {
     JobDataMap map;
 
     public JobDataImpl(JobDataMap map) {

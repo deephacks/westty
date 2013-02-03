@@ -13,7 +13,7 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import org.deephacks.westty.job.Job;
 import org.deephacks.westty.job.Schedule;
 
-public class JobExtension implements Extension {
+class JobExtension implements Extension {
     private static BeanManager bm;
     private static final Set<Class<? extends Job>> jobs = new HashSet<Class<? extends Job>>();
 

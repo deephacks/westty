@@ -20,7 +20,7 @@ import org.deephacks.westty.job.JobData;
 import org.deephacks.westty.job.Schedule;
 
 @Schedule("*/10 * * * * ?")
-public class Rescheduler implements Job {
+class Rescheduler implements Job {
 
     @Inject
     private JobScheduler scheduler;

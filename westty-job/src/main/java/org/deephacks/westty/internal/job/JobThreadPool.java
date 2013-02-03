@@ -10,7 +10,7 @@ import org.quartz.SchedulerConfigException;
 import org.quartz.spi.ThreadPool;
 
 @Singleton
-public class JobThreadPool implements ThreadPool {
+class JobThreadPool implements ThreadPool {
 
     private final ThreadPoolExecutor executor;
 
