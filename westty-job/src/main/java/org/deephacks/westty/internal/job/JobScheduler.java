@@ -160,8 +160,8 @@ class JobScheduler extends StdSchedulerFactory {
             TriggerKey triggerKey = new TriggerKey(cls.getName());
             JobKey jobKey = new JobKey(cls.getName());
 
-            JobDetail jobdetail = newJob(JobDelegate.class).usingJobData(JOB_CLASS_KEY, id)
-                    .withIdentity(jobKey).build();
+            JobDetail jobdetail = newJob(JobDelegate.class)
+                    .usingJobData(JOB_CLASS_KEY, cls.getName()).withIdentity(jobKey).build();
             String cron = getCron(cls);
 
             Trigger trigger = newTrigger().withIdentity(triggerKey)
