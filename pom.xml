@@ -70,6 +70,7 @@
     <module>westty-api</module>
     <module>westty-spi</module>
     <module>westty-core</module>
+    <module>westty-mustache</module>
     <module>westty-datasource</module>
     <module>westty-jpa</module>
     <module>westty-job</module>
@@ -143,30 +144,30 @@
           <useFile>true</useFile>
         </configuration>
       </plugin>
-<!--
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <groupId>org.apache.maven.plugins</groupId>
-        <version>${version.javadoc-plugin}</version>
-        <executions>
+      <!--
+          <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <groupId>org.apache.maven.plugins</groupId>
+          <version>${version.javadoc-plugin}</version>
+          <executions>
           <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
+          <id>attach-javadocs</id>
+          <goals>
+          <goal>jar</goal>
+          </goals>
           </execution>
           <execution>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-            <phase>site</phase>
+          <goals>
+          <goal>aggregate</goal>
+          </goals>
+          <phase>site</phase>
           </execution>
-        </executions>
-        <configuration>
+          </executions>
+          <configuration>
           <javadoc:aggregate>true</javadoc:aggregate>
-        </configuration>
-      </plugin>
--->
+          </configuration>
+          </plugin>
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -431,6 +432,12 @@
         <artifactId>junit</artifactId>
         <version>4.10</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.github.spullara.mustache.java</groupId>
+        <artifactId>compiler</artifactId>
+        <version>0.8.9</version>
+        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.deephacks.tools4j</groupId>
