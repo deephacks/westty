@@ -16,3 +16,4 @@ Westty have a modular and extendable design that provide the following CDI drop-
 * [Google Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [Quartz Job Scheduling](http://quartz-scheduler.org)
+* [Mustache](http://mustache.github.com/)
