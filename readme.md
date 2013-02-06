@@ -7,7 +7,9 @@ programming model for building web applications. Westty starts in around 5 secon
 * [Weld](http://seamframework.org/Weld)
 * [tools4j-config](https://github.com/deephacks/tools4j-config)
 
-Westty have a modular and extendable design that provide the following CDI drop-in modules. These are optional and does not pollute the runtime classpath if not used.
+Westty have a modular and extendable design that provide the following CDI drop-in modules. 
+These are optional and does not pollute the runtime classpath if not used. All modules are 
+self-sustained with clearly separated concerns.
 
 * [DataSource] (http://docs.oracle.com/javase/6/docs/api/javax/sql/DataSource.html)
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
