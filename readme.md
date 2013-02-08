@@ -1,19 +1,18 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
 Westty is a NIO server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
-programming model for building web applications. 
+programming model for building highly optimized web applications. 
 
 * [Netty](http://netty.io)
 * [Weld](http://seamframework.org/Weld)
 * [tools4j-config](https://github.com/deephacks/tools4j-config)
 
-The mission of Westty is to provide a modular and extendable server that keep your runtime clean 
-from irrevelant dependencies. No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
-Westty starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space. 
+The mission is to enable a modular and extendable server that keep application runtime clean 
+from irrevelant dependencies; encouraging frontend technologies such as [angular.js](http://angularjs.org) and 
+[ember.js](http://emberjs.com). No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
 
-that provide the following CDI drop-in modules. 
-These are optional and does not pollute the runtime classpath if not used. All modules are 
-self-sustained with clearly separated concerns.
+Westty provide the following (optional) CDI drop-in modules that does not pollute classpath 
+if not used. All modules are self-sustained with clearly separated concerns.
 
 * [DataSource] (http://docs.oracle.com/javase/6/docs/api/javax/sql/DataSource.html)
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
