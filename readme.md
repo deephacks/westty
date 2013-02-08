@@ -7,7 +7,7 @@ programming model for building highly optimized web applications.
 * [Weld](http://seamframework.org/Weld)
 * [tools4j-config](https://github.com/deephacks/tools4j-config)
 
-The mission is to enable modular and extendable application designs that keep the underlying runtime process clean 
+The mission is to enable modular and extendable application designs that keep the underlying server runtime process clean 
 from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) and 
 [ember.js](http://emberjs.com). No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
 
