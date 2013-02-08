@@ -1,7 +1,8 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
 Westty is a NIO server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
-programming model for building web applications. Westty starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
+programming model for building web applications. No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
+Westty starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space. 
 
 * [Netty](http://netty.io)
 * [Weld](http://seamframework.org/Weld)
@@ -19,3 +20,5 @@ self-sustained with clearly separated concerns.
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [Quartz Job Scheduling](http://quartz-scheduler.org)
 * [Mustache](http://mustache.github.com/)
+
+
