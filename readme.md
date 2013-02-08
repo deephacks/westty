@@ -11,7 +11,7 @@ The mission is to enable modular and extendable application designs that keep th
 from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) and 
 [ember.js](http://emberjs.com). No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
 
-Westty also try to keep things programmatic simply because code enable late binding and trump deployment descriptors 
+Westty also try to keep things programmatic simply because _code_ enable late binding and trump deployment descriptors 
 and/or configuration files on any given day.
 
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
