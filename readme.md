@@ -8,7 +8,7 @@ programming model for building highly optimized web applications.
 * [tools4j-config](https://github.com/deephacks/tools4j-config)
 
 The mission is to enable modular and extendable application designs that keep the underlying server runtime process clean 
-from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) and 
+from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) or 
 [ember.js](http://emberjs.com). No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
 
 Westty also try to keep things programmatic simply because _code_ enable late binding and trump deployment descriptors 
