@@ -14,6 +14,8 @@ from irrevelant dependencies, encouraging frontend technologies such as [angular
 Westty also try to keep things programmatic simply because _code_ enable late binding and trump deployment descriptors 
 and/or configuration files on any given day.
 
+The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
+
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
 concerns and does not pollute classpath if not used. 
 
