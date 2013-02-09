@@ -11,12 +11,10 @@ programming model for building highly optimized web applications.
 
 The mission is to enable modular and extendable application designs that keep the underlying server runtime process clean 
 from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) or 
-[ember.js](http://emberjs.com), maybe with some [Twitter Bootstrap](http://twitter.github.com/bootstrap/) sprayed ontop. No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
+[ember.js](http://emberjs.com) maybe with some [Twitter Bootstrap](http://twitter.github.com/bootstrap/) sprayed ontop. 
+No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
 
-Westty also try to keep things programmatic simply because _code_ enable late binding and trump deployment descriptors 
-and/or configuration files on any given day.
-
-The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
+Westty is _programmatic_ and give users the freedom to implement any mechanism to configure it. The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
 
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
 concerns and does not pollute classpath if not used. 
