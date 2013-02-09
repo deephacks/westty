@@ -1,5 +1,7 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
+<i>“You’ve never heard of the Millennium Falcon? … It’s the ship that made the Kessel run in less than 12 parsecs.”<i>
+
 Westty is a NIO server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
 programming model for building highly optimized web applications. 
 
