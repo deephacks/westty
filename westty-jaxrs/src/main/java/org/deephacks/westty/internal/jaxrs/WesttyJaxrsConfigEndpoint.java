@@ -14,9 +14,9 @@
 package org.deephacks.westty.internal.jaxrs;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static org.deephacks.tools4j.config.internal.core.Reflections.forName;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,17 +28,23 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.deephacks.tools4j.config.admin.AdminContext;
 import org.deephacks.tools4j.config.internal.core.runtime.ObjectToBeanConverter;
 import org.deephacks.tools4j.config.model.Bean;
 import org.deephacks.tools4j.config.model.Bean.BeanId;
+import org.deephacks.tools4j.config.model.Beans;
+import org.deephacks.tools4j.config.model.Criteria;
 import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.tools4j.config.model.Schema;
 import org.deephacks.tools4j.config.spi.Conversion;
-import org.deephacks.westty.jaxrs.JaxrsConfigBean;
+import org.deephacks.westty.jaxrs.JaxrsConfigBeans;
+import org.deephacks.westty.jaxrs.JaxrsConfigBeans.JaxrsConfigBean;
 import org.deephacks.westty.jaxrs.JaxrsConfigClient;
 import org.deephacks.westty.persistence.Transactional;
+
+import com.google.common.base.Strings;
 
 /**
  * JAX-RS endpoint for provisioning configuration in JSON format.
@@ -77,6 +83,19 @@ public class WesttyJaxrsConfigEndpoint {
         return conv.convert(bean, forName(schema));
     }
 
+    @GET
+    @Path("get/{schema}")
+    @Produces(APPLICATION_JSON)
+    @Transactional
+    public JaxrsConfigBeans get(@PathParam("schema") final String schema,
+            @QueryParam("id") final List<String> ids) {
+        List<Bean> result = ctx.list(schema, ids);
+        Collection<?> o = conv.convert(result, forName(schema));
+        JaxrsConfigBeans beans = new JaxrsConfigBeans();
+        beans.setBeans(o);
+        return beans;
+    }
+
     /**
      * See AdminContext.list for more information.
      * 
@@ -87,10 +106,34 @@ public class WesttyJaxrsConfigEndpoint {
     @Path("list/{schema}")
     @Produces({ APPLICATION_JSON })
     @Transactional
-    public List<Object> list(@PathParam("schema") final String schema) {
+    public JaxrsConfigBeans list(@PathParam("schema") final String schema) {
         List<Bean> beans = ctx.list(schema);
         Collection<?> o = conv.convert(beans, forName(schema));
-        return new ArrayList<Object>(o);
+        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        result.setBeans(o);
+        return result;
+    }
+
+    @GET
+    @Path("paginate/{schema}")
+    @Produces({ APPLICATION_JSON })
+    @Transactional
+    public JaxrsConfigBeans paginate(@PathParam("schema") final String schema,
+            @QueryParam("first") int first, @QueryParam("max") int max,
+            @QueryParam("prop") String prop, @QueryParam("schema") String targetSchema,
+            @QueryParam("id") String id) {
+        Criteria criteria = new Criteria(first, max);
+        if (!Strings.isNullOrEmpty(prop) && !Strings.isNullOrEmpty(targetSchema)
+                && !Strings.isNullOrEmpty(id)) {
+            criteria.query(prop, targetSchema, id);
+        }
+        Beans beans = ctx.paginate(schema, criteria);
+        Collection<?> o = conv.convert(beans.getBeans(), forName(schema));
+        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        long count = beans.getTotalCount();
+        result.setTotalCount(count);
+        result.setBeans(o);
+        return result;
     }
 
     /**
@@ -142,6 +185,7 @@ public class WesttyJaxrsConfigEndpoint {
      * @param id id of the instance to be removed
      */
     @DELETE
+    @Consumes({ APPLICATION_XML })
     @Path("delete/{schema}/{id}")
     @Transactional
     public void delete(@PathParam("schema") final String schema, @PathParam("id") final String id) {
