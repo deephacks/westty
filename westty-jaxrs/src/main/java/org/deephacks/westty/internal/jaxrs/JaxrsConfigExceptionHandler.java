@@ -20,7 +20,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Event;
-import org.deephacks.westty.jaxrs.JaxrsConfigError;
+import org.deephacks.tools4j.config.model.Events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +34,48 @@ class JaxrsConfigExceptionHandler implements ExceptionMapper<AbortRuntimeExcepti
         Event e = ex.getEvent();
         Status status = null;
         // 300 codes are reserved for user input errors
-        if (e.getCode() >= 300 && e.getCode() < 400) {
+        switch (e.getCode()) {
+        case Events.CFG301:
+            status = Status.NOT_FOUND;
+            break;
+        case Events.CFG302:
+            status = Status.FORBIDDEN;
+            break;
+        case Events.CFG303:
+            status = Status.CONFLICT;
+            break;
+        case Events.CFG304:
+            status = Status.NOT_FOUND;
+            break;
+        case Events.CFG305:
             status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG306:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG307:
+            status = Status.FORBIDDEN;
+            break;
+        case Events.CFG308:
+            status = Status.CONFLICT;
+            break;
+        case Events.CFG309:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG310:
+            status = Status.CONFLICT;
+            break;
+        case Events.CFG311:
+            status = Status.FORBIDDEN;
+            break;
+        default:
+            status = Status.INTERNAL_SERVER_ERROR;
+            break;
         }
         if (status == null) {
             status = Status.INTERNAL_SERVER_ERROR;
         }
-        JaxrsConfigError err = new JaxrsConfigError(e.getModule(), e.getCode(), e.getMessage());
-        return Response.serverError().status(status).entity(err).build();
+        return Response.serverError().status(status).entity(e.getCode()).build();
 
     }
 }
