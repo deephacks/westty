@@ -1,7 +1,5 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
-<i>“You’ve never heard of Westty? … It’s the ship that made the Kessel run in less than 12 parsecs.”<i>
-
 Westty is a NIO server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
 programming model for building highly optimized web applications. 
 
@@ -12,7 +10,8 @@ programming model for building highly optimized web applications.
 The mission is to enable modular and extendable application designs that keep the underlying server runtime process clean 
 from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) or 
 [ember.js](http://emberjs.com) maybe with some [Twitter Bootstrap](http://twitter.github.com/bootstrap/) sprayed ontop. 
-No servlets, jsp, jsf, jstl or other shenanigans incorporated. 
+No servlets, jsp, jsf, jstl or other shenanigans incorporated. Static resources and HTTPS/SSL are preferably delegated to
+a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well with westty.
 
 Westty is _programmatic_ and give users the freedom to implement any mechanism to configure it. The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
 
