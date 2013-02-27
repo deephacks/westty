@@ -2,18 +2,23 @@ package org.deephacks.westty.jaxrs;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.introspect.VisibilityChecker;
+import org.deephacks.tools4j.config.model.Bean;
+import org.deephacks.tools4j.config.model.Bean.BeanId;
 
 public class JaxrsConfigBeans {
-    private Collection<Object> beans = new ArrayList<Object>();
+    private Collection<JaxrsConfigBean> beans = new ArrayList<JaxrsConfigBean>();
     private long totalCount;
 
-    public void setBeans(Collection<?> beans) {
-        this.beans = (Collection<Object>) beans;
+    public void setBeans(Collection<JaxrsConfigBean> beans) {
+        this.beans = beans;
+    }
+
+    public void addBean(Bean bean) {
+        this.beans.add(new JaxrsConfigBean(bean));
     }
 
     public void setTotalCount(long total) {
@@ -24,55 +29,66 @@ public class JaxrsConfigBeans {
         return totalCount;
     }
 
-    public Collection<Object> getBeans() {
+    public Collection<JaxrsConfigBean> getBeans() {
         return beans;
     }
 
     public static class JaxrsConfigBean {
-        private static final ObjectMapper mapper = new ObjectMapper();
-        static {
-            mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            mapper.setVisibilityChecker(VisibilityChecker.Std.defaultInstance()
-                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY));
-        }
-        private String className;
-        private Object bean;
+        private String id;
+        private String schemaName;
+        private Map<String, List<String>> properties = new HashMap<String, List<String>>();
 
         public JaxrsConfigBean() {
 
         }
 
-        public JaxrsConfigBean(String className, Object bean) {
-            this.className = className;
-            this.bean = bean;
-
-        }
-
-        public JaxrsConfigBean(Object o) {
-            this.className = o.getClass().getCanonicalName();
-            this.bean = o;
-        }
-
-        public void setClassName(String className) {
-            this.className = className;
-        }
-
-        public String getClassName() {
-            return className;
-        }
-
-        public Object getBean() {
-            try {
-                Class<?> clazz = Class.forName(className);
-                return mapper.convertValue(bean, clazz);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        public JaxrsConfigBean(Bean bean) {
+            this.schemaName = bean.getId().getSchemaName();
+            this.id = bean.getId().getInstanceId();
+            for (String name : bean.getPropertyNames()) {
+                List<String> values = bean.getValues(name);
+                if (values == null || values.isEmpty()) {
+                    continue;
+                }
+                properties.put(name, values);
+            }
+            for (String name : bean.getReferenceNames()) {
+                List<BeanId> refs = bean.getReferences();
+                if (refs == null || refs.isEmpty()) {
+                    continue;
+                }
+                List<String> values = new ArrayList<String>();
+                for (BeanId beanId : refs) {
+                    values.add(beanId.getInstanceId());
+                }
+                properties.put(name, values);
             }
         }
 
-        public void setBean(Object bean) {
-            this.bean = bean;
+        public String getSchemaName() {
+            return schemaName;
+        }
+
+        public void setSchemaName(String schemaName) {
+            this.schemaName = schemaName;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public Map<String, List<String>> getProperties() {
+            return properties;
+        }
+
+        public void setProperties(Map<String, List<String>> properties) {
+            this.properties = properties;
         }
 
     }
+
 }

@@ -153,7 +153,7 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
 
     @Override
     public ValidationMode getValidationMode() {
-        return ValidationMode.NONE;
+        return ValidationMode.AUTO;
     }
 
     @Override

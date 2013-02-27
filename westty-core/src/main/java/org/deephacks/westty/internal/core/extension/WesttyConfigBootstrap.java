@@ -2,6 +2,7 @@ package org.deephacks.westty.internal.core.extension;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.event.Observes;
@@ -30,7 +31,14 @@ public class WesttyConfigBootstrap extends WesttyCoreExtension {
                 Method method = m.getJavaMember();
                 try {
                     Object o = method.invoke(null, (Object[]) null);
-                    defaults.add(o);
+                    if (o instanceof List) {
+                        List<?> list = (List<?>) o;
+                        for (Object obj : list) {
+                            defaults.add(obj);
+                        }
+                    } else {
+                        defaults.add(o);
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

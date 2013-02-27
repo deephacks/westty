@@ -18,6 +18,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static org.deephacks.tools4j.config.internal.core.Reflections.forName;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,10 +39,16 @@ import org.deephacks.tools4j.config.model.Beans;
 import org.deephacks.tools4j.config.model.Criteria;
 import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.tools4j.config.model.Schema;
+import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRef;
+import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefList;
+import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefMap;
 import org.deephacks.tools4j.config.spi.Conversion;
 import org.deephacks.westty.jaxrs.JaxrsConfigBeans;
 import org.deephacks.westty.jaxrs.JaxrsConfigBeans.JaxrsConfigBean;
 import org.deephacks.westty.jaxrs.JaxrsConfigClient;
+import org.deephacks.westty.jaxrs.JaxrsConfigObjects;
+import org.deephacks.westty.jaxrs.JaxrsConfigObjects.JaxrsConfigObject;
+import org.deephacks.westty.jaxrs.JaxrsSchema;
 import org.deephacks.westty.persistence.Transactional;
 
 import com.google.common.base.Strings;
@@ -61,55 +68,55 @@ public class WesttyJaxrsConfigEndpoint {
     }
 
     @GET
-    @Path("/")
+    @Path("/getschemas")
+    @Produces({ APPLICATION_JSON })
     @Transactional
-    public Map<String, Schema> getSchema() {
-        return ctx.getSchemas();
+    public Map<String, JaxrsSchema> getSchemas() {
+        Map<String, JaxrsSchema> schemas = new HashMap<String, JaxrsSchema>();
+        for (Schema schema : ctx.getSchemas().values()) {
+            schemas.put(schema.getName(), new JaxrsSchema(schema));
+        }
+        return schemas;
     }
 
-    /**
-     * See AdminContext.get for more information.
-     * 
-     * @param schema
-     * @param id
-     * @return
-     */
-    @GET
     @Path("get/{schema}/{id}")
     @Transactional
     public Object get(@PathParam("schema") final String schema, @PathParam("id") final String id) {
         BeanId beanId = BeanId.create(id, schema);
         Bean bean = ctx.get(beanId);
-        return conv.convert(bean, forName(schema));
+        String className = bean.getSchema().getType();
+        return conv.convert(bean, forName(className));
     }
 
     @GET
     @Path("get/{schema}")
     @Produces(APPLICATION_JSON)
     @Transactional
-    public JaxrsConfigBeans get(@PathParam("schema") final String schema,
+    public JaxrsConfigObjects get(@PathParam("schema") final String schema,
             @QueryParam("id") final List<String> ids) {
         List<Bean> result = ctx.list(schema, ids);
-        Collection<?> o = conv.convert(result, forName(schema));
-        JaxrsConfigBeans beans = new JaxrsConfigBeans();
+        JaxrsConfigObjects beans = new JaxrsConfigObjects();
+        if (result.isEmpty()) {
+            return beans;
+        }
+        String className = result.get(0).getSchema().getType();
+        Collection<?> o = conv.convert(result, forName(className));
         beans.setBeans(o);
         return beans;
     }
 
-    /**
-     * See AdminContext.list for more information.
-     * 
-     * @param schema assumes to be the fully classified class name.
-     * @return list of configurables objects
-     */
     @GET
     @Path("list/{schema}")
     @Produces({ APPLICATION_JSON })
     @Transactional
-    public JaxrsConfigBeans list(@PathParam("schema") final String schema) {
+    public JaxrsConfigObjects list(@PathParam("schema") final String schema) {
         List<Bean> beans = ctx.list(schema);
-        Collection<?> o = conv.convert(beans, forName(schema));
-        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        JaxrsConfigObjects result = new JaxrsConfigObjects();
+        if (beans.isEmpty()) {
+            return result;
+        }
+        String className = beans.get(0).getSchema().getType();
+        Collection<?> o = conv.convert(beans, forName(className));
         result.setBeans(o);
         return result;
     }
@@ -118,7 +125,7 @@ public class WesttyJaxrsConfigEndpoint {
     @Path("paginate/{schema}")
     @Produces({ APPLICATION_JSON })
     @Transactional
-    public JaxrsConfigBeans paginate(@PathParam("schema") final String schema,
+    public JaxrsConfigObjects paginate(@PathParam("schema") final String schema,
             @QueryParam("first") int first, @QueryParam("max") int max,
             @QueryParam("prop") String prop, @QueryParam("schema") String targetSchema,
             @QueryParam("id") String id) {
@@ -128,62 +135,45 @@ public class WesttyJaxrsConfigEndpoint {
             criteria.query(prop, targetSchema, id);
         }
         Beans beans = ctx.paginate(schema, criteria);
-        Collection<?> o = conv.convert(beans.getBeans(), forName(schema));
-        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        JaxrsConfigObjects result = new JaxrsConfigObjects();
+        if (beans.getTotalCount() == 0) {
+            return result;
+        }
+        String className = beans.getBeans().get(0).getSchema().getType();
+        Collection<?> o = conv.convert(beans.getBeans(), forName(className));
         long count = beans.getTotalCount();
         result.setTotalCount(count);
         result.setBeans(o);
         return result;
     }
 
-    /**
-     * See AdminContext.create for more information.
-     * 
-     * @param jaxrsBean wrapper class for the configurable object.
-     */
     @POST
     @Consumes({ APPLICATION_JSON })
     @Path("create")
     @Transactional
-    public void create(final JaxrsConfigBean jaxrsBean) {
+    public void create(final JaxrsConfigObject jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
         ctx.create(bean);
     }
 
-    /**
-     * See AdminContext.set for more information.
-     * 
-     * @param jaxrsBean wrapper class for the configurable object.
-     */
     @POST
     @Consumes({ APPLICATION_JSON })
     @Path("set")
     @Transactional
-    public void set(final JaxrsConfigBean jaxrsBean) {
+    public void set(final JaxrsConfigObject jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
         ctx.set(bean);
     }
 
-    /**
-     * See AdminContext.merge for more information.
-     * 
-     * @param jaxrsBean wrapper class for the configurable object.
-     */
     @POST
     @Consumes({ APPLICATION_JSON })
     @Path("merge")
     @Transactional
-    public void merge(final JaxrsConfigBean jaxrsBean) {
+    public void merge(final JaxrsConfigObject jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
         ctx.merge(bean);
     }
 
-    /**
-     * See AdminContext.delete for more information.
-     * 
-     * @param schema schema name of instance to be removed
-     * @param id id of the instance to be removed
-     */
     @DELETE
     @Consumes({ APPLICATION_XML })
     @Path("delete/{schema}/{id}")
@@ -191,6 +181,123 @@ public class WesttyJaxrsConfigEndpoint {
     public void delete(@PathParam("schema") final String schema, @PathParam("id") final String id) {
         BeanId beanId = BeanId.create(id, schema);
         ctx.delete(beanId);
+    }
+
+    @POST
+    @Path("createbean")
+    @Consumes({ APPLICATION_JSON })
+    @Transactional
+    public void createbean(final JaxrsConfigBean bean) {
+        Bean createbean = jaxrsToBean(bean);
+        ctx.create(createbean);
+    }
+
+    @GET
+    @Path("getbean/{schema}/{id}")
+    @Transactional
+    public JaxrsConfigBean getbean(@PathParam("schema") final String schema,
+            @PathParam("id") final String id) {
+        BeanId beanId = BeanId.create(id, schema);
+        Bean bean = ctx.get(beanId);
+        return new JaxrsConfigBean(bean);
+    }
+
+    @GET
+    @Path("listbeans/{schema}")
+    @Produces({ APPLICATION_JSON })
+    @Transactional
+    public JaxrsConfigBeans listbeans(@PathParam("schema") final String schema) {
+        List<Bean> beans = ctx.list(schema);
+        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        if (beans.isEmpty()) {
+            return result;
+        }
+        if (beans.size() == 0) {
+            return result;
+        }
+        for (Bean bean : beans) {
+            result.addBean(bean);
+        }
+        result.setTotalCount(beans.size());
+        return result;
+    }
+
+    @GET
+    @Path("paginatebeans/{schema}")
+    @Produces({ APPLICATION_JSON })
+    @Transactional
+    public JaxrsConfigBeans paginatebeans(@PathParam("schema") final String schema,
+            @QueryParam("first") int first, @QueryParam("max") int max) {
+        Criteria criteria = new Criteria(first, max);
+        Beans beans = ctx.paginate(schema, criteria);
+        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        if (beans.getTotalCount() == 0) {
+            return result;
+        }
+
+        for (Bean bean : beans.getBeans()) {
+            result.addBean(bean);
+        }
+        result.setTotalCount(beans.getTotalCount());
+        return result;
+    }
+
+    @POST
+    @Consumes({ APPLICATION_JSON })
+    @Path("setbean")
+    @Transactional
+    public void setbean(final JaxrsConfigBean bean) {
+        Bean setbean = jaxrsToBean(bean);
+        ctx.set(setbean);
+    }
+
+    @DELETE
+    @Path("deletebean/{schemaName}/{id}")
+    @Consumes({ APPLICATION_XML })
+    @Transactional
+    public void deletebean(@PathParam("schemaName") final String schema,
+            @PathParam("id") final String id) {
+        ctx.delete(BeanId.create(id, schema));
+    }
+
+    private Bean jaxrsToBean(final JaxrsConfigBean bean) {
+        BeanId id = BeanId.create(bean.getId(), bean.getSchemaName());
+        Bean setbean = Bean.create(id);
+        Schema schema = ctx.getSchemas().get(bean.getSchemaName());
+        Map<String, List<String>> props = bean.getProperties();
+        for (String name : schema.getPropertyNames()) {
+            List<String> values = props.get(name);
+            if (values == null) {
+                continue;
+            }
+            setbean.addProperty(name, values);
+        }
+        for (String name : schema.getReferenceNames()) {
+            List<String> values = props.get(name);
+            if (values == null) {
+                continue;
+            }
+
+            SchemaPropertyRef ref = schema.get(SchemaPropertyRef.class, name);
+            String schemaName = null;
+            if (ref != null) {
+                schemaName = ref.getSchemaName();
+            }
+
+            SchemaPropertyRefList refList = schema.get(SchemaPropertyRefList.class, name);
+            if (refList != null) {
+                schemaName = refList.getSchemaName();
+            }
+            SchemaPropertyRefMap refMap = schema.get(SchemaPropertyRefMap.class, name);
+            if (refMap != null) {
+                schemaName = refMap.getSchemaName();
+            }
+
+            for (String value : values) {
+                setbean.addReference(name, BeanId.create(value, schemaName));
+            }
+        }
+        return setbean;
     }
 
 }

@@ -35,6 +35,39 @@ class JaxrsConfigExceptionHandler implements ExceptionMapper<AbortRuntimeExcepti
         Status status = null;
         // 300 codes are reserved for user input errors
         switch (e.getCode()) {
+        case Events.CFG101:
+            status = Status.NOT_FOUND;
+            break;
+        case Events.CFG102:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG103:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG104:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG105:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG106:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG107:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG108:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG109:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG110:
+            status = Status.BAD_REQUEST;
+            break;
+        case Events.CFG111:
+            status = Status.BAD_REQUEST;
+            break;
         case Events.CFG301:
             status = Status.NOT_FOUND;
             break;
@@ -75,7 +108,7 @@ class JaxrsConfigExceptionHandler implements ExceptionMapper<AbortRuntimeExcepti
         if (status == null) {
             status = Status.INTERNAL_SERVER_ERROR;
         }
-        return Response.serverError().status(status).entity(e.getCode()).build();
+        return Response.serverError().status(status).entity(e.getMessage()).build();
 
     }
 }
