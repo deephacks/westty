@@ -63,8 +63,13 @@ public class WesttyJaxrsConfigEndpoint {
 
     private static final AdminContext ctx = Lookup.get().lookup(AdminContext.class);
     private static final Conversion conv = Conversion.get();
+    private static final Map<String, Schema> schemas = new HashMap<String, Schema>();
     static {
         conv.register(new ObjectToBeanConverter());
+        for (Schema s : ctx.getSchemas().values()) {
+            schemas.put(s.getType(), s);
+        }
+
     }
 
     @GET
@@ -79,67 +84,70 @@ public class WesttyJaxrsConfigEndpoint {
         return schemas;
     }
 
-    @Path("get/{schema}/{id}")
+    @GET
+    @Path("get/{className}/{id}")
     @Transactional
-    public Object get(@PathParam("schema") final String schema, @PathParam("id") final String id) {
-        BeanId beanId = BeanId.create(id, schema);
+    public Object get(@PathParam("className") final String className,
+            @PathParam("id") final String id) {
+        Schema schema = schemas.get(className);
+        BeanId beanId = BeanId.create(id, schema.getName());
         Bean bean = ctx.get(beanId);
-        String className = bean.getSchema().getType();
         return conv.convert(bean, forName(className));
     }
 
     @GET
-    @Path("get/{schema}")
+    @Path("get/{className}")
     @Produces(APPLICATION_JSON)
     @Transactional
-    public JaxrsConfigObjects get(@PathParam("schema") final String schema,
+    public JaxrsConfigObjects get(@PathParam("className") final String className,
             @QueryParam("id") final List<String> ids) {
-        List<Bean> result = ctx.list(schema, ids);
+        Schema schema = schemas.get(className);
+        List<Bean> result = ctx.list(schema.getName(), ids);
         JaxrsConfigObjects beans = new JaxrsConfigObjects();
         if (result.isEmpty()) {
             return beans;
         }
-        String className = result.get(0).getSchema().getType();
         Collection<?> o = conv.convert(result, forName(className));
         beans.setBeans(o);
         return beans;
     }
 
     @GET
-    @Path("list/{schema}")
+    @Path("list/{className}")
     @Produces({ APPLICATION_JSON })
     @Transactional
-    public JaxrsConfigObjects list(@PathParam("schema") final String schema) {
-        List<Bean> beans = ctx.list(schema);
+    public JaxrsConfigObjects list(@PathParam("className") final String className) {
+        Schema schema = schemas.get(className);
+        List<Bean> beans = ctx.list(schema.getName());
         JaxrsConfigObjects result = new JaxrsConfigObjects();
         if (beans.isEmpty()) {
             return result;
         }
-        String className = beans.get(0).getSchema().getType();
         Collection<?> o = conv.convert(beans, forName(className));
         result.setBeans(o);
         return result;
     }
 
     @GET
-    @Path("paginate/{schema}")
+    @Path("paginate/{className}")
     @Produces({ APPLICATION_JSON })
     @Transactional
-    public JaxrsConfigObjects paginate(@PathParam("schema") final String schema,
+    public JaxrsConfigObjects paginate(@PathParam("className") final String className,
             @QueryParam("first") int first, @QueryParam("max") int max,
-            @QueryParam("prop") String prop, @QueryParam("schema") String targetSchema,
+            @QueryParam("prop") String prop, @QueryParam("targetClassName") String targetClassName,
             @QueryParam("id") String id) {
         Criteria criteria = new Criteria(first, max);
-        if (!Strings.isNullOrEmpty(prop) && !Strings.isNullOrEmpty(targetSchema)
+        if (!Strings.isNullOrEmpty(prop) && !Strings.isNullOrEmpty(targetClassName)
                 && !Strings.isNullOrEmpty(id)) {
-            criteria.query(prop, targetSchema, id);
+            Schema targetSchema = schemas.get(targetClassName);
+            criteria.query(prop, targetSchema.getName(), id);
         }
-        Beans beans = ctx.paginate(schema, criteria);
+        Schema schema = schemas.get(className);
+        Beans beans = ctx.paginate(schema.getName(), criteria);
         JaxrsConfigObjects result = new JaxrsConfigObjects();
         if (beans.getTotalCount() == 0) {
             return result;
         }
-        String className = beans.getBeans().get(0).getSchema().getType();
         Collection<?> o = conv.convert(beans.getBeans(), forName(className));
         long count = beans.getTotalCount();
         result.setTotalCount(count);
@@ -178,8 +186,9 @@ public class WesttyJaxrsConfigEndpoint {
     @Consumes({ APPLICATION_XML })
     @Path("delete/{schema}/{id}")
     @Transactional
-    public void delete(@PathParam("schema") final String schema, @PathParam("id") final String id) {
-        BeanId beanId = BeanId.create(id, schema);
+    public void delete(@PathParam("schema") final String className, @PathParam("id") final String id) {
+        Schema schema = schemas.get(className);
+        BeanId beanId = BeanId.create(id, schema.getName());
         ctx.delete(beanId);
     }
 
