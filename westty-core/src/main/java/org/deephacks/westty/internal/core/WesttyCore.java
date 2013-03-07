@@ -26,7 +26,6 @@ import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.westty.internal.core.extension.WesttyConfigBootstrap;
 import org.deephacks.westty.internal.core.http.WesttyHttpPipelineFactory;
-import org.deephacks.westty.internal.core.https.WesttySecurePipelineFactory;
 import org.deephacks.westty.persistence.Transactional;
 import org.deephacks.westty.spi.WesttyIoExecutors;
 import org.deephacks.westty.spi.WesttyModule;
@@ -92,6 +91,7 @@ public class WesttyCore {
         }
 
         public void start() {
+            engine.registerConfig();
             engine.start();
         }
 
@@ -106,8 +106,6 @@ public class WesttyCore {
         @Inject
         private WesttyHttpPipelineFactory coreFactory;
         @Inject
-        private WesttySecurePipelineFactory secureFactory;
-        @Inject
         private WesttyConfigBootstrap configBootstrap;
         @Inject
         private WesttyIoExecutors executors;
@@ -115,18 +113,21 @@ public class WesttyCore {
         private Instance<WesttyModule> modules;
 
         private Channel standardChannel;
-        private Channel secureChannel;
         private ServerBootstrap standardBootstrap;
-        private ServerBootstrap secureBootstrap;
 
         public WesttyEngine() {
 
         }
 
         @Transactional
-        public void start() {
+        public void registerConfig() {
             ctx.register(configBootstrap.getSchemas());
             ctx.registerDefault(configBootstrap.getDefaults());
+        }
+
+        @Transactional
+        public void start() {
+
             for (WesttyModule module : sortModules()) {
                 log.info("Starting WesttyModule {}", module.getClass().getName());
                 module.startup();
@@ -137,7 +138,6 @@ public class WesttyCore {
 
         public void startInternal() {
             startHttp();
-            // startHttps();
         }
 
         private ArrayList<WesttyModule> sortModules() {
@@ -167,23 +167,6 @@ public class WesttyCore {
             log.info("Http listening on port {}.", port);
         }
 
-        private void startHttps() {
-            // int port = config.getHttpsPort();
-            // if (!config.getSsl().getSslEnabled()) {
-            // return;
-            // }
-            //
-            // secureBootstrap = new ServerBootstrap(new
-            // NioServerSocketChannelFactory(
-            // Executors.newCachedThreadPool(), Executors.newCachedThreadPool(),
-            // config.getIoWorkerCount()));
-            // // secureBootstrap.setPipelineFactory(secureFactory);
-            // secureChannel = secureBootstrap.bind(new
-            // InetSocketAddress(port));
-            //
-            // log.info("Https listening on port {}.", port);
-        }
-
         public void stop() {
             log.debug("Closing channels.");
             if (coreFactory != null) {
@@ -193,12 +176,6 @@ public class WesttyCore {
                 standardChannel.close().awaitUninterruptibly(5000);
             }
             if (standardBootstrap != null) {
-                standardBootstrap.releaseExternalResources();
-            }
-            if (secureChannel != null) {
-                standardChannel.close().awaitUninterruptibly(5000);
-            }
-            if (secureBootstrap != null) {
                 standardBootstrap.releaseExternalResources();
             }
 
