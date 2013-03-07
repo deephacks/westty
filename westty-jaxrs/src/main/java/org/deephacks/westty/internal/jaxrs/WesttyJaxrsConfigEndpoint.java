@@ -32,6 +32,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import org.deephacks.tools4j.config.admin.AdminContext;
+import org.deephacks.tools4j.config.internal.core.runtime.BeanToObjectConverter;
+import org.deephacks.tools4j.config.internal.core.runtime.ClassToSchemaConverter;
+import org.deephacks.tools4j.config.internal.core.runtime.FieldToSchemaPropertyConverter;
 import org.deephacks.tools4j.config.internal.core.runtime.ObjectToBeanConverter;
 import org.deephacks.tools4j.config.model.Bean;
 import org.deephacks.tools4j.config.model.Bean.BeanId;
@@ -66,10 +69,12 @@ public class WesttyJaxrsConfigEndpoint {
     private static final Map<String, Schema> schemas = new HashMap<String, Schema>();
     static {
         conv.register(new ObjectToBeanConverter());
+        conv.register(new ClassToSchemaConverter());
+        conv.register(new FieldToSchemaPropertyConverter());
+        conv.register(new BeanToObjectConverter());
         for (Schema s : ctx.getSchemas().values()) {
             schemas.put(s.getType(), s);
         }
-
     }
 
     @GET
