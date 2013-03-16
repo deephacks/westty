@@ -21,6 +21,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
 import java.sql.Savepoint;
@@ -32,6 +33,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -76,6 +78,11 @@ class WesttyDataSource implements WesttyModule, DataSource {
     @Override
     public int priority() {
         return 1000;
+    }
+
+    @Override
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return ds.getParentLogger();
     }
 
     public PrintWriter getLogWriter() throws SQLException {
@@ -327,6 +334,31 @@ class WesttyDataSource implements WesttyModule, DataSource {
 
         public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
             return con.createStruct(typeName, attributes);
+        }
+
+        @Override
+        public void setSchema(String schema) throws SQLException {
+
+        }
+
+        @Override
+        public String getSchema() throws SQLException {
+            return con.getSchema();
+        }
+
+        @Override
+        public void abort(Executor executor) throws SQLException {
+            con.abort(executor);
+        }
+
+        @Override
+        public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+            con.setNetworkTimeout(executor, milliseconds);
+        }
+
+        @Override
+        public int getNetworkTimeout() throws SQLException {
+            return con.getNetworkTimeout();
         }
 
     }
@@ -788,6 +820,17 @@ class WesttyDataSource implements WesttyModule, DataSource {
         public void setNClob(int parameterIndex, Reader reader) throws SQLException {
             stmt.setNClob(parameterIndex, reader);
         }
+
+        @Override
+        public void closeOnCompletion() throws SQLException {
+            stmt.closeOnCompletion();
+
+        }
+
+        @Override
+        public boolean isCloseOnCompletion() throws SQLException {
+            return stmt.isCloseOnCompletion();
+        }
     }
 
     private static final class WesttyStatement implements Statement {
@@ -976,6 +1019,17 @@ class WesttyDataSource implements WesttyModule, DataSource {
 
         public boolean isPoolable() throws SQLException {
             return stmt.isPoolable();
+        }
+
+        @Override
+        public void closeOnCompletion() throws SQLException {
+            stmt.closeOnCompletion();
+
+        }
+
+        @Override
+        public boolean isCloseOnCompletion() throws SQLException {
+            return stmt.isCloseOnCompletion();
         }
     }
 
@@ -1486,5 +1540,16 @@ class WesttyDataSource implements WesttyModule, DataSource {
 
         }
 
+        @Override
+        public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
+            return stmt.getObject(parameterIndex, type);
+        }
+
+        @Override
+        public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
+            return stmt.getObject(parameterName, type);
+        }
+
     }
+
 }

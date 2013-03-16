@@ -54,9 +54,9 @@
     <version.westty>0.0.1-SNAPSHOT</version.westty>
     <version.tools4j.config>0.0.4-SNAPSHOT</version.tools4j.config>
     <!-- java -->
-    <version.java-compiler>1.6</version.java-compiler>
-    <version.java-source>1.6</version.java-source>
-    <version.java-target>1.6</version.java-target>
+    <version.java-compiler>1.7</version.java-compiler>
+    <version.java-source>1.7</version.java-source>
+    <version.java-target>1.7</version.java-target>
     <!-- plugins -->
     <version.surefire-plugin>2.10</version.surefire-plugin>
     <version.eclipse-plugin>2.8</version.eclipse-plugin>
@@ -94,8 +94,6 @@
           <showWarnings>true</showWarnings>
           <optimize>true</optimize>
           <fork>true</fork>
-          <argLine>-Xmx512M</argLine>
-          <executable>${JAVA_HOME}/bin/javac</executable>
         </configuration>
       </plugin>
       <plugin>
@@ -304,7 +302,7 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty</artifactId>
-        <version>3.3.1.Final</version>
+        <version>3.5.9.Final</version>
         <scope>compile</scope>
       </dependency>
       <dependency>

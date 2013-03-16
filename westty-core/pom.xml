@@ -50,6 +50,14 @@
       <artifactId>cal10n-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.vert-x</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.vert-x</groupId>
+      <artifactId>vertx-platform</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.deephacks.tools4j</groupId>
       <artifactId>tools4j-config-core</artifactId>
     </dependency>
