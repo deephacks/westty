@@ -41,6 +41,11 @@
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-sockjs</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-jaxrs</artifactId>
       <scope>test</scope>
     </dependency>

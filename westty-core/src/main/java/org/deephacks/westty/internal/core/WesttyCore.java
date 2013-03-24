@@ -19,12 +19,14 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.westty.internal.core.extension.WesttyConfigBootstrap;
+import org.deephacks.westty.internal.core.extension.WesttySockJsBootstrap;
 import org.deephacks.westty.internal.core.http.WesttyHttpPipelineFactory;
 import org.deephacks.westty.persistence.Transactional;
 import org.deephacks.westty.spi.WesttyIoExecutors;
@@ -36,6 +38,15 @@ import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vertx.java.core.eventbus.EventBus;
+import org.vertx.java.core.http.HttpServer;
+import org.vertx.java.core.impl.DefaultVertx;
+import org.vertx.java.core.impl.VertxInternal;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.sockjs.SockJSServer;
+import org.vertx.java.deploy.Container;
+import org.vertx.java.deploy.impl.VerticleManager;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
@@ -108,9 +119,20 @@ public class WesttyCore {
         @Inject
         private WesttyConfigBootstrap configBootstrap;
         @Inject
+        private WesttySockJsBootstrap sockJsBootstrap;
+        @Inject
         private WesttyIoExecutors executors;
         @Inject
         private Instance<WesttyModule> modules;
+		
+        private VertxInternal vertx = new DefaultVertx();
+		
+        private VerticleManager mgr = new VerticleManager(vertx);
+        
+        private HttpServer server = vertx.createHttpServer();
+        
+        @Inject
+        private EventBus bus;
 
         private Channel standardChannel;
         private ServerBootstrap standardBootstrap;
@@ -118,7 +140,12 @@ public class WesttyCore {
         public WesttyEngine() {
 
         }
-
+        
+        @Produces
+        @Singleton
+        public EventBus createEventBus() {
+            return vertx.eventBus();
+        }
         @Transactional
         public void registerConfig() {
             ctx.register(configBootstrap.getSchemas());
@@ -138,6 +165,7 @@ public class WesttyCore {
 
         public void startInternal() {
             startHttp();
+            startSockJs();
         }
 
         private ArrayList<WesttyModule> sortModules() {
@@ -156,7 +184,6 @@ public class WesttyCore {
         }
 
         private void startHttp() {
-
             int ioWorkerCount = 4;
             int port = 8080;
             standardBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -166,7 +193,17 @@ public class WesttyCore {
 
             log.info("Http listening on port {}.", port);
         }
-
+        
+        private void startSockJs() {
+    	    JsonArray permitted = new JsonArray();
+    	    // Let everything through
+    	    permitted.add(new JsonObject()); 
+            SockJSServer sockJSServer = vertx.createSockJSServer(server);
+    	    sockJSServer.bridge(new JsonObject().putString("prefix", "/eventbus"), permitted, permitted);
+    	    sockJsBootstrap.start(bus);
+    	    server.listen(8090);
+        }
+        
         public void stop() {
             log.debug("Closing channels.");
             if (coreFactory != null) {
@@ -178,7 +215,9 @@ public class WesttyCore {
             if (standardBootstrap != null) {
                 standardBootstrap.releaseExternalResources();
             }
-
+            if(server != null){
+            	server.close();
+            }
             log.debug("All channels closed.");
         }
     }

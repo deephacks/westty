@@ -42,6 +42,10 @@
       <artifactId>westty-spi</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-sockjs</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.weld.se</groupId>
       <artifactId>weld-se-core</artifactId>
     </dependency>
@@ -56,6 +60,10 @@
     <dependency>
       <groupId>org.vert-x</groupId>
       <artifactId>vertx-platform</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.vert-x</groupId>
+      <artifactId>vertx-lang-java</artifactId>
     </dependency>
     <dependency>
       <groupId>org.deephacks.tools4j</groupId>
