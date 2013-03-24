@@ -23,6 +23,7 @@ concerns and does not pollute classpath if not used.
 * [JPA 2.0] (http://jcp.org/en/jsr/detail?id=317)
 * [RestEasy](http://www.jboss.org/resteasy)
 * [WebSockets](http://tools.ietf.org/html/rfc6455)
+* [SockJS](https://github.com/sockjs/sockjs-protocol)
 * [Google Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [Quartz Job Scheduling](http://quartz-scheduler.org)
