@@ -11,9 +11,11 @@ The mission is to enable modular and extendable application designs that keep th
 from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) or 
 [ember.js](http://emberjs.com) maybe with some [Twitter Bootstrap](http://twitter.github.com/bootstrap/) sprayed ontop. 
 No servlets, jsp, jsf, jstl or other shenanigans incorporated. Static resources and HTTPS/SSL are preferably delegated to
-a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well with westty.
+a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well with westty. 
 
 Westty is _programmatic_ and give users the freedom to implement any mechanism to configure it. The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
+
+A [Apache Whirr](http://whirr.apache.org) recipe is provided that make it really easy to deploy a Westty cluster on amazon ec2.
 
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
 concerns and does not pollute classpath if not used. 
