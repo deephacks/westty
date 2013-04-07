@@ -41,6 +41,12 @@ public class WesttyService extends ClusterActionHandlerSupport {
         Cluster cluster = event.getCluster();
         Instance instance = cluster.getInstanceMatching(role(WESTTY_ROLE));
         event.getFirewallManager().addRules(Rule.create().destination(instance).ports(WESTTY_PORT));
+
+        String ip = instance.getPublicIp();
+
+        addStatement(event, call("retry_helpers"));
+        LOG.info("Ip address " + ip);
+        addStatement(event, call("install_nginx", ip));
     }
 
     @Override
@@ -48,12 +54,10 @@ public class WesttyService extends ClusterActionHandlerSupport {
             InterruptedException {
 
         Configuration conf = getConfiguration(event.getClusterSpec(), WESTTY_DEFAULT_PROPERTIES);
-        // add apt_get_retry functions in order to install openjdk 
+
         addStatement(event, call("retry_helpers"));
-        // add install_tarball which is used by configure_westty.sh
         addStatement(event, call("install_tarball"));
         addStatement(event, call("install_jre7"));
-        addStatement(event, call("install_nginx"));
 
         String tarball = prepareRemoteFileUrl(event, conf.getString(WESTTY_TAR_URL));
 

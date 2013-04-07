@@ -1,7 +1,12 @@
 function install_nginx() {
-  retry_apt_get update -qq
-  retry_apt_get -y install nginx
-  cat > /etc/nginx/nginx.conf <<"EOF"
+  if [[ "$1" != "" ]]; then
+
+    local instance_ip=$1
+
+    retry_apt_get update -qq
+    retry_apt_get -y install nginx
+
+    cat > /etc/nginx/nginx.conf <<EOF
 user www-data;
 worker_processes  1;
 
@@ -32,24 +37,25 @@ http {
     include /etc/nginx/sites-enabled/*;
 
     server {
-      server_name westty;
+      server_name $instance_ip;
       root /usr/local/westty/html;
 
       location /jaxrs {
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Server $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Server \$host;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_pass http://127.0.0.1:8080$request_uri;
       }
       location /eventbus {
-        proxy_set_header X-Forwarded-Host $host;
-        proxy_set_header X-Forwarded-Server $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header X-Forwarded-Server \$host;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_pass http://127.0.0.1:8090$request_uri;
       }
     }
 }
 EOF
+  fi
 }
 
 
