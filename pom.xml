@@ -76,6 +76,7 @@
     <module>westty-job</module>
     <module>westty-jaxrs</module>
     <module>westty-websocket</module>
+    <module>westty-whirr</module>
     <module>westty-sockjs</module>
     <module>westty-protobuf</module>
     <module>westty-example</module>
@@ -383,6 +384,11 @@
         <artifactId>javassist</artifactId>
         <version>3.12.1.GA</version>
         <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.whirr</groupId>
+        <artifactId>whirr-core</artifactId>
+        <version>0.8.1</version>
       </dependency>
       <dependency>
         <groupId>net.sf.scannotation</groupId>
