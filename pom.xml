@@ -78,6 +78,7 @@
     <module>westty-websocket</module>
     <module>westty-whirr</module>
     <module>westty-sockjs</module>
+    <module>westty-cluster</module>
     <module>westty-protobuf</module>
     <module>westty-example</module>
     <module>westty-docbkx</module>
@@ -297,6 +298,12 @@
       </dependency>
       <dependency>
         <groupId>org.deephacks.westty</groupId>
+        <artifactId>westty-cluster</artifactId>
+        <scope>provided</scope>
+        <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.westty</groupId>
         <artifactId>westty-protobuf</artifactId>
         <scope>provided</scope>
         <version>${version.westty}</version>
@@ -306,6 +313,11 @@
         <artifactId>westty-job</artifactId>
         <scope>provided</scope>
         <version>${version.westty}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast</artifactId>
+        <version>2.4.1</version>
       </dependency>
       <dependency>
         <groupId>org.vert-x</groupId>
