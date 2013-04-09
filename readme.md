@@ -16,7 +16,7 @@ a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well
 Westty is _programmatic_ and give users the freedom to implement any mechanism to configure it. The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
 
 Westty can be deployed as a cluster (by adding the cluster module jar) on a private network or on amazon ec2 
-using the provided [Apache Whirr](http://whirr.apache.org) recipe.
+using the provided [Apache Whirr](http://whirr.apache.org) recipe, using hazlecast as a provider for cluster membership.
 
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
 concerns and does not pollute classpath if not used. 
