@@ -15,7 +15,8 @@ a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well
 
 Westty is _programmatic_ and give users the freedom to implement any mechanism to configure it. The server engine starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
 
-A [Apache Whirr](http://whirr.apache.org) recipe is provided that make it really easy to deploy a Westty cluster on amazon ec2.
+Westty can be deployed as a cluster (by adding the cluster module jar) on a private network or on amazon ec2 
+using the provided [Apache Whirr](http://whirr.apache.org) recipe.
 
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
 concerns and does not pollute classpath if not used. 
@@ -26,6 +27,7 @@ concerns and does not pollute classpath if not used.
 * [RestEasy](http://www.jboss.org/resteasy)
 * [WebSockets](http://tools.ietf.org/html/rfc6455)
 * [SockJS](https://github.com/sockjs/sockjs-protocol)
+* [Hazlecast](http://www.hazelcast.com)
 * [Google Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [Quartz Job Scheduling](http://quartz-scheduler.org)
