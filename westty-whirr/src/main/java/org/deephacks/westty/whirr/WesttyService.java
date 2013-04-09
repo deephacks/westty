@@ -4,6 +4,7 @@ import static org.apache.whirr.RolePredicates.role;
 import static org.jclouds.scriptbuilder.domain.Statements.call;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.whirr.Cluster;
@@ -29,6 +30,8 @@ public class WesttyService extends ClusterActionHandlerSupport {
 
     final static String WESTTY_SCRIPT = "configure_westty";
 
+    final static String WESTTY_PUBLIC_IP = "WESTTY_PUBLIC_IP";
+
     final static String URL_FLAG = "-u";
 
     @Override
@@ -39,14 +42,20 @@ public class WesttyService extends ClusterActionHandlerSupport {
     @Override
     protected void beforeConfigure(ClusterActionEvent event) throws IOException {
         Cluster cluster = event.getCluster();
-        Instance instance = cluster.getInstanceMatching(role(WESTTY_ROLE));
-        event.getFirewallManager().addRules(Rule.create().destination(instance).ports(WESTTY_PORT));
 
-        String ip = instance.getPublicIp();
+        Set<Instance> instances = cluster.getInstancesMatching(role(WESTTY_ROLE));
+
+        event.getFirewallManager()
+                .addRules(Rule.create().destination(instances).ports(WESTTY_PORT));
+        for (Instance instance : instances) {
+            String ip = instance.getPublicIp();
+            event.getStatementBuilder()
+                    .addExportPerInstance(instance.getId(), WESTTY_PUBLIC_IP, ip);
+        }
 
         addStatement(event, call("retry_helpers"));
-        LOG.info("Ip address " + ip);
-        addStatement(event, call("install_nginx", ip));
+        addStatement(event, call("install_nginx"));
+
     }
 
     @Override
