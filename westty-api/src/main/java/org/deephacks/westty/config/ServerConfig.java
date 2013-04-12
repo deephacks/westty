@@ -87,10 +87,6 @@ public class ServerConfig {
         return maxHttpContentChunkLength;
     }
 
-    public WebSocketConfig getWebsocket() {
-        return websocket;
-    }
-
     public WebConfig getWeb() {
         return web;
     }
