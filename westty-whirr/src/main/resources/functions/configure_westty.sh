@@ -28,5 +28,7 @@ function configure_westty() {
 		echo "export WESTTY_HOME=$WESTTY_HOME" >> /etc/skel/.bashrc
 		echo 'export PATH=$WESTTY_HOME/bin:$PATH' >> /etc/skel/.bashrc
 	fi
+
+
 }
 

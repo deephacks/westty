@@ -13,6 +13,14 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-cluster</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-sockjs</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.whirr</groupId>
       <artifactId>whirr-core</artifactId>
     </dependency>

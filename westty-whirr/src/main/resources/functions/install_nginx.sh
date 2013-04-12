@@ -1,7 +1,4 @@
 function install_nginx() {
-  if [[ "$1" != "" ]]; then
-
-    local instance_ip=$1
 
     retry_apt_get update -qq
     retry_apt_get -y install nginx
@@ -37,7 +34,7 @@ http {
     include /etc/nginx/sites-enabled/*;
 
     server {
-      server_name $instance_ip;
+      server_name $PUBLIC_IP;
       root /usr/local/westty/html;
 
       location /jaxrs {
@@ -55,7 +52,6 @@ http {
     }
 }
 EOF
-  fi
 }
 
 
