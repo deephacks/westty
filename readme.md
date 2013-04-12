@@ -23,7 +23,8 @@ starts in around 5 seconds spent mostly on jar/class scanning and consumes less 
 basic form.
 
 The following CDI drop-in modules are provided. All modules are optional and self-sustained with clearly separated 
-concerns and does not pollute classpath if not used. 
+concerns and does not pollute classpath if not used. If you dont need clustering, datasources, job scheduling, 
+protobuf or websockets then dont use it. Simple, take what you need. Westty is modular like that.
 
 
 * [DataSource] (http://docs.oracle.com/javase/6/docs/api/javax/sql/DataSource.html)
