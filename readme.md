@@ -13,11 +13,12 @@ clean from irrevelant dependencies, encouraging frontend technologies such as [a
 No servlets, jsp, jsf, jstl or other shenanigans incorporated. Static resources and HTTPS/SSL are preferably delegated 
 to a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well with westty. 
 
-Westty is _programmatic_ and give users the freedom to implement any mechanism to configure it. The server engine 
+Westty is programmatic and give users the freedom to implement any mechanism to configure it. The server engine 
 starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
 
-Westty is cluster aware through [Hazelcast](http://www.hazelcast.com) by choice (using westty-cluster jar) and can be 
-deployed as such on private networks or on amazon ec2 using the provided [Apache Whirr](http://whirr.apache.org) recipe.
+Westty can be made cluster aware through [Hazelcast](http://www.hazelcast.com) using the (optional) westty-cluster jar 
+and be deployed as such on private networks or on amazon ec2 using the provided 
+[Apache Whirr](http://whirr.apache.org) recipe.
 
 The following (optional) CDI drop-in modules are provided. All modules are self-sustained with clearly separated 
 concerns and does not pollute classpath if not used. 
