@@ -27,6 +27,13 @@
       </includes>
     </fileSet>
     <fileSet>
+      <directory>../westty-jaxrs/src/main/resources/html</directory>
+      <outputDirectory>/html/config-admin</outputDirectory>
+      <includes>
+        <include>**/**</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>target</directory>
       <outputDirectory>/lib</outputDirectory>
       <includes>
