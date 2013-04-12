@@ -285,12 +285,6 @@
       </dependency>
       <dependency>
         <groupId>org.deephacks.westty</groupId>
-        <artifactId>westty-websocket</artifactId>
-        <scope>provided</scope>
-        <version>${version.westty}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.deephacks.westty</groupId>
         <artifactId>westty-sockjs</artifactId>
         <scope>provided</scope>
         <version>${version.westty}</version>
