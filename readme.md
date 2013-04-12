@@ -22,11 +22,11 @@ goes hand in hand with the [EventBus](http://vertx.io/api/java/api/org/vertx/jav
 clustering is not needed to use it.
 
 Westty is programmatic and give users the freedom to implement any mechanism to configure it. The server engine 
-starts in around 5 seconds spent mostly on jar/class scanning and consumes less than 10mb of JVM heap space in it most
+starts in around 5 seconds spent mostly on jar/class scanning and consumes less than 10mb of JVM heap space in its most
 basic form.
 
 The following CDI drop-in modules are provided. All modules are optional and self-sustained with clearly separated 
-concerns and does not pollute classpath if not used. If you dont need clustering, datasources, job scheduling, 
+concerns and does not pollute classpath. If you dont need clustering, datasources, job scheduling, 
 protobuf or websockets then dont use it. Simple, take what you need. Westty is modular like that.
 
 
