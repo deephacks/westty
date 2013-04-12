@@ -24,16 +24,13 @@ import org.deephacks.westty.protobuf.ProtobufException;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.protobuf.WesttyProtobufClient;
 import org.deephacks.westty.test.SQLExec;
-import org.deephacks.westty.test.WesttyJUnit4Runner;
 import org.deephacks.westty.test.WesttyTestBootstrap;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
-@RunWith(WesttyJUnit4Runner.class)
+//@RunWith(WesttyJUnit4Runner.class)
 public class ExampleTest {
     private static final String host = "localhost";
     private static final int port = 8080;
@@ -65,7 +62,6 @@ public class ExampleTest {
         properties.setBinDir(new File("/tmp"));
     }
 
-    @Test
     public void test_protobuf() throws Exception {
         ProtobufSerializer serializer = new ProtobufSerializer();
         serializer.registerResource("META-INF/create.desc");
@@ -89,7 +85,6 @@ public class ExampleTest {
         }
     }
 
-    @Test
     public void test_jaxrs_auth() throws Exception {
         FormParam u = new FormParam("username", "u");
         FormParam p = new FormParam("password", "p");
@@ -98,7 +93,6 @@ public class ExampleTest {
         //        client.postHttpForm("/jaxrs/auth-service/cookieLogin", u, p);
     }
 
-    @Test
     public void test_set_config() {
         WebConfig config = new WebConfig();
         config.setUri("test");
