@@ -16,7 +16,7 @@ to a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really w
 Westty is programmatic and give users the freedom to implement any mechanism to configure it. The server engine 
 starts in around 5 seconds (spent mostly on jar/class scanning) and consumes less than 10mb of JVM heap space.
 
-Using WebSockets with Westty is real simple, deploy the server runtime with westty-sockjs and you're good to go.
+WebSockets is real simple when using Westty. Just deploy the server runtime with westty-sockjs and you're good to go.
 
 Cluster-awareness is provided through [Hazelcast](http://www.hazelcast.com) using westty-cluster and can be deployed 
 as such on private networks or amazon ec2 using the provided [Apache Whirr](http://whirr.apache.org) recipe.
