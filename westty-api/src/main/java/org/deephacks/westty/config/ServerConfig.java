@@ -63,9 +63,6 @@ public class ServerConfig {
     @Config(desc = "Static web configuration.")
     private WebConfig web;
 
-    @Config(desc = "Ssl configuration.")
-    private SslConfig ssl;
-
     @Config(desc = "Thread pool executor configuration.")
     private ExecutorConfig executor;
 
@@ -99,10 +96,6 @@ public class ServerConfig {
 
     public WebConfig getWeb() {
         return web;
-    }
-
-    public SslConfig getSsl() {
-        return ssl;
     }
 
     public ExecutorConfig getExecutor() {
