@@ -57,9 +57,6 @@ public class ServerConfig {
     @Size(min = 16384)
     private Integer maxHttpContentChunkLength = 65536;
 
-    @Config(desc = "Websocket configuration.")
-    private WebSocketConfig websocket;
-
     @Config(desc = "Static web configuration.")
     private WebConfig web;
 
