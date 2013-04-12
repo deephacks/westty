@@ -18,7 +18,7 @@ Websockets is real simple in Westty, just deploy the server engine with westty-s
 
 Cluster-awareness is provided through [Hazelcast](http://www.hazelcast.com) using westty-cluster and can be deployed 
 as such on private networks or amazon ec2 using the provided [Apache Whirr](http://whirr.apache.org) recipe. Clustering 
-goes hand in hand with the [EventBus](http://vertx.io/api/java/api/org/vertx/java/core/eventbus/EventBus.html), but
+goes hand in hand with the [EventBus](http://vertx.io/api/java/api/org/vertx/java/core/eventbus/EventBus.html) although
 clustering is not needed to use it.
 
 Westty is programmatic and give users the freedom to implement any mechanism to configure it. The server engine 
