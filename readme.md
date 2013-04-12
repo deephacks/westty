@@ -13,10 +13,13 @@ clean from irrevelant dependencies, encouraging frontend technologies such as [a
 No servlets, jsp, jsf, jstl or other shenanigans incorporated. Static resources and HTTPS/SSL are preferably delegated 
 to a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well with westty. 
 
-Websockets is real simple in Westty, just deploy the server engine with westty-sockjs and you're good to go.
+Websockets is real simple in Westty, just deploy the server engine with westty-sockjs and you're good to go. Westty use 
+[Vert.x](http://vertx.io/) internally and enable applications to inject and use the [EventBus](http://vertx.io/api/java/api/org/vertx/java/core/eventbus/EventBus.html).
 
 Cluster-awareness is provided through [Hazelcast](http://www.hazelcast.com) using westty-cluster and can be deployed 
-as such on private networks or amazon ec2 using the provided [Apache Whirr](http://whirr.apache.org) recipe.
+as such on private networks or amazon ec2 using the provided [Apache Whirr](http://whirr.apache.org) recipe. Clustering 
+goes hand in hand with the [EventBus](http://vertx.io/api/java/api/org/vertx/java/core/eventbus/EventBus.html), but
+clustering is not needed to use it.
 
 Westty is programmatic and give users the freedom to implement any mechanism to configure it. The server engine 
 starts in around 5 seconds spent mostly on jar/class scanning and consumes less than 10mb of JVM heap space in it most
