@@ -15,7 +15,6 @@ public class WesttyCoreExtensionImpl implements Extension {
     static {
         extensions.add(new WesttyPropertiesBootstrap());
         extensions.add(new WesttyConfigBootstrap());
-        extensions.add(new WesttySockJsBootstrap());
     }
 
     public static class WesttyCoreExtension {

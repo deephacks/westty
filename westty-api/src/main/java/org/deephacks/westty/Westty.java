@@ -15,60 +15,73 @@ package org.deephacks.westty;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.deephacks.westty.properties.WesttyProperties;
+
 public class Westty {
-	private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
-	private static Object WESTTY;
+    private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
+    private static Object WESTTY;
 
-	public static void main(String[] args) throws Throwable {
-		Westty westty = new Westty();
-		westty.startup();
-	}
+    public static void main(String[] args) throws Throwable {
+        Westty westty = new Westty();
+        westty.startup();
+    }
 
-	public Westty() {
-		if (WESTTY == null) {
-			ClassLoader cl = Thread.currentThread().getContextClassLoader();
-			try {
-				WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
-			} catch (Exception e) {
-				throw new RuntimeException();
-			}
-		}
-	}
+    public Westty() {
+        if (WESTTY == null) {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            try {
+                WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
-	public synchronized void startup() throws Throwable {
-		call("startup");
-	}
+    public Westty(WesttyProperties props) {
+        if (WESTTY == null) {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            try {
+                WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
+                call("setProperties", props);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
-	public synchronized <V> V getInstance(Class<V> cls) throws Throwable {
-		return (V) call("getInstance", cls);
-	}
+    public synchronized void startup() throws Throwable {
+        call("startup");
+    }
 
-	public synchronized void stop() throws Throwable {
-		call("shutdown");
-	}
+    public synchronized <V> V getInstance(Class<V> cls) throws Throwable {
+        return (V) call("getInstance", cls);
+    }
 
-	private Object call(String method, Object... args) throws Throwable {
-		try {
-			if (args == null || args.length == 0) {
-				return WESTTY.getClass().getMethod(method).invoke(WESTTY);
-			} else {
-				Class<?>[] classes = new Class<?>[args.length];
-				for (int i = 0; i < args.length; i++) {
-					classes[i] = args[i].getClass();
-				}
-				return WESTTY.getClass().getMethod(method, classes)
-						.invoke(WESTTY, args);
-			}
-		} catch (InvocationTargetException e) {
-			Throwable t = e.getTargetException();
-			if (t instanceof ExceptionInInitializerError) {
-				ExceptionInInitializerError err = (ExceptionInInitializerError) t;
-				throw err.getCause();
-			}
-			throw t;
+    public synchronized void stop() throws Throwable {
+        call("shutdown");
+    }
 
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    private Object call(String method, Object... args) throws Throwable {
+        try {
+            if (args == null || args.length == 0) {
+                return WESTTY.getClass().getMethod(method).invoke(WESTTY);
+            } else {
+                Class<?>[] classes = new Class<?>[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    classes[i] = args[i].getClass();
+                }
+                return WESTTY.getClass().getMethod(method, classes).invoke(WESTTY, args);
+            }
+        } catch (InvocationTargetException e) {
+            Throwable t = e.getTargetException();
+            if (t instanceof ExceptionInInitializerError) {
+                ExceptionInInitializerError err = (ExceptionInInitializerError) t;
+                throw err.getCause();
+            }
+            throw t;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

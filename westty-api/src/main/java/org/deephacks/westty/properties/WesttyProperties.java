@@ -3,6 +3,8 @@ package org.deephacks.westty.properties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import javax.enterprise.inject.Alternative;
@@ -22,6 +24,9 @@ public class WesttyProperties {
     public static final String BIN_DIR_PROP = "westty.bin.dir";
     public static final String HTML_DIR_PROP = "westty.html.dir";
 
+    public static final String PUBLIC_IP_PROP = "westty.public_ip";
+    public static final String PRIVATE_IP_PROP = "westty.private_ip";
+
     public static final String WESTTY_ROOT_PROP = "westty.root.dir";
     public static final String WESTTY_ROOT = System.getProperty(WESTTY_ROOT_PROP);
     public static final String WESTTY_PROPERTIES_FILE = "westty.properties";
@@ -33,12 +38,24 @@ public class WesttyProperties {
 
     private final Properties properties;
 
+    private String hostAddress;
+
     public WesttyProperties() {
         properties = new Properties();
+        try {
+            hostAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            hostAddress = "0.0.0.0";
+        }
     }
 
     public WesttyProperties(WesttyProperties properties) {
         this.properties = properties.getProperties();
+        try {
+            hostAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            hostAddress = "0.0.0.0";
+        }
     }
 
     @WesttyPropertyBuilder
@@ -54,7 +71,7 @@ public class WesttyProperties {
         properties.setLibDir(new File(root, LIB));
         properties.setConfDir(new File(root, CONF));
         properties.setHtmlDir(new File(root, HTML));
-        properties.loadProperties(new File(root, WESTTY_PROPERTIES_FILE));
+        properties.loadProperties(new File(properties.getConfDir(), WESTTY_PROPERTIES_FILE));
     }
 
     public void add(Properties prop) {
@@ -126,12 +143,41 @@ public class WesttyProperties {
         return new File(getProperty(HTML_DIR_PROP));
     }
 
+    public void setPublicIp(String ip) {
+        setProperty(PUBLIC_IP_PROP, ip);
+    }
+
+    public String getPublicIp() {
+        String value = getProperty(PUBLIC_IP_PROP);
+        if (!Strings.isNullOrEmpty(value)) {
+            return value;
+        }
+        return hostAddress;
+    }
+
+    public void setPrivateIp(String ip) {
+        setProperty(PRIVATE_IP_PROP, ip);
+    }
+
+    public String getPrivateIp() {
+        String value = getProperty(PRIVATE_IP_PROP);
+        if (!Strings.isNullOrEmpty(value)) {
+            return value;
+        }
+        return getPublicIp();
+    }
+
     private String getPropertyOrEmpty(String key) {
         String value = getProperty(key);
         if (Strings.isNullOrEmpty(value)) {
             return "";
         }
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return properties.toString();
     }
 
 }

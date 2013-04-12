@@ -17,7 +17,6 @@ public class Main {
         Westty w = new Westty();
         w.startup();
         Main main = w.getInstance(Main.class);
-        System.out.println(main.props);
         Thread.sleep(100000);
     }
 
