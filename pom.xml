@@ -75,7 +75,6 @@
     <module>westty-jpa</module>
     <module>westty-job</module>
     <module>westty-jaxrs</module>
-    <module>westty-websocket</module>
     <module>westty-whirr</module>
     <module>westty-sockjs</module>
     <module>westty-cluster</module>
