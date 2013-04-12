@@ -13,7 +13,7 @@ clean from irrevelant dependencies, encouraging frontend technologies such as [a
 No servlets, jsp, jsf, jstl or other shenanigans incorporated. Static resources and HTTPS/SSL are preferably delegated 
 to a web proxy; such as [nginx](http://wiki.nginx.org/Main) which works really well with westty. 
 
-WebSockets is real simple when using Westty. Just deploy the server runtime with westty-sockjs and you're good to go.
+Websockets is real simple in Westty, just deploy the server engine with westty-sockjs and you're good to go.
 
 Cluster-awareness is provided through [Hazelcast](http://www.hazelcast.com) using westty-cluster and can be deployed 
 as such on private networks or amazon ec2 using the provided [Apache Whirr](http://whirr.apache.org) recipe.
