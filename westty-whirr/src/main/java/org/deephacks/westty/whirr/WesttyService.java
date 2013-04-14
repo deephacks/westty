@@ -30,6 +30,7 @@ public class WesttyService extends ClusterActionHandlerSupport {
     final static String WESTTY_DEFAULT_PROPERTIES = "whirr-westty-default.properties";
     final static int WESTTY_HTTP_PORT = 80;
     final static int WESTTY_SOCKJS_PORT = 8090;
+    final static int WESTTY_PROTOBUF_PORT = 7777;
 
     final static String WESTTY_TAR_URL = "whirr.westty.tarball.url";
 
@@ -54,7 +55,8 @@ public class WesttyService extends ClusterActionHandlerSupport {
                 Rule.create().destination(instances).ports(WESTTY_HTTP_PORT));
         event.getFirewallManager().addRules(
                 Rule.create().destination(instances).ports(WESTTY_SOCKJS_PORT));
-
+        event.getFirewallManager().addRules(
+                Rule.create().destination(instances).ports(WESTTY_PROTOBUF_PORT));
         //        for (Instance instance : instances) {
         //            String ip = instance.getPublicIp();
         //            event.getStatementBuilder()
