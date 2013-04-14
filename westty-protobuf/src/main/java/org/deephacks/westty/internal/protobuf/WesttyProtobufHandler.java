@@ -85,13 +85,18 @@ class WesttyProtobufHandler extends SimpleChannelHandler {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object invokeEndpoint(Object proto) {
+
         if (endpoints == null) {
             endpoints = extension.getEndpoints();
             beanManager = extension.getBeanManager();
         }
         Class<?> cls = proto.getClass();
         Method method = endpoints.get(cls);
+        if (method == null) {
+            return Failure.newBuilder().setCode(FailureCode.NOT_IMPLEMENTED.getCode()).setMsg("")
+                    .build();
 
+        }
         Set<Bean<?>> protoBeans = beanManager.getBeans(method.getDeclaringClass());
 
         Bean protoBean = beanManager.resolve(protoBeans);

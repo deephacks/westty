@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 import com.google.protobuf.MessageLite;
 
 public class WesttyProtobufClient {
+    public static final int MESSAGE_LENGTH = 4;
+    public static final int MESSAGE_MAX_SIZE_10MB = 10485760;
     private final ProtobufSerializer serializer;
     private static final Logger log = LoggerFactory.getLogger(WesttyProtobufClient.class);
     private final Lock lock = new ReentrantLock();
@@ -52,7 +54,7 @@ public class WesttyProtobufClient {
     private final ChannelGroup channelGroup = new DefaultChannelGroup("channels");
     private final WesttyProtobufDecoder decoder;
     private final WesttyProtobufEncoder encoder;
-    private final LengthFieldPrepender lengthPrepender = new LengthFieldPrepender(2);
+    private final LengthFieldPrepender lengthPrepender = new LengthFieldPrepender(MESSAGE_LENGTH);
     private final ClientHandler clientHandler = new ClientHandler();
 
     public WesttyProtobufClient(ExecutorService bossExecutor, ExecutorService workerExecutor,
@@ -113,8 +115,8 @@ public class WesttyProtobufClient {
             @Override
             public ChannelPipeline getPipeline() throws Exception {
                 ChannelPipeline pipeline = Channels.pipeline();
-                pipeline.addLast("lengthFrameDecoder", new LengthFieldBasedFrameDecoder(65536, 0,
-                        2, 0, 2));
+                pipeline.addLast("lengthFrameDecoder", new LengthFieldBasedFrameDecoder(
+                        MESSAGE_MAX_SIZE_10MB, 0, MESSAGE_LENGTH, 0, MESSAGE_LENGTH));
                 pipeline.addLast("decoder", decoder);
                 pipeline.addLast("lengthPrepender", lengthPrepender);
                 pipeline.addLast("encoder", encoder);

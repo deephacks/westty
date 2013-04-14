@@ -22,6 +22,7 @@ import javax.inject.Singleton;
 
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
+import org.deephacks.westty.protobuf.WesttyProtobufClient;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -54,8 +55,11 @@ class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
         if (executionHandler == null) {
             this.executionHandler = new ExecutionHandler(executor);
         }
-        return Channels.pipeline(new LengthFieldBasedFrameDecoder(65536, 0, 2, 0, 2),
-                new WesttyProtobufDecoder(extension.getSerializer()), new LengthFieldPrepender(2),
+        return Channels.pipeline(new LengthFieldBasedFrameDecoder(
+                WesttyProtobufClient.MESSAGE_MAX_SIZE_10MB, 0, WesttyProtobufClient.MESSAGE_LENGTH,
+                0, WesttyProtobufClient.MESSAGE_LENGTH),
+                new WesttyProtobufDecoder(extension.getSerializer()), new LengthFieldPrepender(
+                        WesttyProtobufClient.MESSAGE_LENGTH),
                 new WesttyProtobufEncoder(extension.getSerializer()), executionHandler, handler);
     }
 
