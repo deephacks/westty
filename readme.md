@@ -27,7 +27,7 @@ basic form.
 
 The following CDI drop-in modules are provided. All modules are optional and self-sustained with clearly separated 
 concerns and does not pollute classpath. If you dont need clustering, datasources, job scheduling, 
-protobuf or websockets then dont use it. Simple, take what you need. Westty is modular like that.
+protobuf or websockets then remove it from classpath. Westty is modular like that, only take what you need. 
 
 
 * [DataSource] (http://docs.oracle.com/javase/6/docs/api/javax/sql/DataSource.html)
