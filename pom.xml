@@ -216,12 +216,14 @@
       <scope>compile</scope>
     </dependency>
     <!-- bridge c3po logging to slf4j -->
+    <!--
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId>
       <version>1.6.4</version>
       <scope>runtime</scope>
     </dependency>
+    -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -502,6 +504,12 @@
         <artifactId>tools4j-config-provider-jpa20</artifactId>
         <version>${version.tools4j.config}</version>
         <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.deephacks.tools4j</groupId>
+        <artifactId>tools4j-config-provider-hbase</artifactId>
+        <version>${version.tools4j.config}</version>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.quartz-scheduler</groupId>
