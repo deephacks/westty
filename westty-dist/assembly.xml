@@ -8,11 +8,39 @@
       <directory>target/jars</directory>
       <outputDirectory>lib</outputDirectory>
       <includes>
-        <include>**/*.jar</include>
+        <include>**/*westty*.jar</include>
+        <include>**/*slf4j-api*.jar</include>
+        <include>**/*slf4j-ext*.jar</include>
+        <include>**/*weld*.jar</include>
+        <include>**/*cdi*.jar</include>
+        <include>**/*jboss*.jar</include>
+        <include>**/*netty*.jar</include>
+        <include>**/*resteasy*.jar</include>
+        <include>**/*jaxrs*.jar</include>
+        <include>**/*jackson*.jar</include>
+        <include>**/*vertx*.jar</include>
+        <include>**/*hazelcast*.jar</include>
+        <include>**/*cal10n-api*.jar</include>
+        <include>**/*logback*.jar</include>
+        <include>**/*javassist*.jar</include>
+        <include>**/*tools4j*.jar</include>
+        <include>**/*javax*.jar</include>
+        <include>**/*scannotation*.jar</include>
+        <include>**/*guava*.jar</include>
+        <include>**/*protobuf*.jar</include>
+        <include>**/*zookeeper*.jar</include>
+        <include>**/*hadoop-core*.jar</include>
+        <include>**/*hbase*.jar</include>
+        <include>**/*commons-logging*.jar</include>
+        <include>**/*commons-lang*.jar</include>
+        <include>**/*commons-configuration*.jar</include>
+        <include>**/*kryo*.jar</include>
+        <include>**/*minlog*.jar</include>
       </includes>
       <excludes>
         <exclude>**/*sources.jar</exclude>
         <exclude>**/*javadoc.jar</exclude>
+        <exclude>**/*hbase*tests.jar</exclude>
       </excludes>
 
     </fileSet>
