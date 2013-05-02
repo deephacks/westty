@@ -1,6 +1,5 @@
 package org.deephacks.westty.internal.jaxrs;
 
-import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -14,11 +13,10 @@ import org.slf4j.LoggerFactory;
 @Singleton
 class WesttyResteasyModule {
     private static final Logger log = LoggerFactory.getLogger(WesttyResteasyModule.class);
-    private final ResteasyDeployment deployment;
+    private final ResteasyDeployment deployment = new ResteasyDeployment();
 
     @Inject
-    public WesttyResteasyModule(ResteasyDeployment deployment, WesttyJaxrsApplication jaxrsApps) {
-        this.deployment = deployment;
+    public WesttyResteasyModule(WesttyJaxrsApplication jaxrsApps) {
         deployment.setApplication(jaxrsApps);
         ResteasyJacksonProvider provider = new ResteasyJacksonProvider();
         provider.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -32,11 +30,5 @@ class WesttyResteasyModule {
 
     public void stop() {
         deployment.stop();
-    }
-
-    @Produces
-    @Singleton
-    public ResteasyDeployment createResteasyDeployment() {
-        return new ResteasyDeployment();
     }
 }
