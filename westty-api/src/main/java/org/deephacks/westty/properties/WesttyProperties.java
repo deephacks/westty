@@ -3,8 +3,6 @@ package org.deephacks.westty.properties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Properties;
 
 import javax.enterprise.inject.Alternative;
@@ -41,21 +39,13 @@ public class WesttyProperties {
     private String hostAddress;
 
     public WesttyProperties() {
-        properties = new Properties();
-        try {
-            hostAddress = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            hostAddress = "0.0.0.0";
-        }
+        this.properties = new Properties();
+        this.hostAddress = "127.0.0.1";
     }
 
     public WesttyProperties(WesttyProperties properties) {
         this.properties = properties.getProperties();
-        try {
-            hostAddress = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            hostAddress = "0.0.0.0";
-        }
+        this.hostAddress = "127.0.0.1";
     }
 
     @WesttyPropertyBuilder
