@@ -29,7 +29,7 @@ public class WesttyClusterProperties extends WesttyProperties {
     public Collection<WesttyServerId> getClusterIds() {
         String prop = getProperty(CLUSTER_IDS);
         if (Strings.isNullOrEmpty(prop)) {
-            return ImmutableList.of();
+            return ImmutableList.of(new WesttyServerId(getPrivateIp(), CLUSTER_DEFAUL_PORT));
         }
         Collection<WesttyServerId> ips = new HashSet<>();
         for (String address : prop.split(",")) {
@@ -75,8 +75,8 @@ public class WesttyClusterProperties extends WesttyProperties {
 
         Join join = network.getJoin();
         join.getMulticastConfig().setEnabled(false);
-
-        for (WesttyServerId ip : getClusterIds()) {
+        Collection<WesttyServerId> ids = getClusterIds();
+        for (WesttyServerId ip : ids) {
             try {
                 join.getTcpIpConfig().addAddress(new Address(ip.host, ip.port)).setEnabled(true);
             } catch (UnknownHostException e) {
