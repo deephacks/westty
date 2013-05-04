@@ -62,6 +62,7 @@ public class WesttyService extends ClusterActionHandlerSupport {
         //            event.getStatementBuilder()
         //                    .addExportPerInstance(instance.getId(), WESTTY_PUBLIC_IP, ip);
         //        }
+        handleFirewallRules(event);
 
         addStatement(event, call("retry_helpers"));
         addStatement(event, call("install_westty"));
