@@ -1,1 +1,2 @@
 org.deephacks.westty.internal.protobuf.ProtobufExtension
+org.deephacks.westty.internal.protobuf.ProtobufBootstrap
