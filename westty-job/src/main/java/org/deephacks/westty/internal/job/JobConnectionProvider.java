@@ -7,7 +7,8 @@ import javax.sql.DataSource;
 
 import org.quartz.utils.ConnectionProvider;
 
-class JobConnectionProvider implements ConnectionProvider {
+public class JobConnectionProvider implements ConnectionProvider {
+
     private DataSource dataSource;
 
     public JobConnectionProvider(DataSource dataSource) {

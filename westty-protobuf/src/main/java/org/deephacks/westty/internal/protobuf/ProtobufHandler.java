@@ -41,10 +41,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
-class WesttyProtobufHandler extends SimpleChannelHandler {
-    private static final Logger log = LoggerFactory.getLogger(WesttyProtobufHandler.class);
+class ProtobufHandler extends SimpleChannelHandler {
+    private static final Logger log = LoggerFactory.getLogger(ProtobufHandler.class);
     @Inject
-    private WesttyProtobufExtension extension;
+    private ProtobufExtension extension;
     private HashMap<Class<?>, Method> endpoints;
     private BeanManager beanManager;
 

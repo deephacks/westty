@@ -23,7 +23,6 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.deephacks.westty.properties.WesttyProperties;
 import org.deephacks.westty.spi.WesttyHttpHandler;
 import org.deephacks.westty.spi.WesttyTemplateCompiler;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -34,48 +33,46 @@ import org.jboss.netty.handler.execution.ExecutionHandler;
 
 @Singleton
 public class WesttyHttpPipelineFactory implements ChannelPipelineFactory {
-	@Inject
-	private Instance<WesttyHttpHandler> handlers;
-	private List<WesttyHttpHandler> handlerList = new ArrayList<WesttyHttpHandler>();
+    @Inject
+    private Instance<WesttyHttpHandler> handlers;
+    private List<WesttyHttpHandler> handlerList = new ArrayList<WesttyHttpHandler>();
 
-	@Inject
-	private Instance<WesttyTemplateCompiler> compilers;
-	private List<WesttyTemplateCompiler> compilerList = new ArrayList<WesttyTemplateCompiler>();
+    @Inject
+    private Instance<WesttyTemplateCompiler> compilers;
+    private List<WesttyTemplateCompiler> compilerList = new ArrayList<WesttyTemplateCompiler>();
 
-	@Inject
-	private WesttyHttpUpstreamHandler requestHandler;
-	@Inject
-	private WesttyProperties properties;
-	@Inject
-	private ThreadPoolExecutor executor;
+    @Inject
+    private WesttyHttpUpstreamHandler requestHandler;
 
-	private ExecutionHandler executionHandler;
+    @Inject
+    private ThreadPoolExecutor executor;
 
-	public ChannelPipeline getPipeline() throws Exception {
+    private ExecutionHandler executionHandler;
 
-		if (executionHandler == null) {
-			this.executionHandler = new ExecutionHandler(executor);
-			for (WesttyHttpHandler handler : handlers) {
-				handlerList.add(handler);
-			}
-			for (WesttyTemplateCompiler compiler : compilers) {
-				compilerList.add(compiler);
-			}
-		}
-		ChannelPipeline pipeline = pipeline();
-		pipeline.addLast("westtyDecoder", new WesttyHttpDecoder(properties,
-				handlerList, compilerList));
-		pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
-		pipeline.addLast("encoder", new HttpResponseEncoder());
-		if (executionHandler != null) {
-			pipeline.addLast("executionHandler", executionHandler);
-		}
-		pipeline.addLast("handler", requestHandler);
+    public ChannelPipeline getPipeline() throws Exception {
 
-		return pipeline;
-	}
+        if (executionHandler == null) {
+            this.executionHandler = new ExecutionHandler(executor);
+            for (WesttyHttpHandler handler : handlers) {
+                handlerList.add(handler);
+            }
+            for (WesttyTemplateCompiler compiler : compilers) {
+                compilerList.add(compiler);
+            }
+        }
+        ChannelPipeline pipeline = pipeline();
+        pipeline.addLast("westtyDecoder", new WesttyHttpDecoder(handlerList, compilerList));
+        pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
+        pipeline.addLast("encoder", new HttpResponseEncoder());
+        if (executionHandler != null) {
+            pipeline.addLast("executionHandler", executionHandler);
+        }
+        pipeline.addLast("handler", requestHandler);
 
-	public void close() {
-		requestHandler.getClientChannels().close();
-	}
+        return pipeline;
+    }
+
+    public void close() {
+        requestHandler.getClientChannels().close();
+    }
 }

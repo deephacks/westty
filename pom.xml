@@ -52,7 +52,7 @@
 
   <properties>
     <version.westty>0.0.1-SNAPSHOT</version.westty>
-    <version.tools4j.config>0.0.5</version.tools4j.config>
+    <version.tools4j.config>0.0.7</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
     <version.java-source>1.7</version.java-source>
@@ -215,6 +215,13 @@
       <version>1.6.4</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.7.5</version>
+      <scope>compile</scope>
+    </dependency>
+
     <!-- bridge c3po logging to slf4j -->
     <!--
     <dependency>
@@ -412,12 +419,12 @@
       <dependency>
         <groupId>javax.validation</groupId>
         <artifactId>validation-api</artifactId>
-        <version>1.1.0.CR3</version>
+        <version>1.1.0.Final</version>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
-        <version>5.0.0.CR3</version>
+        <version>5.0.0.Final</version>
         <scope>runtime</scope>
       </dependency>
       <dependency>

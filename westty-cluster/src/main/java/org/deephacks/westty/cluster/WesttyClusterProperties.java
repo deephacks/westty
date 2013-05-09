@@ -22,10 +22,6 @@ public class WesttyClusterProperties extends WesttyProperties {
     public static final String CLUSTER_PORT = "westty.cluster.port";
     public static final int CLUSTER_DEFAUL_PORT = NetworkConfig.DEFAULT_PORT;
 
-    public WesttyClusterProperties(WesttyProperties properties) {
-        super(properties);
-    }
-
     public Collection<WesttyServerId> getClusterIds() {
         String prop = getProperty(CLUSTER_IDS);
         if (Strings.isNullOrEmpty(prop)) {

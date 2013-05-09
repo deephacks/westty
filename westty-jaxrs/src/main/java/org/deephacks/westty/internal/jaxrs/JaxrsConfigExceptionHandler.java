@@ -89,9 +89,6 @@ class JaxrsConfigExceptionHandler implements ExceptionMapper<AbortRuntimeExcepti
         case Events.CFG307:
             status = Status.FORBIDDEN;
             break;
-        case Events.CFG308:
-            status = Status.CONFLICT;
-            break;
         case Events.CFG309:
             status = Status.BAD_REQUEST;
             break;

@@ -14,12 +14,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceException;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
@@ -29,63 +28,48 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import org.deephacks.tools4j.config.model.ThreadLocalManager;
 import org.deephacks.westty.jpa.WesttyJpaProperties;
 import org.deephacks.westty.properties.WesttyProperties;
-import org.deephacks.westty.spi.WesttyModule;
 import org.scannotation.AnnotationDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
-class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
-    private static final Logger log = LoggerFactory.getLogger(WesttyJpaModule.class);
-
+public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     public static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 
-    private final WesttyProperties properties;
+    private static final Logger log = LoggerFactory.getLogger(EntityManagerFactoryProducer.class);
     private final WesttyJpaProperties jpaProperties;
-    private final DataSource dataSource;
-
     private List<Class<?>> classes = new ArrayList<Class<?>>();
-    private static EntityManagerFactory EMF;
+    private DataSource datasource;
 
     @Inject
-    public WesttyJpaModule(WesttyProperties properties, DataSource dataSource) {
-        this.properties = properties;
-        this.jpaProperties = new WesttyJpaProperties(properties);
-        this.dataSource = dataSource;
+    public EntityManagerFactoryProducer(DataSource datasource) {
+        this.jpaProperties = new WesttyJpaProperties();
+        this.datasource = datasource;
     }
 
-    @Override
-    public void startup() {
-        if (EMF == null) {
-            EMF = createEntityManagerFactory();
+    @Produces
+    @Singleton
+    public EntityManagerFactory produceEntityManagerFactory() {
+        final List<Class<?>> entities = getEntities();
+        add(entities);
+        EntityManagerFactory emf = null;
+        List<PersistenceProvider> providers = getProviders();
+        for (PersistenceProvider provider : providers) {
+            emf = provider.createContainerEntityManagerFactory(this,
+                    WesttyJpaProperties.getProperties());
+            if (emf != null) {
+                break;
+            }
         }
-    }
-
-    @Override
-    public void shutdown() {
-        if (EMF != null) {
-            EMF.close();
+        if (emf == null) {
+            log.info("No Persistence provider for EntityManager named " + getPersistenceUnitName());
+            return null;
+        } else {
+            log.debug("Created persistence unit " + getPersistenceUnitName() + " with entities {}",
+                    entities);
         }
-    }
-
-    @Override
-    public int priority() {
-        return 2000;
-    }
-
-    public void add(Class<?> cls) {
-        classes.add(cls);
-    }
-
-    public void add(Class<?>... cls) {
-        classes.addAll(Arrays.asList(cls));
-    }
-
-    public void add(Collection<Class<?>> cls) {
-        classes.addAll(cls);
+        return emf;
     }
 
     @Override
@@ -110,7 +94,7 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
 
     @Override
     public DataSource getNonJtaDataSource() {
-        return dataSource;
+        return datasource;
     }
 
     @Override
@@ -126,7 +110,7 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
     @Override
     public java.net.URL getPersistenceUnitRootUrl() {
         try {
-            return properties.getLibDir().toURI().toURL();
+            return WesttyProperties.getLibDir().toURI().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -158,7 +142,7 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
 
     @Override
     public Properties getProperties() {
-        return properties.getProperties();
+        return WesttyProperties.getProperties();
     }
 
     @Override
@@ -181,51 +165,24 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
         return null;
     }
 
-    EntityManager get() {
-        return ThreadLocalManager.peek(EntityManager.class);
+    public void add(Class<?> cls) {
+        classes.add(cls);
     }
 
-    EntityManager createEntityManager() {
-        if (EMF == null) {
-            EMF = createEntityManagerFactory();
-        }
-        final EntityManager em = EMF.createEntityManager();
-        ThreadLocalManager.push(EntityManager.class, em);
-        return em;
+    public void add(Class<?>... cls) {
+        classes.addAll(Arrays.asList(cls));
     }
 
-    static void removeEntityManager() {
-        EntityManager em = ThreadLocalManager.pop(EntityManager.class);
-        if (em == null)
-            throw new IllegalStateException(
-                    "Removing of entity manager failed. Your entity manager was not found.");
+    public void add(Collection<Class<?>> cls) {
+        classes.addAll(cls);
     }
 
-    private EntityManagerFactory createEntityManagerFactory() {
-        final List<Class<?>> entities = getEntities();
-        add(entities);
-        EntityManagerFactory emf = null;
-        List<PersistenceProvider> providers = getProviders();
-        for (PersistenceProvider provider : providers) {
-            emf = provider.createContainerEntityManagerFactory(this, jpaProperties.getProperties());
-            if (emf != null) {
-                break;
-            }
-        }
-        if (emf == null) {
-            throw new PersistenceException("No Persistence provider for EntityManager named "
-                    + getPersistenceUnitName());
-        }
-        log.debug("Created persistence unit with entities {}", entities);
-        return emf;
-    }
-
-    private static List<PersistenceProvider> getProviders() {
+    private List<PersistenceProvider> getProviders() {
         return PersistenceProviderResolverHolder.getPersistenceProviderResolver()
                 .getPersistenceProviders();
     }
 
-    private static List<Class<?>> getEntities() {
+    private List<Class<?>> getEntities() {
         try {
             AnnotationDB db = new AnnotationDB();
             List<Class<?>> entities = new ArrayList<Class<?>>();
@@ -233,7 +190,11 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
             URL[] jars = getPersistenceArchives(cl);
             db.scanArchives(jars);
             Map<String, Set<String>> annotationIndex = db.getAnnotationIndex();
-            for (String cls : annotationIndex.get(Entity.class.getName())) {
+            Set<String> classes = annotationIndex.get(Entity.class.getName());
+            if (classes == null) {
+                return entities;
+            }
+            for (String cls : classes) {
                 Class<?> entity = cl.loadClass(cls);
                 entities.add(entity);
             }
@@ -243,7 +204,7 @@ class WesttyJpaModule implements WesttyModule, PersistenceUnitInfo {
         }
     }
 
-    private static URL[] getPersistenceArchives(ClassLoader cl) throws IOException {
+    private URL[] getPersistenceArchives(ClassLoader cl) throws IOException {
         final List<URL> result = new ArrayList<URL>();
         final Enumeration<URL> urls = cl.getResources(PERSISTENCE_XML);
         while (urls.hasMoreElements()) {

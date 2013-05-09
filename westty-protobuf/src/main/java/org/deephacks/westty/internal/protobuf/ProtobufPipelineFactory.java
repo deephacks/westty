@@ -38,12 +38,12 @@ import org.jboss.netty.handler.execution.ExecutionHandler;
 import com.google.protobuf.MessageLite;
 
 @Singleton
-class WesttyProtobufPipelineFactory implements ChannelPipelineFactory {
+class ProtobufPipelineFactory implements ChannelPipelineFactory {
     @Inject
-    private WesttyProtobufExtension extension;
+    private ProtobufExtension extension;
 
     @Inject
-    private WesttyProtobufHandler handler;
+    private ProtobufHandler handler;
 
     @Inject
     private ThreadPoolExecutor executor;

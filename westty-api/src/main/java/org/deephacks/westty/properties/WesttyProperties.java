@@ -5,17 +5,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 
+import org.deephacks.tools4j.config.model.SystemProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
 
-@Alternative
+@Singleton
 public class WesttyProperties {
-    private Logger log = LoggerFactory.getLogger(WesttyProperties.class);
+    private static final Logger log = LoggerFactory.getLogger(WesttyProperties.class);
 
     public static final String LIB_DIR_PROP = "westty.lib.dir";
     public static final String CONF_DIR_PROP = "westty.conf.dir";
@@ -25,8 +27,6 @@ public class WesttyProperties {
     public static final String PUBLIC_IP_PROP = "westty.public_ip";
     public static final String PRIVATE_IP_PROP = "westty.private_ip";
 
-    public static final String WESTTY_ROOT_PROP = "westty.root.dir";
-    public static final String WESTTY_ROOT = System.getProperty(WESTTY_ROOT_PROP);
     public static final String WESTTY_PROPERTIES_FILE = "westty.properties";
 
     public static final String CONF = "conf";
@@ -34,43 +34,31 @@ public class WesttyProperties {
     public static final String BIN = "bin";
     public static final String HTML = "html";
 
-    private final Properties properties;
+    private static final Properties properties = new Properties();
 
-    private String hostAddress;
+    private static String hostAddress = "127.0.0.1";
 
     public WesttyProperties() {
-        this.properties = new Properties();
-        this.hostAddress = "127.0.0.1";
     }
 
-    public WesttyProperties(WesttyProperties properties) {
-        this.properties = properties.getProperties();
-        this.hostAddress = "127.0.0.1";
-    }
-
-    @WesttyPropertyBuilder
-    public static void build(WesttyProperties properties) {
-        if (Strings.isNullOrEmpty(WESTTY_ROOT)) {
-            return;
-        }
-        File root = new File(WESTTY_ROOT);
+    public static void init(File root) {
         if (!root.exists()) {
             return;
         }
-        properties.setBinDir(new File(root, BIN));
-        properties.setLibDir(new File(root, LIB));
-        properties.setConfDir(new File(root, CONF));
-        properties.setHtmlDir(new File(root, HTML));
-        properties.loadProperties(new File(properties.getConfDir(), WESTTY_PROPERTIES_FILE));
+        setBinDir(new File(root, BIN));
+        setLibDir(new File(root, LIB));
+        setConfDir(new File(root, CONF));
+        setHtmlDir(new File(root, HTML));
+        File propFile = new File(getConfDir(), WESTTY_PROPERTIES_FILE);
+        loadProperties(propFile);
+        SystemProperties.add(getProperties());
     }
 
-    public void add(Properties prop) {
-        for (String key : prop.stringPropertyNames()) {
-            setProperty(key, prop.getProperty(key));
-        }
+    public static void add(Properties prop) {
+        properties.putAll(prop);
     }
 
-    public void loadProperties(File file) {
+    public static void loadProperties(File file) {
         Properties props = new Properties();
         if (!file.exists()) {
             return;
@@ -89,55 +77,71 @@ public class WesttyProperties {
         }
     }
 
-    public Properties getProperties() {
+    @Produces
+    @Singleton
+    public static SystemProperties produceSystemProperties() {
+        SystemProperties props = SystemProperties.createDefault();
+        SystemProperties.add(properties);
+        return props;
+    }
+
+    public static Properties getProperties() {
         return properties;
     }
 
-    public void setProperty(String key, String value) {
+    public static void setProperty(String key, String value) {
         properties.setProperty(key, value);
     }
 
-    public String getProperty(String key) {
+    public static void setPropertyIfNotSet(String key, String value) {
+        Object o = properties.get(key);
+        if (o != null) {
+            return;
+        }
+        properties.setProperty(key, value);
+    }
+
+    public static String getProperty(String key) {
         return properties.getProperty(key);
     }
 
-    public void setLibDir(File dir) {
+    public static void setLibDir(File dir) {
         setProperty(LIB_DIR_PROP, dir.getAbsolutePath());
     }
 
-    public File getLibDir() {
+    public static File getLibDir() {
         return new File(getPropertyOrEmpty(LIB_DIR_PROP));
     }
 
-    public void setConfDir(File dir) {
+    public static void setConfDir(File dir) {
         setProperty(CONF_DIR_PROP, dir.getAbsolutePath());
     }
 
-    public File getConfDir() {
+    public static File getConfDir() {
         return new File(getPropertyOrEmpty(CONF_DIR_PROP));
     }
 
-    public void setBinDir(File dir) {
+    public static void setBinDir(File dir) {
         setProperty(BIN_DIR_PROP, dir.getAbsolutePath());
     }
 
-    public File getBinDir() {
+    public static File getBinDir() {
         return new File(getPropertyOrEmpty(BIN_DIR_PROP));
     }
 
-    public void setHtmlDir(File dir) {
+    public static void setHtmlDir(File dir) {
         setProperty(HTML_DIR_PROP, dir.getAbsolutePath());
     }
 
-    public File getHtmlDir() {
+    public static File getHtmlDir() {
         return new File(getProperty(HTML_DIR_PROP));
     }
 
-    public void setPublicIp(String ip) {
+    public static void setPublicIp(String ip) {
         setProperty(PUBLIC_IP_PROP, ip);
     }
 
-    public String getPublicIp() {
+    public static String getPublicIp() {
         String value = getProperty(PUBLIC_IP_PROP);
         if (!Strings.isNullOrEmpty(value)) {
             return value;
@@ -145,11 +149,11 @@ public class WesttyProperties {
         return hostAddress;
     }
 
-    public void setPrivateIp(String ip) {
+    public static void setPrivateIp(String ip) {
         setProperty(PRIVATE_IP_PROP, ip);
     }
 
-    public String getPrivateIp() {
+    public static String getPrivateIp() {
         String value = getProperty(PRIVATE_IP_PROP);
         if (!Strings.isNullOrEmpty(value)) {
             return value;
@@ -157,7 +161,7 @@ public class WesttyProperties {
         return getPublicIp();
     }
 
-    private String getPropertyOrEmpty(String key) {
+    private static String getPropertyOrEmpty(String key) {
         String value = getProperty(key);
         if (Strings.isNullOrEmpty(value)) {
             return "";

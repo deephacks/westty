@@ -35,49 +35,19 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.enterprise.inject.Alternative;
 import javax.sql.DataSource;
 
-import org.deephacks.westty.datasource.WesttyDataSourceProperties;
-import org.deephacks.westty.properties.WesttyProperties;
-import org.deephacks.westty.spi.WesttyModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jolbox.bonecp.BoneCPDataSource;
+@Alternative
+class WesttyDataSource implements DataSource {
 
-@Singleton
-class WesttyDataSource implements WesttyModule, DataSource {
-    private final DataSource ds;
+    private DataSource ds;
 
-    @Inject
-    public WesttyDataSource(WesttyProperties properties) {
-        WesttyDataSourceProperties prop = new WesttyDataSourceProperties(properties);
-        try {
-            Class.forName(prop.getDriver());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        BoneCPDataSource ds = new BoneCPDataSource();
-        ds.setUser(prop.getUsername());
-        ds.setPassword(prop.getPassword());
-        ds.setJdbcUrl(prop.getUrl());
+    public WesttyDataSource(DataSource ds) {
         this.ds = ds;
-    }
-
-    @Override
-    public void startup() {
-    }
-
-    @Override
-    public void shutdown() {
-
-    }
-
-    @Override
-    public int priority() {
-        return 1000;
     }
 
     @Override

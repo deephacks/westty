@@ -23,7 +23,7 @@ import org.deephacks.westty.job.Schedule;
 class Rescheduler implements Job {
 
     @Inject
-    private JobScheduler scheduler;
+    private JobSchedulerBootstrap scheduler;
 
     @Override
     public void execute(JobData map) {

@@ -8,7 +8,6 @@ import javax.inject.Singleton;
 
 import org.deephacks.westty.cluster.DistributedMultiMap;
 import org.deephacks.westty.cluster.WesttyCluster;
-import org.deephacks.westty.properties.WesttyProperties;
 import org.deephacks.westty.sockjs.WesttySockJsProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +23,14 @@ import org.vertx.java.core.impl.VertxInternal;
 public class WesttyVertx extends DefaultVertx {
     private static final Logger log = LoggerFactory.getLogger(WesttyVertx.class);
     private WesttyEventBus bus;
-    private WesttySockJsProperties props;
+    private WesttySockJsProperties props = new WesttySockJsProperties();
     private WesttyCluster cluster;
 
     @Inject
     private Instance<WesttyCluster> clusterInstance;
 
-    @Inject
-    public WesttyVertx(WesttyProperties props) {
+    public WesttyVertx() {
         super();
-        this.props = new WesttySockJsProperties(props);
     }
 
     @Override

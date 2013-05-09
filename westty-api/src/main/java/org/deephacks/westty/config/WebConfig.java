@@ -17,16 +17,11 @@ import javax.validation.constraints.NotNull;
 
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
 
-@Config(name = WebConfig.ID, desc = WebConfig.DESC)
+@Config(name = "westty.web",
+        desc = "Westty static web configuration. Changes requires server restart.")
 @ConfigScope
 public class WebConfig {
-
-    @Id(desc = WebConfig.DESC)
-    public static final String ID = "westty.web";
-
-    static final String DESC = "Westty static web configuration. Changes requires server restart.";
 
     @Config(desc = "URI where static web content is mounted.")
     @NotNull

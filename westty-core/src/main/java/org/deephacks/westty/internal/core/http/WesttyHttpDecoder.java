@@ -12,51 +12,48 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 
 class WesttyHttpDecoder extends HttpRequestDecoder {
-	private final WesttyProperties properties;
-	private final List<WesttyHttpHandler> handlers;
-	private final List<WesttyTemplateCompiler> compilers;
+    private final List<WesttyHttpHandler> handlers;
+    private final List<WesttyTemplateCompiler> compilers;
 
-	public WesttyHttpDecoder(WesttyProperties properties,
-			List<WesttyHttpHandler> handlers,
-			List<WesttyTemplateCompiler> compilers) {
-		this.handlers = handlers;
-		this.properties = properties;
-		this.compilers = compilers;
-	}
+    public WesttyHttpDecoder(List<WesttyHttpHandler> handlers,
+            List<WesttyTemplateCompiler> compilers) {
+        this.handlers = handlers;
+        this.compilers = compilers;
+    }
 
-	@Override
-	protected HttpMessage createMessage(String[] initialLine) throws Exception {
-		String uri = initialLine[1];
-		WesttyHttpHandler accepted = null;
-		for (WesttyHttpHandler handler : handlers) {
-			if (handler.accept(uri)) {
-				accepted = handler;
-				break;
-			}
-		}
-		if (accepted == null) {
-			accepted = new WesttyHtmlHandler(properties.getHtmlDir(), compilers);
-		}
-		return new WesttyHttpMessage(HttpVersion.valueOf(initialLine[2]),
-				HttpMethod.valueOf(initialLine[0]), initialLine[1], accepted);
-	}
+    @Override
+    protected HttpMessage createMessage(String[] initialLine) throws Exception {
+        String uri = initialLine[1];
+        WesttyHttpHandler accepted = null;
+        for (WesttyHttpHandler handler : handlers) {
+            if (handler.accept(uri)) {
+                accepted = handler;
+                break;
+            }
+        }
+        if (accepted == null) {
+            accepted = new WesttyHtmlHandler(WesttyProperties.getHtmlDir(), compilers);
+        }
+        return new WesttyHttpMessage(HttpVersion.valueOf(initialLine[2]),
+                HttpMethod.valueOf(initialLine[0]), initialLine[1], accepted);
+    }
 
-	@Override
-	protected boolean isDecodingRequest() {
-		return true;
-	}
+    @Override
+    protected boolean isDecodingRequest() {
+        return true;
+    }
 
-	public final static class WesttyHttpMessage extends DefaultHttpRequest {
-		private WesttyHttpHandler handler;
+    public final static class WesttyHttpMessage extends DefaultHttpRequest {
+        private WesttyHttpHandler handler;
 
-		public WesttyHttpMessage(HttpVersion version, HttpMethod method,
-				String uri, WesttyHttpHandler handler) {
-			super(version, method, uri);
-			this.handler = handler;
-		}
+        public WesttyHttpMessage(HttpVersion version, HttpMethod method, String uri,
+                WesttyHttpHandler handler) {
+            super(version, method, uri);
+            this.handler = handler;
+        }
 
-		public WesttyHttpHandler getHandler() {
-			return handler;
-		}
-	}
+        public WesttyHttpHandler getHandler() {
+            return handler;
+        }
+    }
 }

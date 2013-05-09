@@ -4,15 +4,14 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.inject.Singleton;
 
 import org.deephacks.westty.cluster.DistributedMultiMap;
 import org.deephacks.westty.cluster.WesttyCluster;
 import org.deephacks.westty.cluster.WesttyClusterProperties;
 import org.deephacks.westty.cluster.WesttyServerId;
-import org.deephacks.westty.properties.WesttyProperties;
-import org.deephacks.westty.spi.WesttyModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,34 +22,25 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 
 @Singleton
-public class WesttyClusterModule implements WesttyModule, WesttyCluster {
-    private static final Logger log = LoggerFactory.getLogger(WesttyClusterModule.class);
-    private static final String CLUSTER_MEMBERS_KEY = "cluster_members";
+public class ClusterBootstrap implements WesttyCluster {
+    private static final Logger log = LoggerFactory.getLogger(ClusterBootstrap.class);
+
     private final WesttyClusterProperties props;
     private HazelcastInstance hazelcast;
-    private WesttyServerId id;
 
-    @Inject
-    public WesttyClusterModule(WesttyProperties properties) {
-        this.props = new WesttyClusterProperties(properties);
+    static {
+        System.setProperty("hazelcast.logging.type", "slf4j");
+    }
+
+    public ClusterBootstrap() {
+        this.props = new WesttyClusterProperties();
         Config cfg = props.getConfig();
         this.hazelcast = Hazelcast.newHazelcastInstance(cfg);
-        this.id = new WesttyServerId(props.getPrivateIp(), props.getClusterPort());
         log.info("Cluster members {}", getMembers());
-    }
-
-    @Override
-    public int priority() {
-        return 500;
-    }
-
-    @Override
-    public synchronized void startup() {
 
     }
 
-    @Override
-    public void shutdown() {
+    public void shutdown(@Observes BeforeShutdown event) {
         Hazelcast.shutdownAll();
     }
 

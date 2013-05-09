@@ -17,16 +17,11 @@ import javax.validation.constraints.NotNull;
 
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
 
-@Config(name = JaxrsConfig.ID, desc = JaxrsConfig.DESC)
+@Config(name = "westty.jaxrs",
+        desc = "Westty jaxrs configuration. Changes requires server restart.")
 @ConfigScope
 public class JaxrsConfig {
-
-    static final String DESC = "Westty jaxrs configuration. Changes requires server restart.";
-
-    @Id(desc = JaxrsConfig.DESC)
-    public static final String ID = "westty.jaxrs";
 
     @Config(desc = "URI where jaxrs services listen.")
     @NotNull

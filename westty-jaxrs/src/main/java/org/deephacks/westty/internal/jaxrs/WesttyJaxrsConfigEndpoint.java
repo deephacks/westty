@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -40,7 +41,6 @@ import org.deephacks.tools4j.config.model.Bean;
 import org.deephacks.tools4j.config.model.Bean.BeanId;
 import org.deephacks.tools4j.config.model.Beans;
 import org.deephacks.tools4j.config.model.Criteria;
-import org.deephacks.tools4j.config.model.Lookup;
 import org.deephacks.tools4j.config.model.Schema;
 import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRef;
 import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefList;
@@ -64,7 +64,9 @@ import com.google.common.base.Strings;
 @Produces({ APPLICATION_JSON })
 public class WesttyJaxrsConfigEndpoint {
 
-    private static final AdminContext ctx = Lookup.get().lookup(AdminContext.class);
+    @Inject
+    private AdminContext ctx;
+
     private static final Conversion conv = Conversion.get();
     private static final Map<String, Schema> schemas = new HashMap<String, Schema>();
     static {
@@ -72,6 +74,9 @@ public class WesttyJaxrsConfigEndpoint {
         conv.register(new ClassToSchemaConverter());
         conv.register(new FieldToSchemaPropertyConverter());
         conv.register(new BeanToObjectConverter());
+    }
+
+    public WesttyJaxrsConfigEndpoint() {
         for (Schema s : ctx.getSchemas().values()) {
             schemas.put(s.getType(), s);
         }

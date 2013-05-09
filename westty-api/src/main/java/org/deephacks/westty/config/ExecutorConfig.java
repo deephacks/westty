@@ -5,16 +5,11 @@ import javax.validation.constraints.Size;
 
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
 
-@Config(name = ExecutorConfig.ID, desc = ExecutorConfig.DESC)
+@Config(name = "westty.executor",
+        desc = "Westty thread pool executor. Changes requires server restart.")
 @ConfigScope
 public class ExecutorConfig {
-
-    static final String DESC = "Westty thread pool executor. Changes requires server restart.";
-
-    @Id(desc = ExecutorConfig.DESC)
-    public static final String ID = "westty.executor";
 
     @Config(desc = "The maximum number of active threads.")
     @NotNull

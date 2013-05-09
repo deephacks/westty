@@ -15,8 +15,6 @@ package org.deephacks.westty;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.deephacks.westty.properties.WesttyProperties;
-
 public class Westty {
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
     private static Object WESTTY;
@@ -32,18 +30,6 @@ public class Westty {
             try {
                 WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
             } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public Westty(WesttyProperties props) {
-        if (WESTTY == null) {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            try {
-                WESTTY = cl.loadClass(WESTTY_CORE).newInstance();
-                call("setProperties", props);
-            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
         }

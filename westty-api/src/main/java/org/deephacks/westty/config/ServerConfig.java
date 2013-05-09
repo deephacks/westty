@@ -18,26 +18,16 @@ import javax.validation.constraints.Size;
 
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
 
-@Config(name = ServerConfig.ID, desc = ServerConfig.DESC)
+@Config(name = "westty",
+        desc = "Westty server engine configuration. Changes requires server restart.")
 @ConfigScope
 public class ServerConfig {
-
-    static final String DESC = "Westty server engine configuration. Changes requires server restart.";
-
-    @Id(desc = ServerConfig.DESC)
-    public static final String ID = "westty";
 
     @Config(desc = "Http listening port.")
     @NotNull
     @Size(min = 0, max = 65535)
     private Integer httpPort = 8080;
-
-    @Config(desc = "Https listening port.")
-    @NotNull
-    @Size(min = 0, max = 65535)
-    private Integer httpsPort = 8181;
 
     @Config(desc = "Specify the worker count to use. "
             + "See netty javadoc NioServerSocketChannelFactory.")
@@ -77,10 +67,6 @@ public class ServerConfig {
 
     public Integer getHttpPort() {
         return httpPort;
-    }
-
-    public Integer getHttpsPort() {
-        return httpsPort;
     }
 
     public Integer getMaxHttpContentChunkLength() {

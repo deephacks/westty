@@ -13,7 +13,6 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 public class WesttyCoreExtensionImpl implements Extension {
     private static final List<WesttyCoreExtension> extensions = new ArrayList<WesttyCoreExtension>();
     static {
-        extensions.add(new WesttyPropertiesBootstrap());
         extensions.add(new WesttyConfigBootstrap());
     }
 

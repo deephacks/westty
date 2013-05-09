@@ -19,8 +19,8 @@ import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.eventbus.Message;
 
 @Singleton
-public class WesttySockJsBootstrap implements Extension {
-    private static final Logger log = LoggerFactory.getLogger(WesttySockJsBootstrap.class);
+public class SockJsEnpointBootstrap implements Extension {
+    private static final Logger log = LoggerFactory.getLogger(SockJsEnpointBootstrap.class);
     public static final HashMap<String, Method> sockjsToEndpoint = new HashMap<String, Method>();
 
     public <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat) {

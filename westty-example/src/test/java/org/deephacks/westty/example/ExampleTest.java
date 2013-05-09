@@ -8,8 +8,6 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.inject.Inject;
-
 import org.deephacks.westty.config.WebConfig;
 import org.deephacks.westty.example.JaxrsClient.FormParam;
 import org.deephacks.westty.example.protobuf.CreateMessages.CreateRequest;
@@ -18,7 +16,6 @@ import org.deephacks.westty.example.protobuf.DeleteMessages.DeleteRequest;
 import org.deephacks.westty.example.protobuf.DeleteMessages.DeleteResponse;
 import org.deephacks.westty.jaxrs.JaxrsConfigClient;
 import org.deephacks.westty.properties.WesttyProperties;
-import org.deephacks.westty.properties.WesttyPropertyBuilder;
 import org.deephacks.westty.protobuf.ProtobufConfig;
 import org.deephacks.westty.protobuf.ProtobufException;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
@@ -41,10 +38,8 @@ public class ExampleTest {
     public static void bootstrap() {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
+        WesttyProperties.setBinDir(new File("/tmp"));
     }
-
-    @Inject
-    private WesttyProperties props;
 
     private static SQLExec bootstrap = new SQLExec("westty", "westty",
             "jdbc:derby:memory:westty;create=true");
@@ -55,11 +50,6 @@ public class ExampleTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @WesttyPropertyBuilder(priority = 1)
-    public static void build(WesttyProperties properties) {
-        properties.setBinDir(new File("/tmp"));
     }
 
     public void test_protobuf() throws Exception {

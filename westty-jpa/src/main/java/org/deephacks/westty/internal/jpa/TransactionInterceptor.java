@@ -21,7 +21,7 @@ class TransactionInterceptor implements Serializable {
     private static final long serialVersionUID = -1033443722024614083L;
 
     @Inject
-    private WesttyJpaModule jpaModule;
+    private EntityManagerProducer producer;
 
     @AroundInvoke
     public Object aroundInvoke(final InvocationContext ic) throws Exception {
@@ -35,7 +35,7 @@ class TransactionInterceptor implements Serializable {
     }
 
     public Object executeInTx(Callable<?> future) throws Exception {
-        EntityManager em = jpaModule.createEntityManager();
+        EntityManager em = producer.createEntityManager();
         Object result = null;
         try {
             em.getTransaction().begin();
@@ -54,7 +54,7 @@ class TransactionInterceptor implements Serializable {
             throw e;
         } finally {
             if (em != null) {
-                WesttyJpaModule.removeEntityManager();
+                producer.removeEntityManager();
                 if (em.isOpen()) {
                     em.close();
                 }

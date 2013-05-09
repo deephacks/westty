@@ -4,13 +4,11 @@ import java.io.File;
 
 import javax.enterprise.inject.Alternative;
 
-import org.deephacks.westty.datasource.WesttyDataSourceProperties;
+import org.deephacks.westty.datasource.DataSourceProperties;
 import org.deephacks.westty.properties.WesttyProperties;
-import org.deephacks.westty.properties.WesttyPropertyBuilder;
 
 @Alternative
-public class WesttyJpaProperties extends WesttyDataSourceProperties {
-    private static final long serialVersionUID = 1667859287794861790L;
+public class WesttyJpaProperties extends DataSourceProperties {
     public static final String USER = "javax.persistence.jdbc.user";
     public static final String PASSWORD = "javax.persistence.jdbc.password";
     public static final String URL = "javax.persistence.jdbc.url";
@@ -20,25 +18,21 @@ public class WesttyJpaProperties extends WesttyDataSourceProperties {
     public static final String JPA_UNIT = "westty.jpa.unit";
     public static final String JPA_PROPERTIES_FILE = "jpa.properties";
 
-    public WesttyJpaProperties(WesttyProperties properties) {
-        super(properties);
-    }
+    public WesttyJpaProperties() {
+        DataSourceProperties ds = new DataSourceProperties();
+        setPropertyIfNotSet(JPA_UNIT, "westty-jpa-unit");
+        setPropertyIfNotSet(USER, ds.getUsername());
+        setPropertyIfNotSet(PASSWORD, ds.getPassword());
+        setPropertyIfNotSet(URL, ds.getUrl());
+        setPropertyIfNotSet(DRIVER, ds.getDriver());
+        setPropertyIfNotSet(PROVIDER, "org.hibernate.ejb.HibernatePersistence");
+        setPropertyIfNotSet(TX_TYPE, "RESOURCE_LOCAL");
+        setPropertyIfNotSet("hibernate.show_sql", "false");
+        setPropertyIfNotSet("hibernate.hbm2ddl.auto", "none");
+        setPropertyIfNotSet("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
+        WesttyProperties
+                .loadProperties(new File(WesttyProperties.getConfDir(), JPA_PROPERTIES_FILE));
 
-    @WesttyPropertyBuilder(priority = 1000)
-    public static void build(WesttyProperties properties) {
-        WesttyDataSourceProperties ds = new WesttyDataSourceProperties(properties);
-        WesttyJpaProperties jpa = new WesttyJpaProperties(properties);
-        jpa.setJpaUnit("westty-jpa-unit");
-        jpa.setUsername(ds.getUsername());
-        jpa.setPassword(ds.getPassword());
-        jpa.setUrl("jdbc:derby:memory:westty");
-        jpa.setDriver(ds.getDriver());
-        jpa.setProvider("org.hibernate.ejb.HibernatePersistence");
-        jpa.setTxType("RESOURCE_LOCAL");
-        // jpa.setProperty("hibernate.hbm2ddl.auto", "validate");
-        jpa.setProperty("hibernate.show_sql", "false");
-        jpa.setProperty("hibernate.dialect", "org.hibernate.dialect.DerbyDialect");
-        properties.loadProperties(new File(properties.getConfDir(), JPA_PROPERTIES_FILE));
     }
 
     public String getJpaUnit() {

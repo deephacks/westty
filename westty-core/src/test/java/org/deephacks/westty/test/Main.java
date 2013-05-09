@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.deephacks.westty.Westty;
 import org.deephacks.westty.properties.WesttyProperties;
-import org.deephacks.westty.properties.WesttyPropertyBuilder;
 
 public class Main {
     @Inject
@@ -17,13 +16,9 @@ public class Main {
         Westty w = new Westty();
         w.startup();
         Main main = w.getInstance(Main.class);
-        Thread.sleep(100000);
-    }
-
-    @WesttyPropertyBuilder(priority = 1)
-    public static void build(WesttyProperties properties) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(".");
-        properties.setHtmlDir(new File(url.getPath()));
+        WesttyProperties.setHtmlDir(new File(url.getPath()));
+        Thread.sleep(100000);
     }
 
 }

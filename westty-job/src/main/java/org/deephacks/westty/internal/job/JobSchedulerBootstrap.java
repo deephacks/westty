@@ -21,8 +21,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.sql.DataSource;
@@ -30,7 +32,7 @@ import javax.sql.DataSource;
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Events;
-import org.deephacks.tools4j.config.model.Lookup;
+import org.deephacks.westty.datasource.DataSourceProperties;
 import org.deephacks.westty.job.Job;
 import org.deephacks.westty.job.JobConfig;
 import org.deephacks.westty.job.JobSchedulerConfig;
@@ -61,26 +63,52 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 
 @Singleton
-class JobScheduler extends StdSchedulerFactory {
-    private static final Logger log = LoggerFactory.getLogger(JobScheduler.class);
+class JobSchedulerBootstrap extends StdSchedulerFactory {
+    private static final Logger log = LoggerFactory.getLogger(JobSchedulerBootstrap.class);
     private static final String JOB_CLASS_KEY = "JOB_ID_KEY";
     private static final String LAST_EXECUTION_TIMESTAMP = "LAST_EXECUTION_TIMESTAMP";
-    private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
+    private static final String DERBY_EMBEDDED = "org.apache.derby.jdbc.EmbeddedDriver";
+    private static final String DERBY_INSTALL_DDL = "META-INF/install_job_derby.ddl";
     private Scheduler scheduler;
     private final JobThreadPool threadPool;
     private final JobConnectionProvider provider;
     private final JobExecutor executor;
+    private boolean isDerbyEmbedded;
+    private JobSchedulerConfig config;
+    private DataSourceProperties properties;
+    private RuntimeContext ctx;
 
     @Inject
-    public JobScheduler(JobThreadPool threadPool, JobExecutor executor, DataSource dataSource) {
+    public JobSchedulerBootstrap(JobSchedulerConfig config, RuntimeContext ctx,
+            JobThreadPool threadPool, JobExecutor executor, DataSource dataSource) {
+        this.ctx = ctx;
+        this.config = config;
         this.threadPool = threadPool;
         this.provider = new JobConnectionProvider(dataSource);
         this.executor = executor;
+        this.properties = new DataSourceProperties();
+        if (this.properties.getDriver().equals(DERBY_EMBEDDED)) {
+            isDerbyEmbedded = true;
+        }
+        try {
+            start();
+            schedule();
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void start() throws SchedulerException {
-        JobSchedulerConfig config = ctx.singleton(JobSchedulerConfig.class);
-
+        if (isDerbyEmbedded) {
+            SQLExec exec = new SQLExec(properties.getUsername(), properties.getPassword(),
+                    properties.getUrl());
+            try {
+                exec.executeResource(DERBY_INSTALL_DDL, false);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         DBConnectionManager manager = DBConnectionManager.getInstance();
         manager.addConnectionProvider(provider.getDataSourceName(), provider);
 
@@ -126,8 +154,12 @@ class JobScheduler extends StdSchedulerFactory {
         }
     }
 
-    public void shutdown() throws SchedulerException {
-        scheduler.shutdown(true);
+    public void shutdown(@Observes BeforeShutdown event) {
+        try {
+            scheduler.shutdown(true);
+        } catch (SchedulerException e) {
+            log.warn(e.getMessage(), e);
+        }
     }
 
     public void reschedule() {

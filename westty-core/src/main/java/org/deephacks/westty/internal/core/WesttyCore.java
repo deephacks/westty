@@ -13,23 +13,18 @@
  */
 package org.deephacks.westty.internal.core;
 
+import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.deephacks.tools4j.config.RuntimeContext;
-import org.deephacks.tools4j.config.model.Lookup;
+import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.internal.core.extension.WesttyConfigBootstrap;
 import org.deephacks.westty.internal.core.http.WesttyHttpPipelineFactory;
-import org.deephacks.westty.persistence.Transactional;
 import org.deephacks.westty.properties.WesttyProperties;
 import org.deephacks.westty.spi.WesttyIoExecutors;
-import org.deephacks.westty.spi.WesttyModule;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
@@ -39,27 +34,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
+import com.google.common.base.Strings;
 
 /**
  * Main class for starting and stopping Westty.
  */
 public class WesttyCore {
+    public static final String WESTTY_ROOT_PROP = "westty.root.dir";
+    public static final String WESTTY_ROOT = System.getProperty(WESTTY_ROOT_PROP);
+
     private static final Logger log = LoggerFactory.getLogger(WesttyCore.class);
-    private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
     private WeldContainer container;
-    private Starter engine;
-    private WesttyProperties properties = new WesttyProperties();
+    private WesttyEngine engine;
 
     public void startup() {
         log.info("Westty startup.");
         try {
             Stopwatch time = new Stopwatch().start();
+            if (!Strings.isNullOrEmpty(WESTTY_ROOT)) {
+                File root = new File(WESTTY_ROOT);
+                if (root.exists()) {
+                    WesttyProperties.init(root);
+                }
+            }
             container = new Weld().initialize();
             log.info("Weld started.");
-            WesttyProperties props = container.instance().select(WesttyProperties.class).get();
-            props.add(properties.getProperties());
-            engine = container.instance().select(Starter.class).get();
+
+            engine = container.instance().select(WesttyEngine.class).get();
             engine.start();
             ShutdownHook.install(new Thread("WesttyCore") {
                 @Override
@@ -82,93 +83,37 @@ public class WesttyCore {
         log.info("Westty shutdown.");
     }
 
-    public void setProperties(WesttyProperties props) {
-        this.properties = props;
-    }
-
     public Object getInstance(Class<?> cls) {
         return container.instance().select(cls).get();
     }
 
-    public static class Starter {
-        @Inject
-        private WesttyEngine engine;
-
-        public Starter() {
-
-        }
-
-        public void start() {
-            engine.registerConfig();
-            engine.start();
-        }
-
-        public void stop() {
-            engine.stop();
-        }
-    }
-
     @Singleton
     private static class WesttyEngine {
-        private static final RuntimeContext ctx = Lookup.get().lookup(RuntimeContext.class);
+        @Inject
+        private RuntimeContext ctx;
+
         @Inject
         private WesttyHttpPipelineFactory coreFactory;
+
         @Inject
         private WesttyConfigBootstrap configBootstrap;
 
         @Inject
         private WesttyIoExecutors executors;
-        @Inject
-        private Instance<WesttyModule> modules;
-        @Inject
-        private WesttyProperties properties;
 
         private Channel standardChannel;
         private ServerBootstrap standardBootstrap;
 
-        public WesttyEngine() {
-
-        }
-
-        @Transactional
-        public void registerConfig() {
+        public void start() {
             ctx.register(configBootstrap.getSchemas());
             ctx.registerDefault(configBootstrap.getDefaults());
-        }
-
-        @Transactional
-        public void start() {
-
-            for (WesttyModule module : sortModules()) {
-                log.info("Starting WesttyModule {}", module.getClass().getName());
-                module.startup();
-                log.info("WesttyModule ready {}", module.getClass().getName());
-            }
-            startInternal();
-        }
-
-        public void startInternal() {
             startHttp();
         }
 
-        private ArrayList<WesttyModule> sortModules() {
-            ArrayList<WesttyModule> result = Lists.newArrayList(modules);
-            Collections.sort(result, new Comparator<WesttyModule>() {
-
-                @Override
-                public int compare(WesttyModule m1, WesttyModule m2) {
-                    if (m1.priority() < m2.priority()) {
-                        return -1;
-                    }
-                    return 1;
-                }
-            });
-            return result;
-        }
-
         private void startHttp() {
-            int ioWorkerCount = 4;
-            int port = 8080;
+            ServerConfig config = ctx.singleton(ServerConfig.class);
+            int ioWorkerCount = config.getIoWorkerCount();
+            int port = config.getHttpPort();
             standardBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                     executors.getBoss(), executors.getWorker(), ioWorkerCount));
             standardBootstrap.setPipelineFactory(coreFactory);

@@ -11,10 +11,11 @@
         <include>**/*westty*.jar</include>
         <include>**/*slf4j-api*.jar</include>
         <include>**/*slf4j-ext*.jar</include>
+        <include>**/*jcl-over-slf4j*.jar</include>
         <include>**/*weld*.jar</include>
         <include>**/*cdi*.jar</include>
         <include>**/*jboss*.jar</include>
-        <include>**/*netty*.jar</include>
+        <include>**/*netty-3.5.9*.jar</include>
         <include>**/*resteasy*.jar</include>
         <include>**/*jaxrs*.jar</include>
         <include>**/*jackson*.jar</include>
@@ -34,8 +35,19 @@
         <include>**/*commons-logging*.jar</include>
         <include>**/*commons-lang*.jar</include>
         <include>**/*commons-configuration*.jar</include>
+        <include>**/*commons-collections*.jar</include>
+        <include>**/*quartz*.jar</include>
         <include>**/*kryo*.jar</include>
         <include>**/*minlog*.jar</include>
+        <include>**/*bonecp*.jar</include>
+        <include>**/*hibernate*.jar</include>
+        <include>**/*antlr*.jar</include>
+        <include>**/*classmate*.jar</include>
+        <include>**/*dom4j*.jar</include>
+        <include>**/*xml-apis*.jar</include>
+        <include>**/*validation-api*.jar</include>
+        <include>**/*derby*.jar</include>
+
       </includes>
       <excludes>
         <exclude>**/*sources.jar</exclude>

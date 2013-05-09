@@ -28,7 +28,7 @@ import org.deephacks.westty.protobuf.Protobuf;
 import org.deephacks.westty.protobuf.ProtobufMethod;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 
-class WesttyProtobufExtension implements Extension {
+class ProtobufExtension implements Extension {
     public static final ProtobufSerializer serializer = new ProtobufSerializer();
     private HashMap<Class<?>, Method> protoToEndpoint = new HashMap<Class<?>, Method>();
     private BeanManager beanManager;

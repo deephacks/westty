@@ -15,18 +15,12 @@ package org.deephacks.westty.job;
 
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
 import org.quartz.impl.jdbcjobstore.Semaphore;
 import org.quartz.impl.jdbcjobstore.UpdateLockRowSemaphore;
 
-@Config(name = JobSchedulerConfig.ID, desc = JobSchedulerConfig.DESC)
+@Config(name = "westty.job", desc = "Job scheduler configuration. Changes requires restart.")
 @ConfigScope
 public class JobSchedulerConfig {
-
-    static final String DESC = "Job scheduler configuration. Changes requires restart.";
-
-    @Id(desc = JobSchedulerConfig.DESC)
-    public static final String ID = "westty.job";
 
     @Config(desc = "See org.quartz.scheduler.instanceName")
     private String instanceName = "WesttyQuartzScheduler";
