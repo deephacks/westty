@@ -70,7 +70,6 @@
     <module>westty-api</module>
     <module>westty-spi</module>
     <module>westty-core</module>
-    <module>westty-mustache</module>
     <module>westty-datasource</module>
     <module>westty-jpa</module>
     <module>westty-job</module>
