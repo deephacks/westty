@@ -15,6 +15,10 @@ public class WesttyJpaProperties extends DataSourceProperties {
     public static final String DRIVER = "javax.persistence.jdbc.driver";
     public static final String PROVIDER = "javax.persistence.provider";
     public static final String TX_TYPE = "javax.persistence.transactionType";
+    public static final String VALIDATION_PRE_PERSIST = "javax.persistence.validation.group.pre-persist";
+    public static final String VALIDATION_PRE_UPDATE = "javax.persistence.validation.group.pre-update";
+    public static final String VALIDATION_PRE_REMOVE = "javax.persistence.transactionType";
+
     public static final String JPA_UNIT = "westty.jpa.unit";
     public static final String JPA_PROPERTIES_FILE = "jpa.properties";
 
@@ -27,9 +31,13 @@ public class WesttyJpaProperties extends DataSourceProperties {
         setPropertyIfNotSet(DRIVER, ds.getDriver());
         setPropertyIfNotSet(PROVIDER, "org.hibernate.ejb.HibernatePersistence");
         setPropertyIfNotSet(TX_TYPE, "RESOURCE_LOCAL");
+        setPropertyIfNotSet(VALIDATION_PRE_PERSIST, "javax.validation.groups.Default");
+        setPropertyIfNotSet(VALIDATION_PRE_UPDATE, "javax.validation.groups.Default");
+        setPropertyIfNotSet(VALIDATION_PRE_REMOVE, "javax.validation.groups.Default");
         setPropertyIfNotSet("hibernate.show_sql", "false");
         setPropertyIfNotSet("hibernate.hbm2ddl.auto", "none");
         setPropertyIfNotSet("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
+
         WesttyProperties
                 .loadProperties(new File(WesttyProperties.getConfDir(), JPA_PROPERTIES_FILE));
 
