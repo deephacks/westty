@@ -13,42 +13,83 @@
  */
 package org.deephacks.westty.internal.protobuf;
 
-import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
-
-import java.util.concurrent.ThreadPoolExecutor;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.protobuf.MessageLite;
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
+import org.deephacks.westty.protobuf.ProtobufClient;
+import org.deephacks.westty.protobuf.ProtobufConfig;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
-import org.deephacks.westty.protobuf.WesttyProtobufClient;
+import org.deephacks.westty.spi.ProviderShutdownEvent;
+import org.deephacks.westty.spi.ProviderStartupEvent;
+import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.jboss.netty.handler.execution.ExecutionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.MessageLite;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
 
 @Singleton
 class ProtobufPipelineFactory implements ChannelPipelineFactory {
-    @Inject
-    private ProtobufExtension extension;
+    private static final Logger log = LoggerFactory.getLogger(ProtobufPipelineFactory.class);
 
     @Inject
-    private ProtobufHandler handler;
+    private ProtobufChannelHandler channelHandler;
 
-    @Inject
+    private ProtobufSerializer serializer;
     private ThreadPoolExecutor executor;
-
     private ExecutionHandler executionHandler;
+    private Channel channel;
+    private ServerBootstrap bootstrap;
+    private ProtobufConfig config;
+
+    @Inject
+    public ProtobufPipelineFactory(ProtobufConfig config, ThreadPoolExecutor executor, ProtobufSerializer serializer) {
+        this.config = config;
+        this.executor = executor;
+        this.serializer = serializer;
+        ExecutorService workers = Executors.newCachedThreadPool();
+        ExecutorService boss = Executors.newCachedThreadPool();
+        bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(boss,
+                workers, config.getIoWorkerCount()));
+        bootstrap.setPipelineFactory(this);
+        bootstrap.setOption("child.tcpNoDelay", true);
+        bootstrap.setOption("child.keepAlive", true);
+    }
+
+    public void startup(@Observes ProviderStartupEvent event) {
+        channel = bootstrap.bind(new InetSocketAddress(config.getPort()));
+        log.info("Protobuf listening on port {}.", config.getPort());
+    }
+
+    public void shutdown(@Observes ProviderShutdownEvent event) {
+        log.info("Closing channels.");
+        channelHandler.getClientChannels().close();
+        if (channel != null) {
+            channel.close().awaitUninterruptibly(5000);
+        }
+        if (bootstrap != null) {
+            bootstrap.releaseExternalResources();
+        }
+        log.info("All channels closed.");
+    }
 
     @Override
     public ChannelPipeline getPipeline() throws Exception {
@@ -56,14 +97,14 @@ class ProtobufPipelineFactory implements ChannelPipelineFactory {
             this.executionHandler = new ExecutionHandler(executor);
         }
         return Channels.pipeline(new LengthFieldBasedFrameDecoder(
-                WesttyProtobufClient.MESSAGE_MAX_SIZE_10MB, 0, WesttyProtobufClient.MESSAGE_LENGTH,
-                0, WesttyProtobufClient.MESSAGE_LENGTH),
-                new WesttyProtobufDecoder(extension.getSerializer()), new LengthFieldPrepender(
-                        WesttyProtobufClient.MESSAGE_LENGTH),
-                new WesttyProtobufEncoder(extension.getSerializer()), executionHandler, handler);
+                ProtobufClient.MESSAGE_MAX_SIZE_10MB, 0, ProtobufClient.MESSAGE_LENGTH,
+                0, ProtobufClient.MESSAGE_LENGTH),
+                new WesttyProtobufDecoder(serializer), new LengthFieldPrepender(
+                        ProtobufClient.MESSAGE_LENGTH),
+                new WesttyProtobufEncoder(serializer), executionHandler, channelHandler);
     }
 
-    public static class WesttyProtobufDecoder extends OneToOneDecoder {
+    private static class WesttyProtobufDecoder extends OneToOneDecoder {
         private final ProtobufSerializer serializer;
 
         public WesttyProtobufDecoder(ProtobufSerializer serializer) {

@@ -13,28 +13,27 @@
  */
 package org.deephacks.westty.internal.protobuf;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
+import org.deephacks.westty.protobuf.Protobuf;
+import org.deephacks.westty.protobuf.ProtobufMethod;
+import org.deephacks.westty.protobuf.ProtobufSerializer;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.inject.Singleton;
 
-import org.deephacks.westty.protobuf.Protobuf;
-import org.deephacks.westty.protobuf.ProtobufMethod;
-import org.deephacks.westty.protobuf.ProtobufSerializer;
+@Singleton
+public class ProtobufExtension implements Extension {
+    private ProtobufSerializer serializer = new ProtobufSerializer();
+    private ProtobufEndpoints endpoints;
 
-class ProtobufExtension implements Extension {
-    public static final ProtobufSerializer serializer = new ProtobufSerializer();
-    private HashMap<Class<?>, Method> protoToEndpoint = new HashMap<Class<?>, Method>();
-    private BeanManager beanManager;
-
-    <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat) {
-
+    <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat, BeanManager bm) {
+        if(endpoints == null){
+            endpoints = new ProtobufEndpoints(bm);
+        }
         if (!pat.getAnnotatedType().isAnnotationPresent(Protobuf.class)) {
             return;
         }
@@ -52,21 +51,13 @@ class ProtobufExtension implements Extension {
                 continue;
             }
             for (Class<?> param : method.getJavaMember().getParameterTypes()) {
-                protoToEndpoint.put(param, method.getJavaMember());
+                endpoints.put(param, method.getJavaMember());
             }
         }
     }
 
-    public void start(@Observes AfterDeploymentValidation event, BeanManager bm) {
-        beanManager = bm;
-    }
-
-    public BeanManager getBeanManager() {
-        return beanManager;
-    }
-
-    public HashMap<Class<?>, Method> getEndpoints() {
-        return protoToEndpoint;
+    public ProtobufEndpoints getEndpoints() {
+        return endpoints;
     }
 
     public ProtobufSerializer getSerializer() {

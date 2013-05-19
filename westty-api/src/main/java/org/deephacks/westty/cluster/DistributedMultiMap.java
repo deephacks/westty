@@ -10,7 +10,7 @@ public interface DistributedMultiMap<K, V> {
 
     boolean put(K key, V value);
 
-    void addEntryListener(WesttyClusterListener<K, V> listener, boolean includeValue);
+    void addEntryListener(ClusterListener<K, V> listener, boolean includeValue);
 
     Set<Map.Entry<K, V>> entrySet();
 

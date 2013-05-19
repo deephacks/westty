@@ -13,8 +13,18 @@
  */
 package org.deephacks.westty.protobuf;
 
-import static org.deephacks.westty.protobuf.FailureMessageException.FailureCode.BAD_REQUEST;
+import com.google.common.base.Strings;
+import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
+import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
+import com.google.protobuf.Descriptors.Descriptor;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors.FileDescriptor;
+import com.google.protobuf.Message;
+import org.deephacks.westty.protobuf.FailureMessages.Failure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.Alternative;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,26 +35,18 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.deephacks.westty.protobuf.FailureMessages.Failure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.deephacks.westty.protobuf.FailureMessageException.FailureCode.BAD_REQUEST;
 
-import com.google.common.base.Strings;
-import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
-import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
-import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Descriptors.FileDescriptor;
-import com.google.protobuf.Message;
-
+@Alternative
 public class ProtobufSerializer {
     private static final Logger log = LoggerFactory.getLogger(ProtobufSerializer.class);
-    private HashMap<Integer, Method> numToMethod = new HashMap<Integer, Method>();
-    private HashMap<String, Integer> protoToNum = new HashMap<String, Integer>();
+    private HashMap<Integer, Method> numToMethod = new HashMap<>();
+    private HashMap<String, Integer> protoToNum = new HashMap<>();
     private static final String UNRECOGNIZED_PROTOCOL_MSG = "Unrecognized protocol.";
 
     public ProtobufSerializer() {
         registerResource("META-INF/failure.desc");
+        registerResource("META-INF/void.desc");
     }
 
     public void register(URL protodesc) {
@@ -130,6 +132,9 @@ public class ProtobufSerializer {
         Message msg = (Message) proto;
         String protoName = msg.getDescriptorForType().getFullName();
         Integer num = protoToNum.get(protoName);
+        if(num == null){
+            throw new IllegalArgumentException("Could not find protoType mapping for " + protoName);
+        }
         byte[] msgBytes = msg.toByteArray();
         Varint32 vint = new Varint32(num);
         int vsize = vint.getSize();

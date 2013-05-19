@@ -1,5 +1,7 @@
 package org.deephacks.westty.cluster;
 
+import org.deephacks.westty.server.Server;
+
 public interface EntryEvent<K, V> {
     /**
      * Returns the key of the entry event
@@ -27,7 +29,7 @@ public interface EntryEvent<K, V> {
      *
      * @return the member fired this event.
      */
-    public WesttyServerId getMember();
+    public Server getMember();
 
     /**
      * Return the event type
