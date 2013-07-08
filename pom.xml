@@ -6,7 +6,7 @@
   <artifactId>westty-root</artifactId>
   <name>Westty Root</name>
   <packaging>pom</packaging>
-  <version>0.1.1</version>
+  <version>0.1.1-SNAPSHOT</version>
   <description>Server engine using Weld and Netty for building REST applications.</description>
   <url>http://westty.deephacks.org</url>
   <inceptionYear>2012</inceptionYear>
@@ -51,7 +51,7 @@
   </developers>
 
   <properties>
-    <version.westty>0.1.1</version.westty>
+    <version.westty>0.1.1-SNAPSHOT</version.westty>
     <version.tools4j.config>0.12.0</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
