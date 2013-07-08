@@ -40,6 +40,5 @@ protobuf or websockets then remove it from classpath. Westty is modular like tha
 * [Google Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
 * [Bean Validation 1.1] (http://beanvalidation.org/)
 * [Quartz Job Scheduling](http://quartz-scheduler.org)
-* [Mustache](http://mustache.github.com/)
 
 
