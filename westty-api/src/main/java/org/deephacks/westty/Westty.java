@@ -14,16 +14,16 @@
 package org.deephacks.westty;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class Westty {
     private static final String WESTTY_CORE = "org.deephacks.westty.internal.core.WesttyCore";
     private static Object WESTTY;
-
+    private String serverName;
     public static void main(String[] args) throws Throwable {
         Westty westty = new Westty();
         westty.startup();
     }
-
     public Westty() {
         if (WESTTY == null) {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -35,8 +35,20 @@ public class Westty {
         }
     }
 
+    public Westty(String serverName){
+        this();
+        this.serverName = serverName;
+    }
+
     public synchronized void startup() throws Throwable {
+        if(serverName != null){
+            call("setServerName", serverName);
+        }
         call("startup");
+    }
+
+    public synchronized void shutdown() throws Throwable {
+        call("shutdown");
     }
 
     public synchronized <V> V getInstance(Class<V> cls) throws Throwable {
@@ -49,14 +61,16 @@ public class Westty {
 
     private Object call(String method, Object... args) throws Throwable {
         try {
+            Class<?> cls = WESTTY.getClass();
             if (args == null || args.length == 0) {
-                return WESTTY.getClass().getMethod(method).invoke(WESTTY);
+                return cls.getMethod(method).invoke(WESTTY);
             } else {
                 Class<?>[] classes = new Class<?>[args.length];
                 for (int i = 0; i < args.length; i++) {
                     classes[i] = args[i].getClass();
                 }
-                return WESTTY.getClass().getMethod(method, classes).invoke(WESTTY, args);
+                Method m = cls.getMethod(method, classes);
+                return m.invoke(WESTTY, args);
             }
         } catch (InvocationTargetException e) {
             Throwable t = e.getTargetException();

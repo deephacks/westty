@@ -32,5 +32,10 @@
       <groupId>net.sf.scannotation</groupId>
       <artifactId>scannotation</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

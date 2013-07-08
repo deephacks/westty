@@ -1,9 +1,8 @@
 package org.deephacks.westty.spi;
 
+import javax.inject.Singleton;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.inject.Singleton;
 
 @Singleton
 public class IoExecutors {

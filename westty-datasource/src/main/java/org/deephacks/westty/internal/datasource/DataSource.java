@@ -1,5 +1,9 @@
 package org.deephacks.westty.internal.datasource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.enterprise.inject.Alternative;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -34,12 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-
-import javax.enterprise.inject.Alternative;
-import javax.sql.DataSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Alternative
 class DataSource implements javax.sql.DataSource {

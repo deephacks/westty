@@ -1,0 +1,21 @@
+
+‚
+(src/test/resources/META-INF/create.protowestty.protobuf"/
+CreateRequest
+	protoTyped (
+msg (	"0
+CreateResponse
+	protoTypee (
+msg (	"4
+AsyncCreateRequest
+	protoTypef (
+msg (	"8
+CreateExceptionRequest
+	protoTypeg (
+msg (	"
+
+GetRequest
+	protoTypeh (" 
+NullRequest
+	protoTypei (B/
+org.deephacks.westty.protobufBCreateMessages

@@ -13,23 +13,24 @@
  */
 package org.deephacks.westty.internal.jaxrs;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import java.util.HashSet;
+import java.util.Set;
 
+@Singleton
 @ApplicationPath(JaxrsApplication.JAXRS_CONTEXT_URI)
 class JaxrsApplication extends Application {
     /** relative uri for jaxrs endpoint for "see other" and "redirects" */
     public static final String JAXRS_CONTEXT_URI = "/";
 
     @Inject
-    private WesttyJaxrsCdiExtension jaxrsExtension;
+    private JaxrsCdiExtension jaxrsExtension;
 
     @Inject
     private BeanManager bm;
@@ -42,7 +43,7 @@ class JaxrsApplication extends Application {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Set<Object> getSingletons() {
-        HashSet<Object> instances = new HashSet<Object>();
+        HashSet<Object> instances = new HashSet<>();
         for (Class<?> cls : jaxrsExtension.getJaxrsClasses()) {
             Set<Bean<?>> beans = bm.getBeans(cls);
             for (Bean<?> bean : beans) {

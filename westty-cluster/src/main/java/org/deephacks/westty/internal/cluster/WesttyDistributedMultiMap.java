@@ -1,17 +1,16 @@
 package org.deephacks.westty.internal.cluster;
 
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryListener;
+import com.hazelcast.core.MultiMap;
+import org.deephacks.westty.cluster.ClusterListener;
+import org.deephacks.westty.cluster.DistributedMultiMap;
+
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.deephacks.westty.cluster.DistributedMultiMap;
-import org.deephacks.westty.cluster.WesttyClusterListener;
-
-import com.hazelcast.core.EntryEvent;
-import com.hazelcast.core.EntryListener;
-import com.hazelcast.core.MultiMap;
-
-public class WesttyDistributedMultiMap<K, V> implements DistributedMultiMap<K, V> {
+class WesttyDistributedMultiMap<K, V> implements DistributedMultiMap<K, V> {
     private MultiMap<K, V> map;
 
     public WesttyDistributedMultiMap(MultiMap<K, V> map) {
@@ -29,7 +28,7 @@ public class WesttyDistributedMultiMap<K, V> implements DistributedMultiMap<K, V
     }
 
     @Override
-    public void addEntryListener(final WesttyClusterListener<K, V> listener, boolean includeValue) {
+    public void addEntryListener(final ClusterListener<K, V> listener, boolean includeValue) {
         EntryListener<K, V> delegate = new EntryListener<K, V>() {
 
             @Override

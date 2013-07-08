@@ -24,5 +24,21 @@
       <groupId>com.jolbox</groupId>
       <artifactId>bonecp</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

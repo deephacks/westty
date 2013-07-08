@@ -1,17 +1,16 @@
 package org.deephacks.westty.internal.jpa;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
+import org.deephacks.westty.jpa.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.persistence.EntityManager;
-
-import org.deephacks.westty.persistence.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 @Transactional
 @Interceptor

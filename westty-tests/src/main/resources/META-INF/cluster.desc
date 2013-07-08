@@ -1,0 +1,20 @@
+
+›
+)src/main/resources/META-INF/cluster.protowestty.tests"3
+AsyncSendRequest
+	protoTypeÈ (
+msg (	"$
+GetSendRequest
+	protoTypeÉ ("8
+GetSendResponse
+	protoTypeÊ (
+	serverMsg (	"6
+AsyncPublishRequest
+	protoTypeË (
+msg (	"'
+GetPublishRequest
+	protoTypeÌ (";
+GetPublishResponse
+	protoTypeÍ (
+	serverMsg (	B-
+org.deephacks.westty.testsBClusterMessages

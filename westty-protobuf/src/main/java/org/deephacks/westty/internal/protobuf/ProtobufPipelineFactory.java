@@ -14,9 +14,10 @@
 package org.deephacks.westty.internal.protobuf;
 
 import com.google.protobuf.MessageLite;
+import org.deephacks.westty.config.ProtobufConfig;
+import org.deephacks.westty.config.ServerSpecificConfigProxy;
 import org.deephacks.westty.protobuf.FailureMessages.Failure;
 import org.deephacks.westty.protobuf.ProtobufClient;
-import org.deephacks.westty.protobuf.ProtobufConfig;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.spi.ProviderShutdownEvent;
 import org.deephacks.westty.spi.ProviderStartupEvent;
@@ -48,7 +49,7 @@ import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
 
 @Singleton
 class ProtobufPipelineFactory implements ChannelPipelineFactory {
-    private static final Logger log = LoggerFactory.getLogger(ProtobufPipelineFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(ProtobufChannelHandler.class);
 
     @Inject
     private ProtobufChannelHandler channelHandler;
@@ -61,14 +62,14 @@ class ProtobufPipelineFactory implements ChannelPipelineFactory {
     private ProtobufConfig config;
 
     @Inject
-    public ProtobufPipelineFactory(ProtobufConfig config, ThreadPoolExecutor executor, ProtobufSerializer serializer) {
-        this.config = config;
+    public ProtobufPipelineFactory(ServerSpecificConfigProxy<ProtobufConfig> config, ThreadPoolExecutor executor, ProtobufSerializer serializer) {
+        this.config = config.get();
         this.executor = executor;
         this.serializer = serializer;
         ExecutorService workers = Executors.newCachedThreadPool();
         ExecutorService boss = Executors.newCachedThreadPool();
         bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(boss,
-                workers, config.getIoWorkerCount()));
+                workers, this.config.getIoWorkerCount()));
         bootstrap.setPipelineFactory(this);
         bootstrap.setOption("child.tcpNoDelay", true);
         bootstrap.setOption("child.keepAlive", true);

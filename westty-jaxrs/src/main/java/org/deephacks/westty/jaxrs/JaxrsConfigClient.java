@@ -13,19 +13,9 @@
  */
 package org.deephacks.westty.jaxrs;
 
-import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response.Status;
-
+import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -33,15 +23,25 @@ import org.codehaus.jackson.map.introspect.VisibilityChecker;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.codehaus.jackson.map.type.MapType;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
-import org.deephacks.tools4j.config.model.Event;
-import org.deephacks.tools4j.config.model.Schema;
+import org.deephacks.westty.config.ServerConfig;
 
-import com.google.common.io.CharStreams;
-import com.google.common.io.Closeables;
+import javax.ws.rs.core.Response.Status;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * Helper class for sending jaxrs config request in a type-safe way. The intention
- * is to use the real configuration classes, not the model.bean class. 
+ * is to use the real configuration classes, not the model.bean class.
  */
 public class JaxrsConfigClient {
     public static final String PATH = "/jaxrs/config-admin-jaxrs";
@@ -52,16 +52,18 @@ public class JaxrsConfigClient {
         mapper.setVisibilityChecker(VisibilityChecker.Std.defaultInstance().withFieldVisibility(
                 JsonAutoDetect.Visibility.ANY));
     }
-
+    public JaxrsConfigClient() {
+        this(ServerConfig.DEFAULT_IP_ADDRESS, ServerConfig.DEFAULT_HTTP_PORT);
+    }
     public JaxrsConfigClient(String host, int port) {
         this.address = "http://" + host + ":" + port + PATH;
     }
 
-    public Map<String, Schema> getschema() throws AbortRuntimeException {
-        String response = gethttp("/");
+    public Map<String, JaxrsSchema> getSchemas() throws AbortRuntimeException {
+        String response = gethttp("/getschemas");
         try {
             MapType type = mapper.getTypeFactory().constructMapType(Map.class, String.class,
-                    Schema.class);
+                    JaxrsSchema.class);
             return mapper.readValue(response, type);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -70,7 +72,7 @@ public class JaxrsConfigClient {
 
     /**
      * Create a bean. See AdminContext for more information.
-     * 
+     *
      * @param o a configurable object
      * @throws AbortRuntimeException See AdminContext for more information.
      */
@@ -81,7 +83,7 @@ public class JaxrsConfigClient {
 
     /**
      * Set a bean. See AdminContext for more information.
-     * 
+     *
      * @param o a configurable object
      * @throws AbortRuntimeException See AdminContext for more information.
      */
@@ -92,7 +94,7 @@ public class JaxrsConfigClient {
 
     /**
      * Merge a bean. See AdminContext for more information.
-     * 
+     *
      * @param o a configurable object
      * @throws AbortRuntimeException See AdminContext for more information.
      */
@@ -103,7 +105,7 @@ public class JaxrsConfigClient {
 
     /**
      * Delete a bean. See AdminContext for more information.
-     * 
+     *
      * @param schema class of the configurable object to be removed
      * @param id instance id of the object.
      * @throws AbortRuntimeException See AdminContext for more information.
@@ -114,8 +116,8 @@ public class JaxrsConfigClient {
 
     /**
      * Get a bean. See AdminContext for more information.
-     * 
-     * @param schema class of the configurable object to be removed
+     *
+     * @param schema class of the configurable object to get
      * @param id instance id of the object.
      * @return Configurable object.
      * @throws AbortRuntimeException See AdminContext for more information.
@@ -130,18 +132,36 @@ public class JaxrsConfigClient {
     }
 
     /**
+     * Get a singleton bean. See AdminContext for more information.
+     *
+     * @param schema class of the configurable object to get.
+     * @return Configurable object.
+     * @throws AbortRuntimeException See AdminContext for more information.
+     */
+    public <T> T getSingleton(Class<T> schema) throws AbortRuntimeException {
+        String response = gethttp("/getSingleton/" + schema.getName());
+        try {
+            return mapper.readValue(response, schema);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * List all beans of a particular type.
-     * 
-     * @param schema class of the configurable object to be removed 
+     *
+     * @param schema class of the configurable object to be removed
      * @return List of configurable objects.
      * @throws AbortRuntimeException See AdminContext for more information.
      */
     public <T> List<T> list(Class<T> schema) throws AbortRuntimeException {
         String response = gethttp("/list/" + schema.getName());
         try {
+            JsonNode json = mapper.readValue(response, JsonNode.class);
+            JsonNode beans = json.get("beans");
             CollectionType type = mapper.getTypeFactory().constructCollectionType(List.class,
                     schema);
-            return mapper.readValue(response, type);
+            return mapper.readValue(beans.toString(), type);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -186,22 +206,7 @@ public class JaxrsConfigClient {
 
             if (conn.getResponseCode() >= Status.BAD_REQUEST.getStatusCode()) {
                 String body = CharStreams.toString(new InputStreamReader(conn.getErrorStream()));
-                JaxrsConfigError err = null;
-                try {
-                    err = mapper.readValue(body, JaxrsConfigError.class);
-                } catch (Exception e) {
-                    throw new RuntimeException("HTTP error code " + conn.getResponseCode() + ". "
-                            + conn.getResponseMessage() + ". " + body);
-                }
-                if (err != null && err.getCode() > 0) {
-                    throw new AbortRuntimeException(new Event(err.getModule(), err.getCode(),
-                            err.getMessage()));
-                } else if (err != null) {
-                    throw new RuntimeException(err.getMessage());
-                } else {
-                    throw new RuntimeException("HTTP error code " + conn.getResponseCode() + ". "
-                            + conn.getResponseMessage() + ". " + body);
-                }
+                throw new HttpException(conn.getResponseCode(), body);
             }
             return CharStreams.toString(new InputStreamReader(conn.getInputStream()));
         } catch (IOException e) {
@@ -212,7 +217,26 @@ public class JaxrsConfigClient {
             }
         }
     }
+    public static class JaxrsBeanList {
+        private int totalCount;
+        private Collection<Object> beans = new ArrayList<>();
 
+        public int getTotalCount() {
+            return totalCount;
+        }
+
+        public void setTotalCount(int totalCount) {
+            this.totalCount = totalCount;
+        }
+
+        public Collection<Object> getBeans() {
+            return beans;
+        }
+
+        public void setBeans(Collection<Object> beans) {
+            this.beans = beans;
+        }
+    }
     public static class JaxrsBean {
         private String className;
         private Object bean;
@@ -252,6 +276,18 @@ public class JaxrsConfigClient {
         public void setBean(Object bean) {
             this.bean = bean;
         }
+    }
 
+    public static class HttpException extends RuntimeException {
+        private int code;
+
+        public HttpException(int code, String msg){
+            super(msg);
+            this.code = code;
+        }
+
+        public int getCode(){
+            return code;
+        }
     }
 }

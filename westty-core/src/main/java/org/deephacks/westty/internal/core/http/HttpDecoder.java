@@ -1,30 +1,35 @@
 package org.deephacks.westty.internal.core.http;
 
-import org.deephacks.westty.WesttyProperties;
-import org.deephacks.westty.spi.WesttyHttpHandler;
-import org.jboss.netty.handler.codec.http.*;
+import org.deephacks.westty.spi.HttpHandler;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpMessage;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 
+import java.io.File;
 import java.util.List;
 
 class HttpDecoder extends HttpRequestDecoder {
-    private final List<WesttyHttpHandler> handlers;
-
-    public HttpDecoder(List<WesttyHttpHandler> handlers) {
+    private final List<HttpHandler> handlers;
+    private File htmlDir;
+    public HttpDecoder(File htmlDir, List<HttpHandler> handlers) {
         this.handlers = handlers;
+        this.htmlDir = htmlDir;
     }
 
     @Override
     protected HttpMessage createMessage(String[] initialLine) throws Exception {
         String uri = initialLine[1];
-        WesttyHttpHandler accepted = null;
-        for (WesttyHttpHandler handler : handlers) {
+        HttpHandler accepted = null;
+        for (HttpHandler handler : handlers) {
             if (handler.accept(uri)) {
                 accepted = handler;
                 break;
             }
         }
         if (accepted == null) {
-            accepted = new HtmlHandler(WesttyProperties.getHtmlDir());
+            accepted = new HtmlHandler(htmlDir);
         }
         return new WesttyHttpMessage(HttpVersion.valueOf(initialLine[2]),
                 HttpMethod.valueOf(initialLine[0]), initialLine[1], accepted);
@@ -36,15 +41,15 @@ class HttpDecoder extends HttpRequestDecoder {
     }
 
     public final static class WesttyHttpMessage extends DefaultHttpRequest {
-        private WesttyHttpHandler handler;
+        private HttpHandler handler;
 
         public WesttyHttpMessage(HttpVersion version, HttpMethod method, String uri,
-                WesttyHttpHandler handler) {
+                HttpHandler handler) {
             super(version, method, uri);
             this.handler = handler;
         }
 
-        public WesttyHttpHandler getHandler() {
+        public HttpHandler getHandler() {
             return handler;
         }
     }

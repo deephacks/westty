@@ -1,0 +1,24 @@
+package westty.tests;
+
+option java_package = "org.deephacks.westty.tests";
+option java_outer_classname = "ServerMessages";
+
+message JsonMessage {
+  optional uint32 protoType = 300;
+  required string id = 1;
+  required string json = 2;
+}
+
+message CreateRequest {
+  optional uint32 protoType = 301;
+  required JsonMessage json = 1;
+}
+
+message ListRequest {
+  optional uint32 protoType = 302;
+}
+
+message ListResponse {
+  optional uint32 protoType = 303;
+  repeated JsonMessage json = 1;
+}

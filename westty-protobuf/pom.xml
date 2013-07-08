@@ -27,13 +27,11 @@
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-core</artifactId>
-      <version>${version.westty}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-core</artifactId>
-      <version>${version.westty}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

@@ -1,0 +1,33 @@
+package westty.tests;
+
+option java_package = "org.deephacks.westty.tests";
+option java_outer_classname = "ClusterMessages";
+
+
+message AsyncSendRequest {
+  optional uint32 protoType = 200;
+  required string msg = 1;
+}
+
+message GetSendRequest {
+  optional uint32 protoType = 201;
+}
+
+message GetSendResponse {
+  optional uint32 protoType = 202;
+  repeated string serverMsg = 1;
+}
+
+message AsyncPublishRequest {
+  optional uint32 protoType = 203;
+  required string msg = 1;
+}
+
+message GetPublishRequest {
+  optional uint32 protoType = 204;
+}
+
+message GetPublishResponse {
+  optional uint32 protoType = 205;
+  repeated string serverMsg = 1;
+}

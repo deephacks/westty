@@ -1,20 +1,17 @@
 package org.deephacks.westty.internal.datasource;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
-import javax.sql.DataSource;
-
+import com.jolbox.bonecp.BoneCPDataSource;
 import org.deephacks.westty.datasource.DataSourceProperties;
 
-import com.jolbox.bonecp.BoneCPDataSource;
+import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 
 class DataSourceProducer {
 
     @Singleton
     @Produces
-    public static DataSource produceDataSource() {
+    public static javax.sql.DataSource produceDataSource() {
         DataSourceProperties prop = new DataSourceProperties();
-
         try {
             Class.forName(prop.getDriver());
         } catch (ClassNotFoundException e) {
@@ -24,7 +21,7 @@ class DataSourceProducer {
         ds.setUser(prop.getUsername());
         ds.setPassword(prop.getPassword());
         ds.setJdbcUrl(prop.getUrl());
-        WesttyDataSource datasource = new WesttyDataSource(ds);
+        DataSource datasource = new DataSource(ds);
         return datasource;
     }
 }

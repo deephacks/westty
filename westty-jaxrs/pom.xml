@@ -37,5 +37,43 @@
       <artifactId>westty-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.tools4j</groupId>
+      <artifactId>tools4j-config-core</artifactId>
+      <type>test-jar</type>
+      <version>${version.tools4j.config}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.westty</groupId>
+      <artifactId>westty-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.deephacks.tools4j</groupId>
+      <artifactId>tools4j-config-provider-jpa20</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <version>4.0.0.Final</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

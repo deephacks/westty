@@ -1,0 +1,15 @@
+package westty.protobuf;
+
+option java_package = "org.deephacks.westty.protobuf";
+option java_outer_classname = "DeleteMessages";
+
+
+message DeleteRequest {
+  optional uint32 protoType = 200;
+  required string msg = 1;
+}
+
+message DeleteResponse {
+  optional uint32 protoType = 201;
+  required string msg = 1;
+}

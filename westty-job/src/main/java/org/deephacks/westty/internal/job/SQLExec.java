@@ -1,5 +1,10 @@
 package org.deephacks.westty.internal.job;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
+
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -12,16 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
-
 public class SQLExec {
 
-    @Inject
     private DataSource datasource;
 
     private String username;

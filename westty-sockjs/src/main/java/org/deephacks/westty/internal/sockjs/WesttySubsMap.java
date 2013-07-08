@@ -1,13 +1,8 @@
 package org.deephacks.westty.internal.sockjs;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
+import org.deephacks.westty.cluster.ClusterListener;
 import org.deephacks.westty.cluster.DistributedMultiMap;
 import org.deephacks.westty.cluster.EntryEvent;
-import org.deephacks.westty.cluster.WesttyClusterListener;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.eventbus.impl.ServerIDs;
@@ -17,12 +12,17 @@ import org.vertx.java.core.impl.BlockingAction;
 import org.vertx.java.core.impl.VertxInternal;
 import org.vertx.java.core.net.impl.ServerID;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * Modified version of HazelcastSubsMap by <a href="http://tfox.org">Tim Fox</a>.
- * 
- * Purpose is to decouple hazelcast implementation from Vertx. 
+ *
+ * Purpose is to decouple hazelcast implementation from Vertx.
  */
-public class WesttySubsMap implements SubsMap, WesttyClusterListener<String, HazelcastServerID> {
+public class WesttySubsMap implements SubsMap, ClusterListener<String, HazelcastServerID> {
     private final VertxInternal vertx;
     private final DistributedMultiMap<String, HazelcastServerID> map;
 

@@ -1,6 +1,6 @@
 package org.deephacks.westty.cluster;
 
-import org.deephacks.westty.Server;
+import org.deephacks.westty.server.Server;
 
 import java.util.Set;
 

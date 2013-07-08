@@ -13,11 +13,11 @@
  */
 package org.deephacks.westty.internal.core.http;
 
-import org.deephacks.westty.server.ServerConfig;
+import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.config.ServerSpecificConfigProxy;
+import org.deephacks.westty.spi.HttpHandler;
 import org.deephacks.westty.spi.ProviderShutdownEvent;
 import org.deephacks.westty.spi.ProviderStartupEvent;
-import org.deephacks.westty.spi.WesttyHttpHandler;
-import org.deephacks.westty.spi.WesttyIoExecutors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -37,6 +37,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.jboss.netty.channel.Channels.pipeline;
@@ -45,16 +46,16 @@ import static org.jboss.netty.channel.Channels.pipeline;
 public class HttpPipelineFactory implements ChannelPipelineFactory {
     private static final Logger log = LoggerFactory.getLogger(HttpPipelineFactory.class);
     @Inject
-    private Instance<WesttyHttpHandler> handlers;
+    private Instance<HttpHandler> handlers;
 
-    private List<WesttyHttpHandler> handlerList = new ArrayList<WesttyHttpHandler>();
+    private List<HttpHandler> handlerList = new ArrayList<HttpHandler>();
 
     @Inject
-    private WesttyHttpUpstreamHandler requestHandler;
+    private HttpUpstreamHandler requestHandler;
 
     private ThreadPoolExecutor executor;
 
-    private ServerConfig config;
+    private ServerConfig server;
 
     private ExecutionHandler executionHandler;
 
@@ -62,13 +63,12 @@ public class HttpPipelineFactory implements ChannelPipelineFactory {
     private ServerBootstrap standardBootstrap;
 
     @Inject
-    public HttpPipelineFactory(ServerConfig config, ThreadPoolExecutor executor,
-                               WesttyIoExecutors ioExecutors) {
-        this.config = config;
+    public HttpPipelineFactory(ServerSpecificConfigProxy<ServerConfig> server, ThreadPoolExecutor executor) {
+        this.server = server.get();
         this.executor = executor;
-        int ioWorkerCount = config.getIoWorkerCount();
-        ExecutorService workers = ioExecutors.getWorker();
-        ExecutorService boss = ioExecutors.getBoss();
+        int ioWorkerCount = this.server.getIoWorkerCount();
+        ExecutorService workers = Executors.newCachedThreadPool();
+        ExecutorService boss = Executors.newCachedThreadPool();
         standardBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(boss, workers,
                 ioWorkerCount));
         standardBootstrap.setPipelineFactory(this);
@@ -78,12 +78,12 @@ public class HttpPipelineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         if (executionHandler == null) {
             this.executionHandler = new ExecutionHandler(executor);
-            for (WesttyHttpHandler handler : handlers) {
+            for (HttpHandler handler : handlers) {
                 handlerList.add(handler);
             }
         }
         ChannelPipeline pipeline = pipeline();
-        pipeline.addLast("westtyDecoder", new HttpDecoder(handlerList));
+        pipeline.addLast("westtyDecoder", new HttpDecoder(server.getHtmlDir(), handlerList));
         pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
         pipeline.addLast("encoder", new HttpResponseEncoder());
         if (executionHandler != null) {
@@ -95,8 +95,8 @@ public class HttpPipelineFactory implements ChannelPipelineFactory {
     }
 
     public void startup(@Observes ProviderStartupEvent event) {
-        standardChannel = standardBootstrap.bind(new InetSocketAddress(config.getHttpPort()));
-        log.info("Http listening on port {}.", config.getHttpPort());
+        standardChannel = standardBootstrap.bind(new InetSocketAddress(server.getHttpPort()));
+        log.info("Http listening on port {}.", server.getHttpPort());
     }
 
     public void shutdown(@Observes ProviderShutdownEvent event) {

@@ -1,6 +1,6 @@
 package org.deephacks.westty.internal.jpa;
 
-import java.util.Map;
+import org.deephacks.tools4j.config.model.ThreadLocalManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -12,8 +12,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.metamodel.Metamodel;
-
-import org.deephacks.tools4j.config.model.ThreadLocalManager;
+import java.util.Map;
 
 class WesttyEntityManager implements EntityManager {
 
@@ -179,6 +178,10 @@ class WesttyEntityManager implements EntityManager {
     }
 
     private EntityManager get() {
-        return ThreadLocalManager.peek(EntityManager.class);
+        EntityManager em = ThreadLocalManager.peek(EntityManager.class);
+        if(em == null){
+            throw new IllegalArgumentException("Could not find a EntityManager, is method @Transactional?");
+        }
+        return em;
     }
 }

@@ -1,0 +1,33 @@
+package westty.protobuf;
+
+option java_package = "org.deephacks.westty.protobuf";
+option java_outer_classname = "CreateMessages";
+
+
+message CreateRequest {
+  optional uint32 protoType = 100;
+  required string msg = 1;
+}
+
+message CreateResponse {
+  optional uint32 protoType = 101;
+  required string msg = 1;
+}
+
+message AsyncCreateRequest {
+  optional uint32 protoType = 102;
+  required string msg = 1;
+}
+
+message CreateExceptionRequest {
+  optional uint32 protoType = 103;
+  required string msg = 1;
+}
+
+message GetRequest {
+  optional uint32 protoType = 104;
+}
+
+message NullRequest {
+  optional uint32 protoType = 105;
+}

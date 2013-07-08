@@ -13,7 +13,6 @@
  */
 package org.deephacks.westty.internal.jaxrs.config;
 
-import com.google.common.base.Strings;
 import org.deephacks.tools4j.config.admin.AdminContext;
 import org.deephacks.tools4j.config.internal.core.runtime.BeanToObjectConverter;
 import org.deephacks.tools4j.config.internal.core.runtime.ClassToSchemaConverter;
@@ -21,8 +20,6 @@ import org.deephacks.tools4j.config.internal.core.runtime.FieldToSchemaPropertyC
 import org.deephacks.tools4j.config.internal.core.runtime.ObjectToBeanConverter;
 import org.deephacks.tools4j.config.model.Bean;
 import org.deephacks.tools4j.config.model.Bean.BeanId;
-import org.deephacks.tools4j.config.model.Beans;
-import org.deephacks.tools4j.config.model.Criteria;
 import org.deephacks.tools4j.config.model.Schema;
 import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRef;
 import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefList;
@@ -36,7 +33,14 @@ import org.deephacks.westty.jaxrs.JaxrsConfigObjects.JaxrsConfigObject;
 import org.deephacks.westty.jaxrs.JaxrsSchema;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +98,15 @@ public class JaxrsConfigEndpoint {
     }
 
     @GET
+    @Path("getSingleton/{className}")
+    public Object get(@PathParam("className") final String className) {
+        Schema schema = schemas.get(className);
+        BeanId beanId = BeanId.createSingleton(schema.getName());
+        Bean bean = ctx.get(beanId);
+        return conv.convert(bean, forName(className));
+    }
+
+    @GET
     @Path("get/{className}")
     @Produces(APPLICATION_JSON)
     public JaxrsConfigObjects get(@PathParam("className") final String className,
@@ -131,23 +144,10 @@ public class JaxrsConfigEndpoint {
             @QueryParam("first") int first, @QueryParam("max") int max,
             @QueryParam("prop") String prop, @QueryParam("targetClassName") String targetClassName,
             @QueryParam("id") String id) {
-        Criteria criteria = new Criteria(first, max);
-        if (!Strings.isNullOrEmpty(prop) && !Strings.isNullOrEmpty(targetClassName)
-                && !Strings.isNullOrEmpty(id)) {
-            Schema targetSchema = schemas.get(targetClassName);
-            criteria.query(prop, targetSchema.getName(), id);
-        }
-        Schema schema = schemas.get(className);
-        Beans beans = ctx.paginate(schema.getName(), criteria);
-        JaxrsConfigObjects result = new JaxrsConfigObjects();
-        if (beans.getTotalCount() == 0) {
-            return result;
-        }
-        Collection<?> o = conv.convert(beans.getBeans(), forName(className));
-        long count = beans.getTotalCount();
-        result.setTotalCount(count);
-        result.setBeans(o);
-        return result;
+        /**
+         * Fixme
+         */
+        return null;
     }
 
     @POST
@@ -224,18 +224,10 @@ public class JaxrsConfigEndpoint {
     @Produces({ APPLICATION_JSON })
     public JaxrsConfigBeans paginatebeans(@PathParam("schema") final String schema,
             @QueryParam("first") int first, @QueryParam("max") int max) {
-        Criteria criteria = new Criteria(first, max);
-        Beans beans = ctx.paginate(schema, criteria);
-        JaxrsConfigBeans result = new JaxrsConfigBeans();
-        if (beans.getTotalCount() == 0) {
-            return result;
-        }
-
-        for (Bean bean : beans.getBeans()) {
-            result.addBean(bean);
-        }
-        result.setTotalCount(beans.getTotalCount());
-        return result;
+        /**
+         * FIXME
+         */
+        return null;
     }
 
     @POST

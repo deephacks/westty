@@ -1,9 +1,9 @@
 package org.deephacks.westty.jaxrs;
 
+import org.deephacks.tools4j.config.model.Schema;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.deephacks.tools4j.config.model.Schema;
 
 public class JaxrsSchema {
     private String schemaName;
@@ -18,6 +18,10 @@ public class JaxrsSchema {
     private List<SchemaPropertyRef> propertyRef = new ArrayList<SchemaPropertyRef>();
     private List<SchemaPropertyRefList> propertyRefList = new ArrayList<SchemaPropertyRefList>();
     private List<SchemaPropertyRefMap> propertyRefMap = new ArrayList<SchemaPropertyRefMap>();
+
+    public JaxrsSchema(){
+
+    }
 
     public JaxrsSchema(Schema schema) {
         this.schemaName = schema.getName();
@@ -159,6 +163,9 @@ public class JaxrsSchema {
         private String fieldName;
         private boolean isImmutable;
 
+        public AbstractSchemaProperty(){
+
+        }
         public AbstractSchemaProperty(
                 org.deephacks.tools4j.config.model.Schema.AbstractSchemaProperty schema) {
             this.name = schema.getName();
@@ -206,6 +213,10 @@ public class JaxrsSchema {
         private String type;
         private List<String> enums;
 
+        public SchemaProperty(){
+
+        }
+
         public SchemaProperty(org.deephacks.tools4j.config.model.Schema.SchemaProperty schema) {
             super(schema);
             this.defaultValue = schema.getDefaultValue();
@@ -248,6 +259,10 @@ public class JaxrsSchema {
         private String collectionType;
         private List<String> defaultValues;
         private List<String> enums;
+
+        public SchemaPropertyList(){
+
+        }
 
         public SchemaPropertyList(
                 org.deephacks.tools4j.config.model.Schema.SchemaPropertyList schema) {
@@ -300,6 +315,10 @@ public class JaxrsSchema {
         private String schemaName;
         private boolean isSingleton;
 
+        public SchemaPropertyRef(){
+
+        }
+
         public SchemaPropertyRef(org.deephacks.tools4j.config.model.Schema.SchemaPropertyRef schema) {
             super(schema);
             this.schemaName = schema.getSchemaName();
@@ -327,6 +346,10 @@ public class JaxrsSchema {
     public final static class SchemaPropertyRefList extends AbstractSchemaProperty {
         private String collectionType;
         private String schemaName;
+
+        public SchemaPropertyRefList(){
+
+        }
 
         public SchemaPropertyRefList(
                 org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefList schema) {
@@ -356,6 +379,10 @@ public class JaxrsSchema {
     public final static class SchemaPropertyRefMap extends AbstractSchemaProperty {
         private String mapType;
         private String schemaName;
+
+        public SchemaPropertyRefMap(){
+
+        }
 
         public SchemaPropertyRefMap(
                 org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefMap schema) {

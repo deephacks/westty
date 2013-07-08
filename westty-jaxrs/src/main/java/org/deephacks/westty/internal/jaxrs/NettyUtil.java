@@ -97,7 +97,7 @@ class NettyUtil {
         for (String cookieVals : cookieHeaders) {
             /**
              * This split has been added to support multiple
-             * cookies inside the cookie header, for example:
+             * cookies inside the cookie header, for tests:
              * Cookie: sessionid=123; test=345
              */
             for (String cookieVal : cookieVals.split("[;,]")) {

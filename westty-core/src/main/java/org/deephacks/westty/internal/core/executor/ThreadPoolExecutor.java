@@ -1,21 +1,14 @@
 package org.deephacks.westty.internal.core.executor;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.deephacks.westty.config.ExecutorConfig;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.deephacks.westty.ExecutorConfig;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class ThreadPoolExecutor extends OrderedMemoryAwareThreadPoolExecutor {

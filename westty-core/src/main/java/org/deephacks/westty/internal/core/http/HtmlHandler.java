@@ -1,6 +1,6 @@
 package org.deephacks.westty.internal.core.http;
 
-import org.deephacks.westty.spi.WesttyHttpHandler;
+import org.deephacks.westty.spi.HttpHandler;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
@@ -14,7 +14,7 @@ import java.io.RandomAccessFile;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 
 @Alternative
-class HtmlHandler extends WesttyHttpHandler {
+class HtmlHandler extends HttpHandler {
     private final String staticRootPath;
 
     public HtmlHandler(File rootPath) {

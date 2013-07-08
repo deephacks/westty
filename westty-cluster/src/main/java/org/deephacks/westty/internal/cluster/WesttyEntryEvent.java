@@ -1,11 +1,10 @@
 package org.deephacks.westty.internal.cluster;
 
-import java.net.InetSocketAddress;
-
-import org.deephacks.westty.cluster.EntryEvent;
-import org.deephacks.westty.cluster.WesttyServerId;
-
 import com.hazelcast.core.Member;
+import org.deephacks.westty.cluster.EntryEvent;
+import org.deephacks.westty.server.Server;
+
+import java.net.InetSocketAddress;
 
 public class WesttyEntryEvent<K, V> implements EntryEvent<K, V> {
     private com.hazelcast.core.EntryEvent<K, V> event;
@@ -30,10 +29,10 @@ public class WesttyEntryEvent<K, V> implements EntryEvent<K, V> {
     }
 
     @Override
-    public WesttyServerId getMember() {
+    public Server getMember() {
         Member member = event.getMember();
         InetSocketAddress add = member.getInetSocketAddress();
-        return new WesttyServerId(add.getAddress().getHostAddress(), add.getPort());
+        return new Server(add.getAddress().getHostAddress(), add.getPort());
     }
 
     @Override

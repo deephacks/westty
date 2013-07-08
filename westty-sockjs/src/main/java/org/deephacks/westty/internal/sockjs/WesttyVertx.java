@@ -1,14 +1,10 @@
 package org.deephacks.westty.internal.sockjs;
 
-import java.util.Iterator;
-
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import org.deephacks.westty.cluster.Cluster;
 import org.deephacks.westty.cluster.DistributedMultiMap;
-import org.deephacks.westty.cluster.WesttyCluster;
-import org.deephacks.westty.sockjs.WesttySockJsProperties;
+import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.config.ServerSpecificConfigProxy;
+import org.deephacks.westty.config.SockJsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.eventbus.EventBus;
@@ -19,15 +15,27 @@ import org.vertx.java.core.eventbus.impl.hazelcast.HazelcastServerID;
 import org.vertx.java.core.impl.DefaultVertx;
 import org.vertx.java.core.impl.VertxInternal;
 
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Iterator;
+
 @Singleton
 public class WesttyVertx extends DefaultVertx {
-    private static final Logger log = LoggerFactory.getLogger(WesttyVertx.class);
+    private Logger log = LoggerFactory.getLogger(WesttyVertx.class);
     private WesttyEventBus bus;
-    private WesttySockJsProperties props = new WesttySockJsProperties();
-    private WesttyCluster cluster;
+    private Cluster cluster;
+    private SockJsConfig sockjs;
+    private ServerConfig server;
 
     @Inject
-    private Instance<WesttyCluster> clusterInstance;
+    private Instance<Cluster> clusterInstance;
+
+    @Inject
+    public WesttyVertx(ServerSpecificConfigProxy<ServerConfig> server, ServerSpecificConfigProxy<SockJsConfig> sockjs){
+        this.server = server.get();
+        this.sockjs = sockjs.get();
+    }
 
     public WesttyVertx() {
         super();
@@ -38,7 +46,7 @@ public class WesttyVertx extends DefaultVertx {
         if (bus != null) {
             return bus;
         }
-        Iterator<WesttyCluster> it = clusterInstance.iterator();
+        Iterator<Cluster> it = clusterInstance.iterator();
         if (it.hasNext()) {
             cluster = it.next();
         }
@@ -47,8 +55,8 @@ public class WesttyVertx extends DefaultVertx {
             bus = new WesttyEventBus(this);
         } else {
             log.info("Creating cluster vertx on {}:{} with members " + cluster.getMembers(),
-                    props.getEventBusHost(), props.getEventBusPort());
-            bus = new WesttyEventBus(this, props.getEventBusPort(), props.getEventBusHost());
+                    server.getPrivateIp(), sockjs.getEventBusPort());
+            bus = new WesttyEventBus(this, sockjs.getEventBusPort(), server.getPrivateIp());
         }
         return bus;
     }

@@ -1,5 +1,11 @@
 package org.deephacks.westty.test;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import com.google.common.io.Resources;
+
+import javax.inject.Singleton;
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -9,24 +15,22 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
-
+@Singleton
 public class SQLExec {
 
-    @Inject
     private DataSource datasource;
 
     private String username;
     private String password;
     private String url;
+
+    public SQLExec(){
+
+    }
 
     public SQLExec(String username, String password, String url) {
         this.username = username;
@@ -58,7 +62,7 @@ public class SQLExec {
         execute(file, c, ignoreSqlEx);
     }
 
-    private Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         Connection c = null;
         if (datasource != null) {
             c = datasource.getConnection();
@@ -76,11 +80,13 @@ public class SQLExec {
             IOException {
         execute(Files.readLines(f, Charset.defaultCharset()), c, ignoreSqlEx);
     }
-
+    public void execute(String... lines) throws SQLException, IOException {
+        execute(Arrays.asList(lines), getConnection(), false);
+    }
     private void execute(List<String> lines, Connection c, boolean ignoreSqlEx)
             throws SQLException, IOException {
         try {
-            List<String> sqlStmts = new ArrayList<String>();
+            List<String> sqlStmts = new ArrayList<>();
             StringBuilder sb = new StringBuilder();
             for (String input : lines) {
                 if (input == null || "".equals(input.trim()) || input.startsWith("--")

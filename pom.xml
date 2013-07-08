@@ -52,7 +52,7 @@
 
   <properties>
     <version.westty>0.0.1-SNAPSHOT</version.westty>
-    <version.tools4j.config>0.0.7</version.tools4j.config>
+    <version.tools4j.config>0.12.0</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
     <version.java-source>1.7</version.java-source>
@@ -78,7 +78,7 @@
     <module>westty-sockjs</module>
     <module>westty-cluster</module>
     <module>westty-protobuf</module>
-    <module>westty-example</module>
+    <module>westty-tests</module>
     <module>westty-docbkx</module>
   </modules>
   <build>
@@ -212,39 +212,40 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.6.4</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
       <version>1.7.5</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.6</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- bridge c3po logging to slf4j -->
     <!--
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <version>1.6.4</version>
-      <scope>runtime</scope>
-    </dependency>
+        <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>log4j-over-slf4j</artifactId>
+        <version>1.6.4</version>
+        <scope>runtime</scope>
+        </dependency>
     -->
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <scope>test</scope>
-      <version>1.0.0</version>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>13.0.1</version>
+      <version>14.0.1</version>
     </dependency>
   </dependencies>
 
@@ -473,12 +474,6 @@
         <artifactId>junit</artifactId>
         <version>4.10</version>
         <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.github.spullara.mustache.java</groupId>
-        <artifactId>compiler</artifactId>
-        <version>0.8.9</version>
-        <scope>compile</scope>
       </dependency>
       <dependency>
         <groupId>org.deephacks.tools4j</groupId>

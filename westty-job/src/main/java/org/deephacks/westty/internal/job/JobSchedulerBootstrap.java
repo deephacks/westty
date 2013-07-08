@@ -13,30 +13,18 @@
  */
 package org.deephacks.westty.internal.job;
 
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeShutdown;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.sql.DataSource;
-
+import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
 import org.deephacks.tools4j.config.RuntimeContext;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Events;
+import org.deephacks.westty.config.JobConfig;
+import org.deephacks.westty.config.JobSchedulerConfig;
 import org.deephacks.westty.datasource.DataSourceProperties;
 import org.deephacks.westty.job.Job;
-import org.deephacks.westty.job.JobConfig;
-import org.deephacks.westty.job.JobSchedulerConfig;
 import org.deephacks.westty.job.Schedule;
+import org.deephacks.westty.spi.ProviderShutdownEvent;
+import org.deephacks.westty.spi.ProviderStartupEvent;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -54,13 +42,26 @@ import org.quartz.impl.StdJobRunShellFactory;
 import org.quartz.impl.StdScheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.jdbcjobstore.JobStoreTX;
+import org.quartz.impl.jdbcjobstore.Semaphore;
+import org.quartz.impl.jdbcjobstore.UpdateLockRowSemaphore;
 import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.utils.DBConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.base.Strings;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.sql.DataSource;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 @Singleton
 class JobSchedulerBootstrap extends StdSchedulerFactory {
@@ -90,16 +91,9 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
         if (this.properties.getDriver().equals(DERBY_EMBEDDED)) {
             isDerbyEmbedded = true;
         }
-        try {
-            start();
-            schedule();
-        } catch (SchedulerException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
-    public void start() throws SchedulerException {
+    public void startup(@Observes ProviderStartupEvent event) throws SchedulerException {
         if (isDerbyEmbedded) {
             SQLExec exec = new SQLExec(properties.getUsername(), properties.getPassword(),
                     properties.getUrl());
@@ -133,7 +127,7 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
         resources.setJobRunShellFactory(jobShell);
 
         JobStoreTX store = new JobStoreTX();
-        store.setLockHandler(config.getLockStrategy());
+        store.setLockHandler(getLockStrategy(config.getInstanceName()));
         store.setLockOnInsert(true);
         store.setInstanceName(config.getInstanceName());
         store.setInstanceId(config.getInstanceId());
@@ -148,14 +142,22 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
         store.initialize(cl, qs.getSchedulerSignaler());
 
         try {
+            log.info("Starting scheduler");
             scheduler.start();
+            schedule();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    public Semaphore getLockStrategy(String instanceName) {
+        UpdateLockRowSemaphore lock = new UpdateLockRowSemaphore();
+        lock.setSchedName(instanceName);
+        return lock;
+    }
 
-    public void shutdown(@Observes BeforeShutdown event) {
+    public void shutdown(@Observes ProviderShutdownEvent event) {
         try {
+            log.info("Shutdown scheduler");
             scheduler.shutdown(true);
         } catch (SchedulerException e) {
             log.warn(e.getMessage(), e);
@@ -199,13 +201,14 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
             Trigger trigger = newTrigger().withIdentity(triggerKey)
                     .withSchedule(cronSchedule(cron)).forJob(jobdetail).build();
             if (!scheduler.checkExists(jobKey)) {
+                log.info("Scheduling {}", cls);
                 scheduler.scheduleJob(jobdetail, trigger);
             }
         }
     }
 
     private String getCron(Class<? extends Job> cls) {
-        String cron = ctx.get(cls.getSimpleName(), JobConfig.class).cronExpression;
+        String cron = ctx.get(cls.getSimpleName(), JobConfig.class).getCronExpression();
         if (Strings.isNullOrEmpty(cron)) {
             cron = cls.getAnnotation(Schedule.class).value();
         }
@@ -236,23 +239,18 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
             Logger logger = LoggerFactory.getLogger(cls);
             BeanManager beanManager = JobExtension.getBeanManager();
             Set<Bean<?>> jobBeans = beanManager.getBeans(cls);
-
-            Bean jobBean = beanManager.resolve(jobBeans);
+            Bean<?> jobBean = beanManager.resolve(jobBeans);
             CreationalContext cc = beanManager.createCreationalContext(jobBean);
             Job job = (Job) beanManager.getReference(jobBean, Job.class, cc);
+            Stopwatch s = new Stopwatch().start();
             try {
-                Stopwatch s = new Stopwatch().start();
-                try {
-                    logger.debug("Executing.");
-                    job.execute(new JobDataImpl(map));
-                    map.putAsString(LAST_EXECUTION_TIMESTAMP, System.currentTimeMillis());
-                } catch (Exception e) {
-                    logger.warn("Unexpected exception", e);
-                }
-                logger.debug("Execution took " + s.elapsedTime(TimeUnit.NANOSECONDS) + "ns");
-            } finally {
-                jobBean.destroy((Object) job, cc);
+                logger.debug("Executing.");
+                job.execute(new JobDataImpl(map));
+                map.putAsString(LAST_EXECUTION_TIMESTAMP, System.currentTimeMillis());
+            } catch (Exception e) {
+                logger.warn("Unexpected exception", e);
             }
+            logger.debug("Execution took " + s.elapsedTime(TimeUnit.NANOSECONDS) + "ns");
         }
     }
 

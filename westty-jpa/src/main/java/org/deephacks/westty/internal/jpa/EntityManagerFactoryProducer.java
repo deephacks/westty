@@ -1,18 +1,11 @@
 package org.deephacks.westty.internal.jpa;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import org.deephacks.westty.WesttyProperties;
+import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.jpa.JpaProperties;
+import org.scannotation.AnnotationDB;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -21,30 +14,26 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
-import javax.persistence.spi.ClassTransformer;
-import javax.persistence.spi.PersistenceProvider;
-import javax.persistence.spi.PersistenceProviderResolverHolder;
-import javax.persistence.spi.PersistenceUnitInfo;
-import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.persistence.spi.*;
 import javax.sql.DataSource;
-
-import org.deephacks.westty.jpa.WesttyJpaProperties;
-import org.deephacks.westty.properties.WesttyProperties;
-import org.scannotation.AnnotationDB;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     public static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 
     private static final Logger log = LoggerFactory.getLogger(EntityManagerFactoryProducer.class);
-    private final WesttyJpaProperties jpaProperties;
-    private List<Class<?>> classes = new ArrayList<Class<?>>();
+    private final JpaProperties jpaProperties;
+    private List<Class<?>> classes = new ArrayList<>();
     private DataSource datasource;
 
     @Inject
     public EntityManagerFactoryProducer(DataSource datasource) {
-        this.jpaProperties = new WesttyJpaProperties();
+        this.jpaProperties = new JpaProperties();
         this.datasource = datasource;
     }
 
@@ -57,7 +46,7 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
         List<PersistenceProvider> providers = getProviders();
         for (PersistenceProvider provider : providers) {
             emf = provider.createContainerEntityManagerFactory(this,
-                    WesttyJpaProperties.getProperties());
+                    JpaProperties.getProperties());
             if (emf != null) {
                 break;
             }
@@ -110,7 +99,11 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     @Override
     public java.net.URL getPersistenceUnitRootUrl() {
         try {
-            return WesttyProperties.getLibDir().toURI().toURL();
+            File libDir = new ServerConfig().getLibDir();
+            if(libDir == null){
+                return null;
+            }
+            return libDir.toURI().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

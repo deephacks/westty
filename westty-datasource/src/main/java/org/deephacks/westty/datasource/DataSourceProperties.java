@@ -1,8 +1,8 @@
 package org.deephacks.westty.datasource;
 
-import javax.enterprise.inject.Alternative;
+import org.deephacks.westty.WesttyProperties;
 
-import org.deephacks.westty.properties.WesttyProperties;
+import javax.enterprise.inject.Alternative;
 
 @Alternative
 public class DataSourceProperties extends WesttyProperties {

@@ -1,11 +1,11 @@
 package org.deephacks.westty.jpa;
 
-import java.io.File;
+import org.deephacks.westty.WesttyProperties;
+import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.datasource.DataSourceProperties;
 
 import javax.enterprise.inject.Alternative;
-
-import org.deephacks.westty.datasource.DataSourceProperties;
-import org.deephacks.westty.WesttyProperties;
+import java.io.File;
 
 @Alternative
 public class JpaProperties extends DataSourceProperties {
@@ -39,7 +39,7 @@ public class JpaProperties extends DataSourceProperties {
         setPropertyIfNotSet("hibernate.dialect", "org.hibernate.dialect.DerbyTenSevenDialect");
 
         WesttyProperties
-                .loadProperties(new File(WesttyProperties.getConfDir(), JPA_PROPERTIES_FILE));
+                .loadProperties(new File(new ServerConfig().getConfDir(), JPA_PROPERTIES_FILE));
 
     }
 

@@ -1,0 +1,8 @@
+package example;
+
+option java_package = "org.deephacks.westty.protobuf";
+option java_outer_classname = "VoidMessage";
+
+message Void {
+  optional uint32 protoType = 1001;
+}
