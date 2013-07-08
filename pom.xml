@@ -6,7 +6,7 @@
   <artifactId>westty-root</artifactId>
   <name>Westty Root</name>
   <packaging>pom</packaging>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <description>Server engine using Weld and Netty for building REST applications.</description>
   <url>http://westty.deephacks.org</url>
   <inceptionYear>2012</inceptionYear>
@@ -51,7 +51,7 @@
   </developers>
 
   <properties>
-    <version.westty>0.1.0</version.westty>
+    <version.westty>0.1.1</version.westty>
     <version.tools4j.config>0.12.0</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
@@ -143,30 +143,28 @@
           <useFile>true</useFile>
         </configuration>
       </plugin>
-      <!--
-          <plugin>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <groupId>org.apache.maven.plugins</groupId>
-          <version>${version.javadoc-plugin}</version>
-          <executions>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>${version.javadoc-plugin}</version>
+        <executions>
           <execution>
-          <id>attach-javadocs</id>
-          <goals>
-          <goal>jar</goal>
-          </goals>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
           </execution>
           <execution>
-          <goals>
-          <goal>aggregate</goal>
-          </goals>
-          <phase>site</phase>
+            <goals>
+              <goal>aggregate</goal>
+            </goals>
+            <phase>site</phase>
           </execution>
-          </executions>
-          <configuration>
+        </executions>
+        <configuration>
           <javadoc:aggregate>true</javadoc:aggregate>
-          </configuration>
-          </plugin>
-      -->
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
