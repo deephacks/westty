@@ -21,10 +21,11 @@ import org.jboss.resteasy.plugins.server.embedded.SecurityDomain;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpResponse;
 import org.jboss.resteasy.plugins.server.netty.NettySecurityContext;
-import org.jboss.resteasy.specimpl.UriInfoImpl;
+import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.jboss.resteasy.spi.ResteasyUriInfo;
 import org.jboss.resteasy.util.HttpHeaderNames;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
@@ -32,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.RuntimeDelegate;
 import java.io.IOException;
@@ -79,8 +79,8 @@ class ResteasyHttpHandler extends HttpHandler {
 
         NettyHttpResponse nettyResponse = new NettyHttpResponse(event.getChannel(), keepAlive);
 
-        HttpHeaders headers = null;
-        UriInfoImpl uriInfo = null;
+        ResteasyHttpHeaders headers = null;
+        ResteasyUriInfo uriInfo = null;
         try {
             headers = NettyUtil.extractHttpHeaders(request);
             uriInfo = NettyUtil.extractUriInfo(request, JaxrsApplication.JAXRS_CONTEXT_URI,
