@@ -16,7 +16,7 @@ package org.deephacks.westty.config;
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.Id;
 
-@Config(name = "westty.jobs", desc = "Configuration for a specific job")
+@Config(name = "jobs", desc = "Configuration for a specific job")
 public class JobConfig {
     @Id(desc = "id")
     private String id;

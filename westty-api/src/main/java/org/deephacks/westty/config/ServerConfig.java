@@ -13,31 +13,19 @@
  */
 package org.deephacks.westty.config;
 
-import com.google.common.base.Strings;
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 import org.deephacks.tools4j.config.Id;
-import org.deephacks.tools4j.config.model.SystemProperties;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 
-import static org.deephacks.westty.WesttyProperties.*;
-
 @ConfigScope
-@Config(name = "westty.server",
-        desc = "Westty server engine configuration. Changes requires server restart.")
+@Config(name = "servers",
+        desc = "Server engine configuration. Changes requires server restart.")
 public class ServerConfig {
-
-    public static final String PUBLIC_IP_PROP = "westty.public_ip";
-    public static final String PRIVATE_IP_PROP = "westty.private_ip";
-    public static final String CLUSTER_PORT_PROP = "westty.cluster.port";
-    public static final String LIB_DIR_PROP = "westty.lib.dir";
-    public static final String CONF_DIR_PROP = "westty.conf.dir";
-    public static final String BIN_DIR_PROP = "westty.bin.dir";
-    public static final String HTML_DIR_PROP = "westty.html.dir";
 
     public static final String DEFAULT_SERVER_NAME = "server";
     public static final String DEFAULT_CONF_DIR = "conf";
@@ -49,32 +37,34 @@ public class ServerConfig {
     public static final int DEFAULT_CLUSTER_PORT = 5701;
 
     @Id(desc="Name of this server")
-    private String serverName = DEFAULT_SERVER_NAME;
+    private String name = DEFAULT_SERVER_NAME;
 
     @Config(desc = "Public Ip Address.")
-    private String publicIp;
+    private String publicIp = DEFAULT_IP_ADDRESS;
 
     @Config(desc = "Private Ip Address.")
-    // westty.server.instanceId.privateIp
-    private String privateIp;
+    private String privateIp = DEFAULT_IP_ADDRESS;
 
     @Config(desc="Port that this server uses for the cluster.")
-    private Integer clusterPort;
+    private Integer clusterPort = DEFAULT_CLUSTER_PORT;
 
     @Config(desc="Ip address that this server uses for the cluster.")
-    private String clusterIpAddress;
+    private String clusterIp = DEFAULT_IP_ADDRESS;
+
+    @Config(desc = "Root directory.")
+    private String rootDir = System.getProperty("root.dir");
 
     @Config(desc = "Location of the conf directory relative to the root directory.")
-    private String confDir;
+    private String confDir = DEFAULT_CONF_DIR;
 
     @Config(desc = "Location of the lib directory relative to the root directory.")
-    private String libDir;
+    private String libDir = DEFAULT_LIB_DIR;
 
     @Config(desc = "Location of the bin directory relative to the root directory.")
-    private String binDir;
+    private String binDir = DEFAULT_BIN_DIR;
 
     @Config(desc = "Location of the html directory relative to the root directory.")
-    private String htmlDir;
+    private String htmlDir = DEFAULT_HTML_DIR;
 
 
     @Config(desc = "Http listening port.")
@@ -101,30 +91,12 @@ public class ServerConfig {
     @Min(16384)
     private Integer maxHttpContentChunkLength = 65536;
 
-
-
     public ServerConfig() {
 
     }
 
     public ServerConfig(String serverName) {
-        this.serverName = serverName;
-    }
-
-    public void setHttpPort(Integer httpPort) {
-        this.httpPort = httpPort;
-    }
-
-    public void setIoWorkerCount(Integer ioWorkerCount) {
-        this.ioWorkerCount = ioWorkerCount;
-    }
-
-    public void setMaxRequestSize(Integer maxRequestSize) {
-        this.maxRequestSize = maxRequestSize;
-    }
-
-    public void setMaxHttpContentChunkLength(Integer maxHttpContentChunkLength) {
-        this.maxHttpContentChunkLength = maxHttpContentChunkLength;
+        this.name = serverName;
     }
 
     public Integer getIoWorkerCount() {
@@ -143,139 +115,56 @@ public class ServerConfig {
         return maxHttpContentChunkLength;
     }
 
-    public void setPublicIp(String ip){
-        this.privateIp = ip;
-    }
-
-    public static void setPublicIpProperty(String ip) {
-        setProperty(PUBLIC_IP_PROP, ip);
-    }
-
     public String getPublicIp() {
-        if(publicIp != null) {
-            return publicIp;
-        }
-        String value = getProperty(PUBLIC_IP_PROP);
-        if (!Strings.isNullOrEmpty(value)) {
-            return value;
-        }
-        return DEFAULT_IP_ADDRESS;
-    }
-
-    public void setPrivateIp(String ip){
-        this.privateIp = ip;
-    }
-
-    public static void setPrivateIpProperty(String ip) {
-        setProperty(PRIVATE_IP_PROP, ip);
+        return publicIp;
     }
 
     public String getPrivateIp() {
-        if(privateIp != null) {
-            return privateIp;
-        }
-        String value = getProperty(PRIVATE_IP_PROP);
-        if (!Strings.isNullOrEmpty(value)) {
-            return value;
-        }
-        return getPublicIp();
-    }
-
-    public void setClusterPort(int port){
-        this.clusterPort = port;
+        return privateIp;
     }
 
     public int getClusterPort() {
-        if(clusterPort != null){
-            return clusterPort;
-        }
-        String value = getProperty(CLUSTER_PORT_PROP);
-        if (!Strings.isNullOrEmpty(value)) {
-            return Integer.parseInt(value);
-        }
-        return DEFAULT_CLUSTER_PORT;
-    }
-
-    public static void setClusterPortProperty(int port) {
-        setProperty(CLUSTER_PORT_PROP, Integer.toString(port));
-    }
-
-
-    public static void initRootDir(File root) {
-        if (!root.exists()) {
-            return;
-        }
-        setBinDirProperty(new File(root, DEFAULT_BIN_DIR));
-        setLibDirProperty(new File(root, DEFAULT_LIB_DIR));
-        setConfDirProperty(new File(root, DEFAULT_CONF_DIR));
-        setHtmlDirProperty(new File(root, DEFAULT_HTML_DIR));
-        File confDir = new ServerConfig().getConfDir();
-        File propFile = new File(confDir, WESTTY_PROPERTIES_FILE);
-        loadProperties(propFile);
-        SystemProperties.add(getProperties());
-    }
-
-    public void setLibDir(String dir){
-        this.libDir = dir;
-    }
-
-    public static void setLibDirProperty(File dir) {
-        setProperty(LIB_DIR_PROP, dir.getAbsolutePath());
+        return clusterPort;
     }
 
     public File getLibDir() {
-        if(libDir != null) {
-            return new File(libDir);
-        }
-        String value = getProperty(LIB_DIR_PROP);
-        return value == null ? null : new File(getProperty(LIB_DIR_PROP));
-    }
-
-    public static void setConfDirProperty(File dir) {
-        setProperty(CONF_DIR_PROP, dir.getAbsolutePath());
-    }
-
-    public void setConfDir(String dir){
-        this.confDir = dir;
+        return new File(rootDir, libDir);
     }
 
     public File getConfDir() {
-        if(confDir != null) {
-            return new File(confDir);
-        }
-        String value = getProperty(CONF_DIR_PROP);
-        return value == null ? null : new File(getProperty(CONF_DIR_PROP));
-    }
-
-    public void setBinDir(String dir){
-        this.binDir = dir;
-    }
-
-    public static void setBinDirProperty(File dir) {
-        setProperty(BIN_DIR_PROP, dir.getAbsolutePath());
+        return new File(rootDir, confDir);
     }
 
     public File getBinDir() {
-        if(binDir != null) {
-            return new File(binDir);
-        }
-        String value = getProperty(BIN_DIR_PROP);
-        return value == null ? null : new File(getProperty(BIN_DIR_PROP));
-    }
-
-    public static void setHtmlDirProperty(File dir) {
-        setProperty(HTML_DIR_PROP, dir.getAbsolutePath());
-    }
-
-    public void setHtmlDir(String dir){
-        this.htmlDir = dir;
+        return new File(rootDir, binDir);
     }
 
     public File getHtmlDir() {
-        if(htmlDir != null){
-            return new File(htmlDir);
-        }
-        String value = getProperty(HTML_DIR_PROP);
-        return value == null ? null : new File(getProperty(HTML_DIR_PROP));
+        return new File(rootDir, htmlDir);
     }
+
+    public void setHttpPort(Integer httpPort) {
+        this.httpPort = httpPort;
+    }
+
+    public void setServerName(String serverName) {
+        this.name = serverName;
+    }
+
+    public void setPublicIp(String publicIp) {
+        this.publicIp = publicIp;
+    }
+
+    public void setPrivateIp(String privateIp) {
+        this.privateIp = privateIp;
+    }
+
+    public void setClusterPort(Integer clusterPort) {
+        this.clusterPort = clusterPort;
+    }
+
+    public void setClusterIpAddress(String clusterIpAddress) {
+        this.clusterIp = clusterIpAddress;
+    }
+
 }

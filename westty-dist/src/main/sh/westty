@@ -28,7 +28,8 @@ fi
 JAVA_OPTS=$JAVA_OPTS
 
 exec java -classpath "${LAUNCHER_HOME}"/lib/westty-launcher.jar \
-  "-Dwestty.root.dir=${LAUNCHER_HOME}"  \
+  "-Droot.dir=${LAUNCHER_HOME}"  \
+  "-Dapplication.conf=${LAUNCHER_HOME}/conf/application.conf"  \
   $JAVA_OPTS \
   "-Dmain.class=org.deephacks.westty.Westty"  \
   "-Dlib.dir=lib" org.deephacks.westty.Launcher "$@"

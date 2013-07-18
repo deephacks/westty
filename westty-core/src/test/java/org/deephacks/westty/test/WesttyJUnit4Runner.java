@@ -29,6 +29,15 @@ public class WesttyJUnit4Runner extends BlockJUnit4ClassRunner {
             m.setAccessible(true);
             m.invoke(null, null);
         }
+        if (westty == null) {
+            this.westty = new Westty();
+            try {
+                westty.startup();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw new InitializationError(e);
+            }
+        }
     }
 
     @Override
@@ -43,7 +52,6 @@ public class WesttyJUnit4Runner extends BlockJUnit4ClassRunner {
                     throw new InitializationError(e);
                 }
             }
-
             return westty.getInstance(cls);
         } catch (Throwable e) {
             e.printStackTrace();

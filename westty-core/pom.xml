@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-core</artifactId>
+      <artifactId>tools4j-config</artifactId>
     </dependency>
   </dependencies>
 </project>

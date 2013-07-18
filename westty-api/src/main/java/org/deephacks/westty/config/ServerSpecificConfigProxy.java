@@ -1,6 +1,7 @@
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.RuntimeContext;
+import com.google.common.base.Optional;
+import org.deephacks.tools4j.config.ConfigContext;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Events;
 import org.deephacks.westty.server.ServerName;
@@ -44,15 +45,21 @@ public class ServerSpecificConfigProxy<T> {
         private ServerName serverName;
 
         @Inject
-        private RuntimeContext ctx;
+        private ConfigContext config;
 
         @Produces
         public ServerSpecificConfigProxy<T> produceServerConfigProxy(InjectionPoint ip){
             Class<?> declaringClass = ip.getMember().getDeclaringClass();
             Class<?> configCls = getParameterizedType(declaringClass, ip.getAnnotated().getBaseType());
             try {
-                Object config = ctx.get(serverName.getName(), configCls);
-                return new ServerSpecificConfigProxy(config);
+                Optional<?> optionalServer = config.get(serverName.getName(), configCls);
+                if (optionalServer.isPresent()) {
+                    return new ServerSpecificConfigProxy(optionalServer.get());
+                } else {
+                    log.debug("Config instance {} of type {} not found", serverName.getName(), configCls);
+                    Object config = newInstance(configCls, serverName.getName());
+                    return new ServerSpecificConfigProxy(config);
+                }
             } catch (AbortRuntimeException e) {
                 if (e.getEvent().getCode() != Events.CFG304){
                     throw e;

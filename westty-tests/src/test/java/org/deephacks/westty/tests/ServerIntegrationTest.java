@@ -2,8 +2,9 @@ package org.deephacks.westty.tests;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import org.deephacks.westty.datasource.DataSourceProperties;
-import org.deephacks.westty.jaxrs.JaxrsConfigClient;
+import org.deephacks.tools4j.config.ConfigContext;
+import org.deephacks.westty.config.DataSourceConfig;
+import org.deephacks.westty.config.ProtobufConfig;
 import org.deephacks.westty.protobuf.ProtobufClient;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.spi.IoExecutors;
@@ -34,9 +35,11 @@ import static org.junit.matchers.JUnitMatchers.hasItem;
 public class ServerIntegrationTest {
     private static final ProtobufSerializer serializer = new ProtobufSerializer();
     private static final String TABLE = "CREATE TABLE JSON (ID varchar(255), JSON varchar(1024), PROTOCOL varchar(255));";
-    private static final ProtobufClient protobuf = new ProtobufClient(new IoExecutors(), serializer);
-    private static final JaxrsConfigClient config = new JaxrsConfigClient();
+    private static final ProtobufClient protobuf = new ProtobufClient(new IoExecutors(), serializer, new ProtobufConfig());
     private static final JaxrsClient jaxrs = new JaxrsClient();
+
+    private static final ConfigContext config = ConfigContext.get();
+
     @Inject
     private EventBus bus;
 
@@ -45,8 +48,8 @@ public class ServerIntegrationTest {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
         serializer.registerResource("META-INF/server.desc");
-        DataSourceProperties ds = new DataSourceProperties();
-        SQLExec sql = new SQLExec(ds.getUsername(), ds.getPassword(), ds.getUrl());
+        DataSourceConfig dataSourceConfig = config.get(DataSourceConfig.class);
+        SQLExec sql = new SQLExec(dataSourceConfig.getUser(), dataSourceConfig.getPassword(), dataSourceConfig.getUrl());
         sql.execute(TABLE);
         sql.executeResource("META-INF/install_config_derby.ddl", false);
     }

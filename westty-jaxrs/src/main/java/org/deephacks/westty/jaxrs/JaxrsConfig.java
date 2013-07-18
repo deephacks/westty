@@ -13,13 +13,13 @@
  */
 package org.deephacks.westty.jaxrs;
 
-import javax.validation.constraints.NotNull;
-
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 
-@Config(name = "westty.jaxrs",
-        desc = "Westty jaxrs configuration. Changes requires server restart.")
+import javax.validation.constraints.NotNull;
+
+@Config(name = "jaxrs",
+        desc = "JAX-RS configuration. Changes requires server restart.")
 @ConfigScope
 public class JaxrsConfig {
 

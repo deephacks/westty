@@ -8,9 +8,8 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.nio.Address;
-import org.deephacks.tools4j.config.RuntimeContext;
+import org.deephacks.tools4j.config.ConfigContext;
 import org.deephacks.westty.cluster.Cluster;
-import org.deephacks.westty.cluster.ClusterProperties;
 import org.deephacks.westty.cluster.DistributedMultiMap;
 import org.deephacks.westty.config.ClusterConfig;
 import org.deephacks.westty.config.ServerConfig;
@@ -33,7 +32,6 @@ import java.util.Set;
 class ClusterBootstrap implements Cluster {
     private static final Logger log = LoggerFactory.getLogger(ClusterBootstrap.class);
 
-    private final ClusterProperties props;
     private HazelcastInstance hazelcast;
     private ClusterConfig cluster;
     private ServerConfig server;
@@ -43,10 +41,9 @@ class ClusterBootstrap implements Cluster {
     }
 
     @Inject
-    public ClusterBootstrap(RuntimeContext ctx, ServerSpecificConfigProxy<ServerConfig> server) {
-        this.cluster = ctx.singleton(ClusterConfig.class);
+    public ClusterBootstrap(ConfigContext ctx, ServerSpecificConfigProxy<ServerConfig> server) {
+        this.cluster = ctx.get(ClusterConfig.class);
         this.server = server.get();
-        this.props = new ClusterProperties();
         Config cfg = getConfig();
         this.hazelcast = Hazelcast.newHazelcastInstance(cfg);
         log.info("Cluster members {}", getMembers());
@@ -85,7 +82,7 @@ class ClusterBootstrap implements Cluster {
 
         Join join = network.getJoin();
         join.getMulticastConfig().setEnabled(false);
-        List<ServerConfig> servers = cluster.getServers(server);
+        List<ServerConfig> servers = cluster.getServers();
         for (ServerConfig server : servers) {
             try {
                 join.getTcpIpConfig().addAddress(new Address(server.getPrivateIp(), server.getClusterPort())).setEnabled(true);

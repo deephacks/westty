@@ -18,8 +18,8 @@ import org.deephacks.tools4j.config.ConfigScope;
 
 import javax.validation.constraints.NotNull;
 
-@Config(name = "westty.web",
-        desc = "Westty static web configuration. Changes requires server restart.")
+@Config(name = "web",
+        desc = "Static web configuration. Changes requires server restart.")
 @ConfigScope
 public class WebConfig {
 

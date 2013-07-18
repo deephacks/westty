@@ -21,7 +21,6 @@ import java.util.Properties;
 
 @Singleton
 public class SQLExec {
-
     private DataSource datasource;
 
     private String username;

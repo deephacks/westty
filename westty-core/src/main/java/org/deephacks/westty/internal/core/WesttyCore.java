@@ -15,7 +15,7 @@ package org.deephacks.westty.internal.core;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
-import org.deephacks.tools4j.config.RuntimeContext;
+import org.deephacks.tools4j.config.ConfigContext;
 import org.deephacks.westty.application.ApplicationShutdownEvent;
 import org.deephacks.westty.application.ApplicationStartupEvent;
 import org.deephacks.westty.config.ServerConfig;
@@ -37,8 +37,8 @@ import java.io.File;
  * Main class for starting and stopping Westty.
  */
 public class WesttyCore {
-    public static final String WESTTY_ROOT_PROP = "westty.root.dir";
-    public static final String WESTTY_ROOT = System.getProperty(WESTTY_ROOT_PROP);
+    public static final String APPLICATION_CONF_PROP = "application.conf";
+    public static final String APPLICATION_CONF = System.getProperty(APPLICATION_CONF_PROP);
     private static final Logger log = LoggerFactory.getLogger(WesttyCore.class);
     private WeldContainer container;
     private Weld weld;
@@ -49,10 +49,10 @@ public class WesttyCore {
         log.info("Westty startup.");
         try {
             Stopwatch time = new Stopwatch().start();
-            if (!Strings.isNullOrEmpty(WESTTY_ROOT)) {
-                File root = new File(WESTTY_ROOT);
-                if (root.exists()) {
-                    ServerConfig.initRootDir(root);
+            if (!Strings.isNullOrEmpty(APPLICATION_CONF)) {
+                File conf = new File(APPLICATION_CONF);
+                if (conf.exists()) {
+                    System.setProperty(APPLICATION_CONF_PROP, conf.getAbsolutePath());
                 }
             }
             weld = new Weld();
@@ -69,6 +69,7 @@ public class WesttyCore {
             });
             log.info("Westty started in {} ms.", time.elapsedMillis());
         } catch (Exception e) {
+            log.error("Exception during startup", e);
             shutdown();
             throw new RuntimeException(e);
         }
@@ -98,7 +99,7 @@ public class WesttyCore {
     @Singleton
     private static class WesttyEngine {
         @Inject
-        private RuntimeContext ctx;
+        private ConfigContext config;
 
         @Inject
         private Event<ApplicationStartupEvent> applicationStartupEvent;

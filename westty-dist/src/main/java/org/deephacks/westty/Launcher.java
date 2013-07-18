@@ -29,7 +29,7 @@ public class Launcher {
     /** files to put on current thread classloader */
     private final List<File> classpath = new ArrayList<File>();
     /** system property to determine launcher run script directory  */
-    private static final String LAUNCHER_HOME_PROP = "westty.root.dir";
+    private static final String LAUNCHER_HOME_PROP = "root.dir";
     /** system property of main class to launch  */
     private static final String MAIN_CLASS_PROP = "main.class";
     /** system property of directory to load classpath from */

@@ -10,7 +10,6 @@ import org.apache.whirr.service.ClusterActionEvent;
 import org.apache.whirr.service.ClusterActionHandlerSupport;
 import org.apache.whirr.service.FirewallManager.Rule;
 import org.deephacks.westty.config.ClusterConfig;
-import org.deephacks.westty.config.ProtobufConfig;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.config.SockJsConfig;
 
@@ -46,15 +45,19 @@ public class WesttyService extends ClusterActionHandlerSupport {
         Cluster cluster = event.getCluster();
 
         Set<Instance> instances = cluster.getInstancesMatching(role(WESTTY_ROLE));
-
-        event.getStatementBuilder().addExport(ClusterConfig.CLUSTER_SERVERS_PROP, generateClusterIds(instances));
-
+        // FIXME:
+        ClusterConfig config = new ClusterConfig();
+        // event.getStatementBuilder().addExport(ClusterConfig.CLUSTER_SERVERS_PROP, generateClusterIds(instances));
+        event.getStatementBuilder().addExport("FIXME", generateClusterIds(instances));
         event.getFirewallManager().addRules(
                 Rule.create().destination(instances).ports(WESTTY_HTTP_PORT));
         event.getFirewallManager().addRules(
                 Rule.create().destination(instances).ports(SockJsConfig.DEFAULT_HTTP_PORT));
-        event.getFirewallManager().addRules(
-                Rule.create().destination(instances).ports(ProtobufConfig.DEFAULT_PORT));
+        // FIXME::
+//        event.getFirewallManager().addRules(
+//                Rule.create().destination(instances).ports(ProtobufConfig.DEFAULT_PORT));
+
+
         //        for (Instance instance : instances) {
         //            String ip = instance.getPublicIp();
         //            event.getStatementBuilder()

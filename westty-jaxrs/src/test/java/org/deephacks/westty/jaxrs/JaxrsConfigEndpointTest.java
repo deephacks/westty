@@ -2,13 +2,14 @@ package org.deephacks.westty.jaxrs;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import org.deephacks.tools4j.config.ConfigContext;
 import org.deephacks.tools4j.config.internal.core.jpa.Jpa20BeanManager;
-import org.deephacks.westty.datasource.DataSourceProperties;
-import org.deephacks.westty.jaxrs.JaxrsConfigClient.HttpException;
+import org.deephacks.westty.config.DataSourceConfig;
 import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.jaxrs.JaxrsConfigClient.HttpException;
 import org.deephacks.westty.test.SQLExec;
-import org.deephacks.westty.test.WesttyJUnit4Runner;
 import org.deephacks.westty.test.TestBootstrap;
+import org.deephacks.westty.test.WesttyJUnit4Runner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,17 +38,19 @@ public class JaxrsConfigEndpointTest {
     private Child c1 = new Child("c1", "v1");
     private Child c2 = new Child("c2", "v2");
     private Child c3 = new Child("c3", "v3");
+    private static ConfigContext config = ConfigContext.get();
 
     @TestBootstrap
     public static void bootstrap() throws IOException, SQLException {
         new JaxrsConfigEndpointTest().before();
+
     }
 
     @Before
     public void before(){
         try {
-            DataSourceProperties p = new DataSourceProperties();
-            SQLExec sql = new SQLExec(p.getUsername(), p.getPassword(), p.getUrl());
+            DataSourceConfig p = new DataSourceConfig();
+            SQLExec sql = new SQLExec(p.getUser(), p.getPassword(), p.getUrl());
             List<String> install = readMetaInfResource(Jpa20BeanManager.class, INSTALL_DDL);
             sql.execute(install, false);
         } catch (Exception e) {
@@ -58,8 +61,8 @@ public class JaxrsConfigEndpointTest {
     @After
     public void after() throws IOException, SQLException {
         try {
-            DataSourceProperties p = new DataSourceProperties();
-            SQLExec sql = new SQLExec(p.getUsername(), p.getPassword(), p.getUrl());
+            DataSourceConfig p = new DataSourceConfig();
+            SQLExec sql = new SQLExec(p.getUser(), p.getPassword(), p.getUrl());
             List<String> uninstall = readMetaInfResource(Jpa20BeanManager.class, UNINSTALL_DDL);
             sql.execute(uninstall, false);
         } catch (Exception e) {

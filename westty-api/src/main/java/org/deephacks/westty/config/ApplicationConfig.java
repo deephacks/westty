@@ -18,7 +18,7 @@ import org.deephacks.tools4j.config.Id;
 
 import javax.validation.constraints.NotNull;
 
-@Config(name = "application", desc = "westty application")
+@Config(name = "application", desc = "application")
 public class ApplicationConfig {
     @Id(desc = "westty application identification")
     private String id;

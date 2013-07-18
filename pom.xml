@@ -52,7 +52,7 @@
 
   <properties>
     <version.westty>0.1.1-SNAPSHOT</version.westty>
-    <version.tools4j.config>0.12.0</version.tools4j.config>
+    <version.tools4j.config>0.14.2</version.tools4j.config>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
     <version.java-source>1.7</version.java-source>
@@ -207,6 +207,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.deephacks.tools4j</groupId>
+      <artifactId>tools4j-config</artifactId>
+      <version>${version.tools4j.config}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.6.4</version>
@@ -224,16 +230,6 @@
       <version>1.0.6</version>
       <scope>test</scope>
     </dependency>
-
-    <!-- bridge c3po logging to slf4j -->
-    <!--
-        <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>log4j-over-slf4j</artifactId>
-        <version>1.6.4</version>
-        <scope>runtime</scope>
-        </dependency>
-    -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -392,12 +388,6 @@
         <scope>compile</scope>
       </dependency>
       <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>14.0.1</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
         <groupId>javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>3.12.1.GA</version>
@@ -481,26 +471,7 @@
       </dependency>
       <dependency>
         <groupId>org.deephacks.tools4j</groupId>
-        <artifactId>tools4j-config-core</artifactId>
-        <version>${version.tools4j.config}</version>
-        <!-- only to manually invoke config cdi extension -->
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.deephacks.tools4j</groupId>
-        <artifactId>tools4j-config-api-runtime</artifactId>
-        <version>${version.tools4j.config}</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.deephacks.tools4j</groupId>
-        <artifactId>tools4j-config-api-model</artifactId>
-        <version>${version.tools4j.config}</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.deephacks.tools4j</groupId>
-        <artifactId>tools4j-config-api-admin</artifactId>
+        <artifactId>tools4j-config</artifactId>
         <version>${version.tools4j.config}</version>
         <scope>compile</scope>
       </dependency>
@@ -508,7 +479,7 @@
         <groupId>org.deephacks.tools4j</groupId>
         <artifactId>tools4j-config-provider-jpa20</artifactId>
         <version>${version.tools4j.config}</version>
-        <scope>compile</scope>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>org.deephacks.tools4j</groupId>

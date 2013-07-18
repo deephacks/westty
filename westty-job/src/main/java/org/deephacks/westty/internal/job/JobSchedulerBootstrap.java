@@ -13,14 +13,14 @@
  */
 package org.deephacks.westty.internal.job;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Strings;
-import org.deephacks.tools4j.config.RuntimeContext;
+import org.deephacks.tools4j.config.ConfigContext;
 import org.deephacks.tools4j.config.model.AbortRuntimeException;
 import org.deephacks.tools4j.config.model.Events;
+import org.deephacks.westty.config.DataSourceConfig;
 import org.deephacks.westty.config.JobConfig;
 import org.deephacks.westty.config.JobSchedulerConfig;
-import org.deephacks.westty.datasource.DataSourceProperties;
 import org.deephacks.westty.job.Job;
 import org.deephacks.westty.job.Schedule;
 import org.deephacks.westty.spi.ProviderShutdownEvent;
@@ -75,28 +75,29 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
     private final JobConnectionProvider provider;
     private final JobExecutor executor;
     private boolean isDerbyEmbedded;
-    private JobSchedulerConfig config;
-    private DataSourceProperties properties;
-    private RuntimeContext ctx;
+    private JobSchedulerConfig schedulerConfig;
+    private DataSourceConfig dataSourceConfig;
+    private ConfigContext config;
 
     @Inject
-    public JobSchedulerBootstrap(JobSchedulerConfig config, RuntimeContext ctx,
-            JobThreadPool threadPool, JobExecutor executor, DataSource dataSource) {
-        this.ctx = ctx;
+    public JobSchedulerBootstrap(JobSchedulerConfig schedulerConfig, DataSourceConfig dataSourceConfig,
+                                 ConfigContext config, JobThreadPool threadPool,
+                                 JobExecutor executor, DataSource dataSource) {
+        this.schedulerConfig = schedulerConfig;
         this.config = config;
         this.threadPool = threadPool;
         this.provider = new JobConnectionProvider(dataSource);
         this.executor = executor;
-        this.properties = new DataSourceProperties();
-        if (this.properties.getDriver().equals(DERBY_EMBEDDED)) {
+        this.dataSourceConfig = dataSourceConfig;
+        if (this.dataSourceConfig.getDriver().equals(DERBY_EMBEDDED)) {
             isDerbyEmbedded = true;
         }
     }
 
     public void startup(@Observes ProviderStartupEvent event) throws SchedulerException {
         if (isDerbyEmbedded) {
-            SQLExec exec = new SQLExec(properties.getUsername(), properties.getPassword(),
-                    properties.getUrl());
+            SQLExec exec = new SQLExec(dataSourceConfig.getUser(), dataSourceConfig.getPassword(),
+                    dataSourceConfig.getUrl());
             try {
                 exec.executeResource(DERBY_INSTALL_DDL, false);
             } catch (Exception e) {
@@ -109,30 +110,30 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
         CascadingClassLoadHelper cl = new CascadingClassLoadHelper();
 
         QuartzSchedulerResources resources = new QuartzSchedulerResources();
-        resources.setInstanceId(config.getInstanceId());
-        resources.setName(config.getInstanceName());
+        resources.setInstanceId(schedulerConfig.getInstanceId());
+        resources.setName(schedulerConfig.getInstanceName());
         resources.setMakeSchedulerThreadDaemon(true);
-        resources.setThreadName(config.getInstanceName());
+        resources.setThreadName(schedulerConfig.getInstanceName());
         resources.setThreadPool(threadPool);
         resources.setThreadExecutor(executor);
         resources.setRunUpdateCheck(false);
-        resources.setMaxBatchSize(config.getBatchTriggerAcquisitionMaxCount());
-        resources.setBatchTimeWindow(config.getBatchTriggerAcquisitionFireAheadTimeWindow());
+        resources.setMaxBatchSize(schedulerConfig.getBatchTriggerAcquisitionMaxCount());
+        resources.setBatchTimeWindow(schedulerConfig.getBatchTriggerAcquisitionFireAheadTimeWindow());
 
-        QuartzScheduler qs = new QuartzScheduler(resources, config.getIdleTimeWait(),
-                config.getDbFailureRetryInterval());
+        QuartzScheduler qs = new QuartzScheduler(resources, schedulerConfig.getIdleTimeWait(),
+                schedulerConfig.getDbFailureRetryInterval());
         scheduler = new StdScheduler(qs);
 
         StdJobRunShellFactory jobShell = new StdJobRunShellFactory();
         resources.setJobRunShellFactory(jobShell);
 
         JobStoreTX store = new JobStoreTX();
-        store.setLockHandler(getLockStrategy(config.getInstanceName()));
+        store.setLockHandler(getLockStrategy(schedulerConfig.getInstanceName()));
         store.setLockOnInsert(true);
-        store.setInstanceName(config.getInstanceName());
-        store.setInstanceId(config.getInstanceId());
-        store.setIsClustered(config.getIsClustered());
-        store.setClusterCheckinInterval(config.getClusterCheckinInterval());
+        store.setInstanceName(schedulerConfig.getInstanceName());
+        store.setInstanceId(schedulerConfig.getInstanceId());
+        store.setIsClustered(schedulerConfig.getIsClustered());
+        store.setClusterCheckinInterval(schedulerConfig.getClusterCheckinInterval());
         store.setTxIsolationLevelSerializable(true);
         store.setDataSource(provider.getDataSourceName());
         resources.setJobStore(store);
@@ -158,7 +159,9 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
     public void shutdown(@Observes ProviderShutdownEvent event) {
         try {
             log.info("Shutdown scheduler");
-            scheduler.shutdown(true);
+            if (scheduler != null){
+                scheduler.shutdown(true);
+            }
         } catch (SchedulerException e) {
             log.warn(e.getMessage(), e);
         }
@@ -185,10 +188,10 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
         for (Class<? extends Job> cls : JobExtension.getJobs()) {
             String id = cls.getSimpleName();
             try {
-                ctx.get(id, JobConfig.class);
+                config.get(id, JobConfig.class);
             } catch (AbortRuntimeException e) {
                 if (e.getEvent().getCode() == Events.CFG304) {
-                    ctx.registerDefault(new JobConfig(id));
+                    config.registerDefault(new JobConfig(id));
                 }
             }
             TriggerKey triggerKey = new TriggerKey(cls.getName());
@@ -208,11 +211,11 @@ class JobSchedulerBootstrap extends StdSchedulerFactory {
     }
 
     private String getCron(Class<? extends Job> cls) {
-        String cron = ctx.get(cls.getSimpleName(), JobConfig.class).getCronExpression();
-        if (Strings.isNullOrEmpty(cron)) {
-            cron = cls.getAnnotation(Schedule.class).value();
+        Optional<JobConfig> jobConfig = config.get(cls.getSimpleName(), JobConfig.class);
+        if (!jobConfig.isPresent()) {
+            return cls.getAnnotation(Schedule.class).value();
         }
-        return cron;
+        return jobConfig.get().getCronExpression();
     }
 
     @PersistJobDataAfterExecution

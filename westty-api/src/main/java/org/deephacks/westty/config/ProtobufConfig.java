@@ -9,11 +9,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @ConfigScope
-@Config(name = "westty.protobuf",
-        desc = "Westty protobuf configuration. Changes requires server restart.")
+@Config(name = "protobuf",
+        desc = "Protobuf configuration. Changes requires server restart.")
 public class ProtobufConfig {
-
-    public static int DEFAULT_PORT = 7777;
 
     @Id(desc="Name of this server")
     private String serverName = ServerConfig.DEFAULT_SERVER_NAME;
@@ -29,7 +27,7 @@ public class ProtobufConfig {
     @NotNull
     @Min(0)
     @Max(65535)
-    private Integer port = DEFAULT_PORT;
+    private Integer port = 7777;
 
     @Config(desc = "Specify the worker count to use. "
             + "See netty javadoc NioServerSocketChannelFactory.")

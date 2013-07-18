@@ -39,8 +39,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+/**
+ * Westty datasource
+ */
 @Alternative
-class DataSource implements javax.sql.DataSource {
+public class DataSource implements javax.sql.DataSource {
 
     private javax.sql.DataSource ds;
 

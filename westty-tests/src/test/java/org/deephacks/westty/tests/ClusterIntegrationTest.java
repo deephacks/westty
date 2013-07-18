@@ -2,9 +2,8 @@ package org.deephacks.westty.tests;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import org.deephacks.tools4j.config.internal.core.xml.XmlBeanManagerSetup;
+import org.deephacks.tools4j.config.spi.BeanManager;
 import org.deephacks.westty.Westty;
-import org.deephacks.westty.WesttyProperties;
 import org.deephacks.westty.config.ClusterConfig;
 import org.deephacks.westty.config.ProtobufConfig;
 import org.deephacks.westty.config.ServerConfig;
@@ -45,8 +44,8 @@ public class ClusterIntegrationTest {
         root.setLevel(Level.INFO);
         serializer.registerResource("META-INF/cluster.desc");
     }
-
-    private static final ProtobufClient protobufClient = new ProtobufClient(new IoExecutors(), serializer);
+    private static ProtobufConfig protobufConfig = new ProtobufConfig();
+    private static final ProtobufClient protobufClient = new ProtobufClient(new IoExecutors(), serializer, new ProtobufConfig());
     private static final JaxrsConfigClient jaxrsConfigClient = new JaxrsConfigClient();
 
     private static final Westty w1 = new Westty("w1");
@@ -58,9 +57,8 @@ public class ClusterIntegrationTest {
         // make sure that we can force the xml bean manager
         // even though the jpa bean manager normally would
         // take precedence..
-        WesttyProperties.setProperty("config.beanmanager",
+        System.setProperty(BeanManager.class.getName(),
                 "org.deephacks.tools4j.config.internal.core.xml.XmlBeanManager");
-        new XmlBeanManagerSetup().before();
         w1.startup();
         createServers("w1", "w2", "w3");
         w2.startup();
@@ -193,7 +191,7 @@ public class ClusterIntegrationTest {
     }
 
     private void asyncSendProtobuf(String msg, Integer num) throws Exception {
-        Integer channelId = protobufClient.connect(new InetSocketAddress(ProtobufConfig.DEFAULT_PORT + num));
+        Integer channelId = protobufClient.connect(new InetSocketAddress(protobufConfig.getPort() + num));
         AsyncSendRequest req = AsyncSendRequest.newBuilder().setMsg(msg).build();
         protobufClient.callAsync(channelId, req);
         Thread.sleep(500);
@@ -201,7 +199,7 @@ public class ClusterIntegrationTest {
     }
 
     private List<String> getSendProtobuf(Integer num) throws IOException {
-        Integer channelId = protobufClient.connect(new InetSocketAddress(ProtobufConfig.DEFAULT_PORT + num));
+        Integer channelId = protobufClient.connect(new InetSocketAddress(protobufConfig.getPort() + num));
         GetSendRequest req = GetSendRequest.newBuilder().build();
         GetSendResponse res = (GetSendResponse) protobufClient.callSync(channelId, req);
         protobufClient.disconnect(channelId);
@@ -209,7 +207,7 @@ public class ClusterIntegrationTest {
     }
 
     private void asyncPublishProtobuf(String msg, Integer num) throws Exception {
-        Integer channelId = protobufClient.connect(new InetSocketAddress(ProtobufConfig.DEFAULT_PORT + num));
+        Integer channelId = protobufClient.connect(new InetSocketAddress(protobufConfig.getPort() + num));
         AsyncPublishRequest req = AsyncPublishRequest.newBuilder().setMsg(msg).build();
         protobufClient.callAsync(channelId, req);
         Thread.sleep(500);
@@ -217,21 +215,23 @@ public class ClusterIntegrationTest {
     }
 
     private List<String> getPublishProtobuf(Integer num) throws IOException {
-        Integer channelId = protobufClient.connect(new InetSocketAddress(ProtobufConfig.DEFAULT_PORT + num));
+        Integer channelId = protobufClient.connect(new InetSocketAddress(protobufConfig.getPort() + num));
         GetPublishRequest req = GetPublishRequest.newBuilder().build();
         GetPublishResponse res = (GetPublishResponse) protobufClient.callSync(channelId, req);
         protobufClient.disconnect(channelId);
         return res.getServerMsgList();
     }
     public static void createServers(String... serverNames) throws Throwable {
+        ClusterConfig cluster = new ClusterConfig();
         for (int i = 0; i < serverNames.length; i++){
             ServerConfig server = new ServerConfig(serverNames[i]);
             server.setHttpPort(ServerConfig.DEFAULT_HTTP_PORT + i);
             server.setClusterPort(ServerConfig.DEFAULT_CLUSTER_PORT + i);
             jaxrsConfigClient.create(server);
+            cluster.addServer(server);
 
             ProtobufConfig proto = new ProtobufConfig(serverNames[i]);
-            proto.setPort(ProtobufConfig.DEFAULT_PORT + i);
+            proto.setPort(protobufConfig.getPort() + i);
             jaxrsConfigClient.create(proto);
 
             SockJsConfig sockjs = new SockJsConfig(serverNames[i]);
@@ -239,8 +239,7 @@ public class ClusterIntegrationTest {
             sockjs.setEventBusPort(SockJsConfig.DEFAULT_EVENTBUS_PORT + i);
             jaxrsConfigClient.create(sockjs);
         }
-        ClusterConfig cluster = new ClusterConfig();
-        cluster.setServerNames(serverNames);
+
         jaxrsConfigClient.create(cluster);
     }
 }

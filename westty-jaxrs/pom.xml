@@ -50,10 +50,7 @@
     </dependency>
     <dependency>
       <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-core</artifactId>
-      <type>test-jar</type>
-      <version>${version.tools4j.config}</version>
-      <scope>test</scope>
+      <artifactId>tools4j-config</artifactId>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>

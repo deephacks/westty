@@ -16,7 +16,7 @@ package org.deephacks.westty.config;
 import org.deephacks.tools4j.config.Config;
 import org.deephacks.tools4j.config.ConfigScope;
 
-@Config(name = "westty.job", desc = "Job scheduler configuration. Changes requires restart.")
+@Config(name = "job", desc = "Job scheduler configuration. Changes requires restart.")
 @ConfigScope
 public class JobSchedulerConfig {
 

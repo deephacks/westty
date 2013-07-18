@@ -7,8 +7,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @ConfigScope
-@Config(name = "westty.executor",
-        desc = "Westty thread pool executor. Changes requires server restart.")
+@Config(name = "executor",
+        desc = "Thread pool executor. Changes requires server restart.")
 public class ExecutorConfig {
 
     @Config(desc = "The maximum number of active threads.")

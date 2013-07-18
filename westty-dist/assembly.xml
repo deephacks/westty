@@ -25,9 +25,12 @@
         <include>**/*logback*.jar</include>
         <include>**/*javassist*.jar</include>
         <include>**/*tools4j*.jar</include>
+        <include>**/*metrics*.jar</include>
+        <include>**/*cqengine*.jar</include>
         <include>**/*javax*.jar</include>
         <include>**/*scannotation*.jar</include>
         <include>**/*guava*.jar</include>
+        <include>**/*httpclient*.jar</include>
         <include>**/*protobuf*.jar</include>
         <include>**/*zookeeper*.jar</include>
         <include>**/*hadoop-core*.jar</include>

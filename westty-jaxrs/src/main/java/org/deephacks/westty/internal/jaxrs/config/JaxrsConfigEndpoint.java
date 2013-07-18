@@ -13,6 +13,7 @@
  */
 package org.deephacks.westty.internal.jaxrs.config;
 
+import com.google.common.base.Optional;
 import org.deephacks.tools4j.config.admin.AdminContext;
 import org.deephacks.tools4j.config.internal.core.runtime.BeanToObjectConverter;
 import org.deephacks.tools4j.config.internal.core.runtime.ClassToSchemaConverter;
@@ -20,6 +21,7 @@ import org.deephacks.tools4j.config.internal.core.runtime.FieldToSchemaPropertyC
 import org.deephacks.tools4j.config.internal.core.runtime.ObjectToBeanConverter;
 import org.deephacks.tools4j.config.model.Bean;
 import org.deephacks.tools4j.config.model.Bean.BeanId;
+import org.deephacks.tools4j.config.model.Events;
 import org.deephacks.tools4j.config.model.Schema;
 import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRef;
 import org.deephacks.tools4j.config.model.Schema.SchemaPropertyRefList;
@@ -58,19 +60,20 @@ import static org.deephacks.tools4j.config.internal.core.Reflections.forName;
 @Produces({ APPLICATION_JSON })
 public class JaxrsConfigEndpoint {
 
-    private AdminContext ctx;
+    private AdminContext admin;
 
     private static final Conversion conv = Conversion.get();
-    private static final Map<String, Schema> schemas = new HashMap<String, Schema>();
+    private static final Map<String, Schema> schemas = new HashMap<>();
     static {
         conv.register(new ObjectToBeanConverter());
         conv.register(new ClassToSchemaConverter());
         conv.register(new FieldToSchemaPropertyConverter());
         conv.register(new BeanToObjectConverter());
     }
+
     @Inject
     public JaxrsConfigEndpoint(AdminContext ctx) {
-        this.ctx = ctx;
+        this.admin = ctx;
         for (Schema s : ctx.getSchemas().values()) {
             schemas.put(s.getType(), s);
         }
@@ -80,8 +83,8 @@ public class JaxrsConfigEndpoint {
     @Path("/getschemas")
     @Produces({ APPLICATION_JSON })
     public Map<String, JaxrsSchema> getSchemas() {
-        Map<String, JaxrsSchema> schemas = new HashMap<String, JaxrsSchema>();
-        for (Schema schema : ctx.getSchemas().values()) {
+        Map<String, JaxrsSchema> schemas = new HashMap<>();
+        for (Schema schema : admin.getSchemas().values()) {
             schemas.put(schema.getName(), new JaxrsSchema(schema));
         }
         return schemas;
@@ -93,8 +96,11 @@ public class JaxrsConfigEndpoint {
             @PathParam("id") final String id) {
         Schema schema = schemas.get(className);
         BeanId beanId = BeanId.create(id, schema.getName());
-        Bean bean = ctx.get(beanId);
-        return conv.convert(bean, forName(className));
+        Optional<Bean> optional = admin.get(beanId);
+        if (!optional.isPresent()) {
+            throw Events.CFG304_BEAN_DOESNT_EXIST(beanId);
+        }
+        return conv.convert(optional.get(), forName(className));
     }
 
     @GET
@@ -102,7 +108,7 @@ public class JaxrsConfigEndpoint {
     public Object get(@PathParam("className") final String className) {
         Schema schema = schemas.get(className);
         BeanId beanId = BeanId.createSingleton(schema.getName());
-        Bean bean = ctx.get(beanId);
+        Bean bean = admin.get(beanId).get();
         return conv.convert(bean, forName(className));
     }
 
@@ -112,7 +118,7 @@ public class JaxrsConfigEndpoint {
     public JaxrsConfigObjects get(@PathParam("className") final String className,
             @QueryParam("id") final List<String> ids) {
         Schema schema = schemas.get(className);
-        List<Bean> result = ctx.list(schema.getName(), ids);
+        List<Bean> result = admin.list(schema.getName(), ids);
         JaxrsConfigObjects beans = new JaxrsConfigObjects();
         if (result.isEmpty()) {
             return beans;
@@ -127,7 +133,7 @@ public class JaxrsConfigEndpoint {
     @Produces({ APPLICATION_JSON })
     public JaxrsConfigObjects list(@PathParam("className") final String className) {
         Schema schema = schemas.get(className);
-        List<Bean> beans = ctx.list(schema.getName());
+        List<Bean> beans = admin.list(schema.getName());
         JaxrsConfigObjects result = new JaxrsConfigObjects();
         if (beans.isEmpty()) {
             return result;
@@ -155,7 +161,7 @@ public class JaxrsConfigEndpoint {
     @Path("create")
     public void create(final JaxrsConfigObject jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
-        ctx.create(bean);
+        admin.create(bean);
     }
 
     @POST
@@ -163,7 +169,7 @@ public class JaxrsConfigEndpoint {
     @Path("set")
     public void set(final JaxrsConfigObject jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
-        ctx.set(bean);
+        admin.set(bean);
     }
 
     @POST
@@ -171,7 +177,7 @@ public class JaxrsConfigEndpoint {
     @Path("merge")
     public void merge(final JaxrsConfigObject jaxrsBean) {
         Bean bean = conv.convert(jaxrsBean.getBean(), Bean.class);
-        ctx.merge(bean);
+        admin.merge(bean);
     }
 
     @DELETE
@@ -180,7 +186,7 @@ public class JaxrsConfigEndpoint {
     public void delete(@PathParam("schema") final String className, @PathParam("id") final String id) {
         Schema schema = schemas.get(className);
         BeanId beanId = BeanId.create(id, schema.getName());
-        ctx.delete(beanId);
+        admin.delete(beanId);
     }
 
     @POST
@@ -188,7 +194,7 @@ public class JaxrsConfigEndpoint {
     @Consumes({ APPLICATION_JSON })
     public void createbean(final JaxrsConfigBean bean) {
         Bean createbean = jaxrsToBean(bean);
-        ctx.create(createbean);
+        admin.create(createbean);
     }
 
     @GET
@@ -196,7 +202,7 @@ public class JaxrsConfigEndpoint {
     public JaxrsConfigBean getbean(@PathParam("schema") final String schema,
             @PathParam("id") final String id) {
         BeanId beanId = BeanId.create(id, schema);
-        Bean bean = ctx.get(beanId);
+        Bean bean = admin.get(beanId).get();
         return new JaxrsConfigBean(bean);
     }
 
@@ -204,7 +210,7 @@ public class JaxrsConfigEndpoint {
     @Path("listbeans/{schema}")
     @Produces({ APPLICATION_JSON })
     public JaxrsConfigBeans listbeans(@PathParam("schema") final String schema) {
-        List<Bean> beans = ctx.list(schema);
+        List<Bean> beans = admin.list(schema);
         JaxrsConfigBeans result = new JaxrsConfigBeans();
         if (beans.isEmpty()) {
             return result;
@@ -235,7 +241,7 @@ public class JaxrsConfigEndpoint {
     @Path("setbean")
     public void setbean(final JaxrsConfigBean bean) {
         Bean setbean = jaxrsToBean(bean);
-        ctx.set(setbean);
+        admin.set(setbean);
     }
 
     @DELETE
@@ -243,13 +249,13 @@ public class JaxrsConfigEndpoint {
     @Consumes({ APPLICATION_XML })
     public void deletebean(@PathParam("schemaName") final String schema,
             @PathParam("id") final String id) {
-        ctx.delete(BeanId.create(id, schema));
+        admin.delete(BeanId.create(id, schema));
     }
 
     private Bean jaxrsToBean(final JaxrsConfigBean bean) {
         BeanId id = BeanId.create(bean.getId(), bean.getSchemaName());
         Bean setbean = Bean.create(id);
-        Schema schema = ctx.getSchemas().get(bean.getSchemaName());
+        Schema schema = admin.getSchemas().get(bean.getSchemaName());
         Map<String, List<String>> props = bean.getProperties();
         for (String name : schema.getPropertyNames()) {
             List<String> values = props.get(name);

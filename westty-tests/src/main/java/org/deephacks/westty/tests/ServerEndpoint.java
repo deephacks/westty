@@ -13,7 +13,7 @@
  */
 package org.deephacks.westty.tests;
 
-import org.deephacks.tools4j.config.RuntimeContext;
+import org.deephacks.tools4j.config.ConfigContext;
 import org.deephacks.westty.job.Job;
 import org.deephacks.westty.job.JobData;
 import org.deephacks.westty.job.Schedule;
@@ -76,7 +76,7 @@ public class ServerEndpoint implements Job {
     private Parent parent;
 
     @Inject
-    private RuntimeContext ctx;
+    private ConfigContext config;
 
     @Transactional
     public void createJpa(JsonEntity entity) {

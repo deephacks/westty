@@ -60,18 +60,19 @@ public class ProtobufClient {
     private final ClientProtobufEncoder encoder;
     private final LengthFieldPrepender lengthPrepender = new LengthFieldPrepender(MESSAGE_LENGTH);
     private final ClientHandler clientHandler = new ClientHandler();
-
+    private final ProtobufConfig config;
     @Inject
     public ProtobufClient(IoExecutors excutors,
-                          ProtobufSerializer serializer) {
+                          ProtobufSerializer serializer, ProtobufConfig config) {
         this.factory = new NioClientSocketChannelFactory(excutors.getBoss(), excutors.getWorker());
         this.serializer = serializer;
         this.decoder = new ClientProtobufDecoder(serializer);
         this.encoder = new ClientProtobufEncoder();
+        this.config = config;
     }
 
     public int connect() throws IOException {
-        return connect(new InetSocketAddress(ProtobufConfig.DEFAULT_PORT));
+        return connect(new InetSocketAddress(config.getPort()));
     }
 
     public int connect(InetSocketAddress address) throws IOException {

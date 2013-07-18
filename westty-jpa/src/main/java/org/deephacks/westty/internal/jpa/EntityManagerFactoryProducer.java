@@ -1,8 +1,7 @@
 package org.deephacks.westty.internal.jpa;
 
-import org.deephacks.westty.WesttyProperties;
-import org.deephacks.westty.config.ServerConfig;
-import org.deephacks.westty.jpa.JpaProperties;
+import org.deephacks.westty.config.DataSourceConfig;
+import org.deephacks.westty.config.JpaConfig;
 import org.scannotation.AnnotationDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,27 +13,39 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
-import javax.persistence.spi.*;
+import javax.persistence.spi.ClassTransformer;
+import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceProviderResolverHolder;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     public static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 
     private static final Logger log = LoggerFactory.getLogger(EntityManagerFactoryProducer.class);
-    private final JpaProperties jpaProperties;
     private List<Class<?>> classes = new ArrayList<>();
     private DataSource datasource;
+    private DataSourceConfig dataSourceConfig;
+    private JpaConfig jpaConfig;
 
     @Inject
-    public EntityManagerFactoryProducer(DataSource datasource) {
-        this.jpaProperties = new JpaProperties();
+    public EntityManagerFactoryProducer(DataSource datasource, DataSourceConfig dataSourceConfig, JpaConfig jpaConfig) {
+        this.dataSourceConfig = dataSourceConfig;
         this.datasource = datasource;
+        this.jpaConfig = jpaConfig;
     }
 
     @Produces
@@ -46,7 +57,7 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
         List<PersistenceProvider> providers = getProviders();
         for (PersistenceProvider provider : providers) {
             emf = provider.createContainerEntityManagerFactory(this,
-                    JpaProperties.getProperties());
+                    jpaConfig.getProperties());
             if (emf != null) {
                 break;
             }
@@ -63,17 +74,17 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
 
     @Override
     public String getPersistenceUnitName() {
-        return jpaProperties.getJpaUnit();
+        return jpaConfig.getJpaUnit();
     }
 
     @Override
     public String getPersistenceProviderClassName() {
-        return jpaProperties.getProvider();
+        return jpaConfig.getProvider();
     }
 
     @Override
     public PersistenceUnitTransactionType getTransactionType() {
-        return PersistenceUnitTransactionType.valueOf(jpaProperties.getTxType());
+        return PersistenceUnitTransactionType.valueOf(jpaConfig.getTxType());
     }
 
     @Override
@@ -93,12 +104,14 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
 
     @Override
     public List<URL> getJarFileUrls() {
-        return new ArrayList<URL>();
+        return new ArrayList<>();
     }
 
     @Override
     public java.net.URL getPersistenceUnitRootUrl() {
-        try {
+        return null;
+        /*try {
+
             File libDir = new ServerConfig().getLibDir();
             if(libDir == null){
                 return null;
@@ -107,11 +120,12 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+        */
     }
 
     @Override
     public List<String> getManagedClassNames() {
-        List<String> classNames = new ArrayList<String>();
+        List<String> classNames = new ArrayList<>();
         for (Class<?> cls : classes) {
             classNames.add(cls.getCanonicalName());
         }
@@ -135,7 +149,7 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
 
     @Override
     public Properties getProperties() {
-        return WesttyProperties.getProperties();
+        return jpaConfig.getProperties();
     }
 
     @Override
@@ -178,7 +192,7 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     private List<Class<?>> getEntities() {
         try {
             AnnotationDB db = new AnnotationDB();
-            List<Class<?>> entities = new ArrayList<Class<?>>();
+            List<Class<?>> entities = new ArrayList<>();
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             URL[] jars = getPersistenceArchives(cl);
             db.scanArchives(jars);
@@ -198,7 +212,7 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     }
 
     private URL[] getPersistenceArchives(ClassLoader cl) throws IOException {
-        final List<URL> result = new ArrayList<URL>();
+        final List<URL> result = new ArrayList<>();
         final Enumeration<URL> urls = cl.getResources(PERSISTENCE_XML);
         while (urls.hasMoreElements()) {
             // either a jar or file in a dir
