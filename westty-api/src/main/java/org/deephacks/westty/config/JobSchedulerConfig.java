@@ -21,7 +21,7 @@ import org.deephacks.tools4j.config.ConfigScope;
 public class JobSchedulerConfig {
 
     @Config(desc = "See org.quartz.scheduler.instanceName")
-    private String instanceName = "WesttyQuartzScheduler";
+    private String instanceName = "QuartzScheduler";
 
     @Config(desc = "See org.quartz.scheduler.instanceId")
     private String instanceId = "AUTO";

@@ -7,7 +7,7 @@ import java.util.Properties;
 @Config(name="jpa")
 public class JpaConfig {
     public static final String JPA_UNIT = "unit";
-    public static final String JPA_UNIT_DEFAULT = "westty.jpa.unit";
+    public static final String JPA_UNIT_DEFAULT = "default";
     public static final String USER = "javax.persistence.jdbc.user";
     public static final String PASSWORD = "javax.persistence.jdbc.password";
     public static final String URL = "javax.persistence.jdbc.url";
