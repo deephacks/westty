@@ -4,6 +4,9 @@ import org.deephacks.tools4j.config.Config;
 
 import java.util.Properties;
 
+/**
+ * Jpa configuration that inherits configuration from DataSourceConfig if not set explicitly.
+ */
 @Config(name="jpa")
 public class JpaConfig {
     public static final String JPA_UNIT = "unit";
