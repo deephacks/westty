@@ -193,8 +193,7 @@ public class JaxrsConfigEndpoint {
     @Path("createbean")
     @Consumes({ APPLICATION_JSON })
     public void createbean(final JaxrsConfigBean bean) {
-        Bean createbean = jaxrsToBean(bean);
-        admin.create(createbean);
+        admin.create(jaxrsToBean(bean));
     }
 
     @GET
@@ -230,10 +229,21 @@ public class JaxrsConfigEndpoint {
     @Produces({ APPLICATION_JSON })
     public JaxrsConfigBeans paginatebeans(@PathParam("schema") final String schema,
             @QueryParam("first") int first, @QueryParam("max") int max) {
-        /**
-         * FIXME
-         */
-        return null;
+        List<Bean> beans = admin.newQuery(schema)
+                .setFirstResult(first)
+                .setMaxResults(max)
+                .retrieve();
+        JaxrsConfigBeans result = new JaxrsConfigBeans();
+        if (beans.isEmpty()) {
+            return result;
+        }
+        if (beans.size() == 0) {
+            return result;
+        }
+        for (Bean bean : beans) {
+            result.addBean(bean);
+        }
+        return result;
     }
 
     @POST
@@ -253,9 +263,14 @@ public class JaxrsConfigEndpoint {
     }
 
     private Bean jaxrsToBean(final JaxrsConfigBean bean) {
-        BeanId id = BeanId.create(bean.getId(), bean.getSchemaName());
-        Bean setbean = Bean.create(id);
         Schema schema = admin.getSchemas().get(bean.getSchemaName());
+        final BeanId id;
+        if (schema.getId().isSingleton()) {
+            id = BeanId.createSingleton(schema.getName());
+        } else {
+            id = BeanId.create(bean.getId(), bean.getSchemaName());
+        }
+        Bean setbean = Bean.create(id);
         Map<String, List<String>> props = bean.getProperties();
         for (String name : schema.getPropertyNames()) {
             List<String> values = props.get(name);

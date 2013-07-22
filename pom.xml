@@ -144,28 +144,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <groupId>org.apache.maven.plugins</groupId>
-        <version>${version.javadoc-plugin}</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-          <execution>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-            <phase>site</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <javadoc:aggregate>true</javadoc:aggregate>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>${version.source-plugin}</version>
@@ -512,6 +490,28 @@
       <id>sign-artifacts</id>
       <build>
         <plugins>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <version>${version.javadoc-plugin}</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+              <execution>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+                <phase>site</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <javadoc:aggregate>true</javadoc:aggregate>
+            </configuration>
+          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
