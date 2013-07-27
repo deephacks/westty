@@ -1,8 +1,10 @@
 package org.deephacks.westty.config;
 
 import org.deephacks.confit.Config;
+import org.deephacks.confit.ConfigScope;
 
 @Config(name="datasource")
+@ConfigScope
 public class DataSourceConfig {
 
     private String password = "westty";

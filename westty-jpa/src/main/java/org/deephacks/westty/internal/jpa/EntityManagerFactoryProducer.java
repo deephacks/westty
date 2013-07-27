@@ -51,25 +51,30 @@ public class EntityManagerFactoryProducer implements PersistenceUnitInfo {
     @Produces
     @Singleton
     public EntityManagerFactory produceEntityManagerFactory() {
-        final List<Class<?>> entities = getEntities();
-        add(entities);
-        EntityManagerFactory emf = null;
-        List<PersistenceProvider> providers = getProviders();
-        for (PersistenceProvider provider : providers) {
-            emf = provider.createContainerEntityManagerFactory(this,
-                    jpaConfig.getProperties());
-            if (emf != null) {
-                break;
+        try {
+            final List<Class<?>> entities = getEntities();
+            add(entities);
+            EntityManagerFactory emf = null;
+            List<PersistenceProvider> providers = getProviders();
+            Properties properties = jpaConfig.getProperties();
+            for (PersistenceProvider provider : providers) {
+                emf = provider.createContainerEntityManagerFactory(this,properties);
+                if (emf != null) {
+                    break;
+                }
             }
+            if (emf == null) {
+                log.info("No Persistence provider for EntityManager named " + getPersistenceUnitName());
+                return null;
+            } else {
+                log.debug("Created persistence unit " + getPersistenceUnitName() + " with entities {}",
+                        entities);
+            }
+            return emf;
+        } catch (Exception e) {
+            log.error("Could not create EntityManagerFactory.", e);
+            throw e;
         }
-        if (emf == null) {
-            log.info("No Persistence provider for EntityManager named " + getPersistenceUnitName());
-            return null;
-        } else {
-            log.debug("Created persistence unit " + getPersistenceUnitName() + " with entities {}",
-                    entities);
-        }
-        return emf;
     }
 
     @Override

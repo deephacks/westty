@@ -1,6 +1,7 @@
 package org.deephacks.westty.config;
 
 import org.deephacks.confit.Config;
+import org.deephacks.confit.ConfigScope;
 
 import java.util.Properties;
 
@@ -8,6 +9,7 @@ import java.util.Properties;
  * Jpa configuration that inherits configuration from DataSourceConfig if not set explicitly.
  */
 @Config(name="jpa")
+@ConfigScope
 public class JpaConfig {
     public static final String JPA_UNIT = "unit";
     public static final String JPA_UNIT_DEFAULT = "default";
