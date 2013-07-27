@@ -50,14 +50,19 @@
         <include>**/*xml-apis*.jar</include>
         <include>**/*validation-api*.jar</include>
         <include>**/*derby*.jar</include>
-
       </includes>
       <excludes>
         <exclude>**/*sources.jar</exclude>
         <exclude>**/*javadoc.jar</exclude>
         <exclude>**/*hbase*tests.jar</exclude>
       </excludes>
-
+    </fileSet>
+    <fileSet>
+      <directory>target/html</directory>
+      <outputDirectory>/html/confit-admin</outputDirectory>
+      <includes>
+        <include>**/**</include>
+      </includes>
     </fileSet>
     <fileSet>
       <directory>..</directory>
@@ -67,13 +72,6 @@
         <include>LICENSE</include>
         <include>NOTICE</include>
         <include>RELEASE_NOTES</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <directory>../westty-jaxrs/src/main/resources/html</directory>
-      <outputDirectory>/html/config-admin</outputDirectory>
-      <includes>
-        <include>**/**</include>
       </includes>
     </fileSet>
     <fileSet>

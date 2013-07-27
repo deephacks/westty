@@ -183,6 +183,26 @@
               <outputDirectory>${project.build.directory}/jars</outputDirectory>
             </configuration>
           </execution>
+          <!-- install confit-admin-jaxrs angular.js application -->
+          <execution>
+            <id>unpack</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.deephacks</groupId>
+                  <artifactId>confit-admin-jaxrs</artifactId>
+                  <type>jar</type>
+                  <overWrite>false</overWrite>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <includes>**/html/**</includes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
           <execution>
             <id>copy-sources</id>
             <phase>prepare-package</phase>
@@ -197,6 +217,28 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <version>1.5.2</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <file>${project.build.directory}/html/js/confit-services.js</file>
+          <replacements>
+            <replacement>
+              <token>/confit-admin</token>
+              <value>/jaxrs/confit-admin</value>
+            </replacement>
+          </replacements>
+        </configuration>
       </plugin>
     </plugins>
   </build>
