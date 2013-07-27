@@ -13,8 +13,8 @@
  */
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.ConfigScope;
+import org.deephacks.confit.Config;
+import org.deephacks.confit.ConfigScope;
 
 @Config(name = "job", desc = "Job scheduler configuration. Changes requires restart.")
 @ConfigScope

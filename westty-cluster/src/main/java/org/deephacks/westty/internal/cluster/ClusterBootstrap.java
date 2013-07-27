@@ -8,7 +8,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.nio.Address;
-import org.deephacks.tools4j.config.ConfigContext;
+import org.deephacks.confit.ConfigContext;
 import org.deephacks.westty.cluster.Cluster;
 import org.deephacks.westty.cluster.DistributedMultiMap;
 import org.deephacks.westty.config.ClusterConfig;

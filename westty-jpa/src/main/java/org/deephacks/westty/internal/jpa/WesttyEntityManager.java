@@ -1,6 +1,6 @@
 package org.deephacks.westty.internal.jpa;
 
-import org.deephacks.tools4j.config.model.ThreadLocalManager;
+import org.deephacks.confit.model.ThreadLocalManager;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

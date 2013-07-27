@@ -50,8 +50,8 @@
       <artifactId>cal10n-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config</artifactId>
+      <groupId>org.deephacks</groupId>
+      <artifactId>confit</artifactId>
     </dependency>
   </dependencies>
 </project>

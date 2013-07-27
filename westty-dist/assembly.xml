@@ -24,7 +24,7 @@
         <include>**/*cal10n-api*.jar</include>
         <include>**/*logback*.jar</include>
         <include>**/*javassist*.jar</include>
-        <include>**/*tools4j*.jar</include>
+        <include>**/*confit*.jar</include>
         <include>**/*metrics*.jar</include>
         <include>**/*cqengine*.jar</include>
         <include>**/*javax*.jar</include>

@@ -1,6 +1,6 @@
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.Config;
+import org.deephacks.confit.Config;
 
 @Config(name="datasource")
 public class DataSourceConfig {

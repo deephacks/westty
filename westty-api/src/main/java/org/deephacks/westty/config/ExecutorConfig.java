@@ -1,7 +1,7 @@
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.ConfigScope;
+import org.deephacks.confit.Config;
+import org.deephacks.confit.ConfigScope;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;

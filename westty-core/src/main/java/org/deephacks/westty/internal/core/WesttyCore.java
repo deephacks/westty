@@ -15,7 +15,7 @@ package org.deephacks.westty.internal.core;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
-import org.deephacks.tools4j.config.ConfigContext;
+import org.deephacks.confit.ConfigContext;
 import org.deephacks.westty.application.ApplicationShutdownEvent;
 import org.deephacks.westty.application.ApplicationStartupEvent;
 import org.deephacks.westty.config.ServerConfig;

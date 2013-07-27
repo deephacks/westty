@@ -1,6 +1,6 @@
 package org.deephacks.westty.jaxrs;
 
-import org.deephacks.tools4j.config.Config;
+import org.deephacks.confit.Config;
 
 import java.util.HashMap;
 import java.util.Map;

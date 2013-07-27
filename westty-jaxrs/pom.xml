@@ -21,8 +21,14 @@
       <artifactId>westty-spi</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.deephacks</groupId>
+      <artifactId>confit-admin-jaxrs</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>jaxrs-api</artifactId>
+      <version>3.0.1.Final</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -49,16 +55,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config</artifactId>
+      <groupId>org.deephacks</groupId>
+      <artifactId>confit</artifactId>
     </dependency>
     <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-jpa</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-provider-jpa20</artifactId>
+      <groupId>org.deephacks</groupId>
+      <artifactId>confit-provider-jpa20</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

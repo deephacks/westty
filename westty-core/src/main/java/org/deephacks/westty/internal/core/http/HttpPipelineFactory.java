@@ -48,7 +48,7 @@ public class HttpPipelineFactory implements ChannelPipelineFactory {
     @Inject
     private Instance<HttpHandler> handlers;
 
-    private List<HttpHandler> handlerList = new ArrayList<HttpHandler>();
+    private List<HttpHandler> handlerList = new ArrayList<>();
 
     @Inject
     private HttpUpstreamHandler requestHandler;

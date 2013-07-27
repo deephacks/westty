@@ -15,9 +15,9 @@ package org.deephacks.westty.internal.job;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import org.deephacks.tools4j.config.ConfigContext;
-import org.deephacks.tools4j.config.model.AbortRuntimeException;
-import org.deephacks.tools4j.config.model.Events;
+import org.deephacks.confit.ConfigContext;
+import org.deephacks.confit.model.AbortRuntimeException;
+import org.deephacks.confit.model.Events;
 import org.deephacks.westty.config.DataSourceConfig;
 import org.deephacks.westty.config.JobConfig;
 import org.deephacks.westty.config.JobSchedulerConfig;

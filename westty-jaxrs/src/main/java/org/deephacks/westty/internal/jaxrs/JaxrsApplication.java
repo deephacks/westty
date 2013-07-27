@@ -25,9 +25,9 @@ import java.util.Set;
 
 @Singleton
 @ApplicationPath(JaxrsApplication.JAXRS_CONTEXT_URI)
-class JaxrsApplication extends Application {
+public class JaxrsApplication extends Application {
     /** relative uri for jaxrs endpoint for "see other" and "redirects" */
-    public static final String JAXRS_CONTEXT_URI = "/";
+    public static final String JAXRS_CONTEXT_URI = "/jaxrs";
 
     @Inject
     private JaxrsCdiExtension jaxrsExtension;

@@ -1,9 +1,9 @@
 package org.deephacks.westty.config;
 
 import com.google.common.base.Optional;
-import org.deephacks.tools4j.config.ConfigContext;
-import org.deephacks.tools4j.config.model.AbortRuntimeException;
-import org.deephacks.tools4j.config.model.Events;
+import org.deephacks.confit.ConfigContext;
+import org.deephacks.confit.model.AbortRuntimeException;
+import org.deephacks.confit.model.Events;
 import org.deephacks.westty.server.ServerName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

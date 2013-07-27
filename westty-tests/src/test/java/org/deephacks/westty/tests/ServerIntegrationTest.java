@@ -2,9 +2,13 @@ package org.deephacks.westty.tests;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import org.deephacks.tools4j.config.ConfigContext;
+import org.deephacks.confit.ConfigContext;
+import org.deephacks.confit.admin.AdminContext;
+import org.deephacks.confit.jaxrs.AdminContextJaxrsProxy;
 import org.deephacks.westty.config.DataSourceConfig;
 import org.deephacks.westty.config.ProtobufConfig;
+import org.deephacks.westty.config.ServerConfig;
+import org.deephacks.westty.internal.jaxrs.JaxrsApplication;
 import org.deephacks.westty.protobuf.ProtobufClient;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.spi.IoExecutors;
@@ -37,7 +41,7 @@ public class ServerIntegrationTest {
     private static final String TABLE = "CREATE TABLE JSON (ID varchar(255), JSON varchar(1024), PROTOCOL varchar(255));";
     private static final ProtobufClient protobuf = new ProtobufClient(new IoExecutors(), serializer, new ProtobufConfig());
     private static final JaxrsClient jaxrs = new JaxrsClient();
-
+    private static final String URI_PREFIX = JaxrsApplication.JAXRS_CONTEXT_URI + ServerEndpoint.JAXRS_PATH;
     private static final ConfigContext config = ConfigContext.get();
 
     @Inject
@@ -46,7 +50,7 @@ public class ServerIntegrationTest {
     @TestBootstrap
     public static void bootstrap() throws Exception {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.INFO);
+        root.setLevel(Level.DEBUG);
         serializer.registerResource("META-INF/server.desc");
         DataSourceConfig dataSourceConfig = config.get(DataSourceConfig.class);
         SQLExec sql = new SQLExec(dataSourceConfig.getUser(), dataSourceConfig.getPassword(), dataSourceConfig.getUrl());
@@ -59,9 +63,11 @@ public class ServerIntegrationTest {
      */
     @Test
     public void test_jaxrs_and_jpa() {
+        AdminContext admin = AdminContextJaxrsProxy.get(ServerConfig.DEFAULT_IP_ADDRESS, ServerConfig.DEFAULT_HTTP_PORT, "jaxrs");
+        admin.list(ServerConfig.class);
         JsonEntity entity = new JsonEntity(UUID.randomUUID().toString(), Protocol.JAXRS, "test");
-        jaxrs.posthttp(ServerEndpoint.JAXRS_PATH + "/create", JsonUtil.toJson(entity));
-        List<JsonEntity> list = JsonUtil.fromJsonList(jaxrs.gethttp(ServerEndpoint.JAXRS_PATH + "/list"));
+        jaxrs.posthttp(URI_PREFIX + "/create", JsonUtil.toJson(entity));
+        List<JsonEntity> list = JsonUtil.fromJsonList(jaxrs.gethttp(URI_PREFIX + "/list"));
         assertThat(list, hasItem(entity));
     }
     /**
@@ -71,8 +77,8 @@ public class ServerIntegrationTest {
     @Test
     public void test_nested_jpa_transaction(){
         JsonEntity entity = new JsonEntity(UUID.randomUUID().toString(), Protocol.JAXRS, "test");
-        jaxrs.posthttp(ServerEndpoint.JAXRS_PATH + "/nested", JsonUtil.toJson(entity));
-        List<JsonEntity> list = JsonUtil.fromJsonList(jaxrs.gethttp(ServerEndpoint.JAXRS_PATH + "/list"));
+        jaxrs.posthttp(URI_PREFIX + "/nested", JsonUtil.toJson(entity));
+        List<JsonEntity> list = JsonUtil.fromJsonList(jaxrs.gethttp(URI_PREFIX + "/list"));
         assertThat(list, not(hasItem(entity)));
     }
     /**

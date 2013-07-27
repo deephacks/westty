@@ -44,7 +44,7 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 @Singleton
-class ResteasyHttpHandler extends HttpHandler {
+public class ResteasyHttpHandler extends HttpHandler {
     private static final Logger log = LoggerFactory.getLogger(ResteasyHttpHandler.class);
     public static final String JAXRS_CONTEXT_URI = "/jaxrs";
 

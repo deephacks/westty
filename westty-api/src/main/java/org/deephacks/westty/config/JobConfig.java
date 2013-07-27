@@ -13,8 +13,8 @@
  */
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.Id;
+import org.deephacks.confit.Config;
+import org.deephacks.confit.Id;
 
 @Config(name = "jobs", desc = "Configuration for a specific job")
 public class JobConfig {

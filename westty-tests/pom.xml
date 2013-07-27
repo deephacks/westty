@@ -13,12 +13,16 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.deephacks</groupId>
+      <artifactId>confit-admin-jaxrs</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.deephacks.tools4j</groupId>
-      <artifactId>tools4j-config-provider-jpa20</artifactId>
+      <groupId>org.deephacks</groupId>
+      <artifactId>confit-provider-jpa20</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>

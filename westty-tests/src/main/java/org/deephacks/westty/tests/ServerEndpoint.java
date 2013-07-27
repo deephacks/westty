@@ -13,7 +13,7 @@
  */
 package org.deephacks.westty.tests;
 
-import org.deephacks.tools4j.config.ConfigContext;
+import org.deephacks.confit.ConfigContext;
 import org.deephacks.westty.job.Job;
 import org.deephacks.westty.job.JobData;
 import org.deephacks.westty.job.Schedule;
@@ -53,14 +53,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  * kind of endpoints is not advised.
  */
 @Singleton
-@Consumes({ APPLICATION_JSON })
-@Produces({ APPLICATION_JSON })
 @Path(ServerEndpoint.JAXRS_PATH)
 @Protobuf("server")
 @Schedule("*/2 * * * * ?")
 @SockJsEndpoint
 public class ServerEndpoint implements Job {
-    public static final String JAXRS_PATH = "/jaxrs/server";
+    public static final String JAXRS_PATH = "/server";
     public static final String CREATE_EVENTBUS_ADDRESS = "CreateServerEndpoint";
     public static final String GET_EVENTBUS_ADDRESS = "GetServerEndpoint";
 
@@ -87,21 +85,24 @@ public class ServerEndpoint implements Job {
     }
 
     @GET
-    @Path("/list")
+    @Path("list")
+    @Produces({ APPLICATION_JSON })
     @Transactional
     public List<JsonEntity> list() {
         return (List<JsonEntity>) em.createQuery("select e from JsonEntity e", JsonEntity.class).getResultList();
     }
 
     @POST
-    @Path("/create")
+    @Path("create")
+    @Consumes({ APPLICATION_JSON })
     @Transactional
     public void create(JsonEntity entity) {
         em.persist(entity);
     }
 
     @POST
-    @Path("/nested")
+    @Path("nested")
+    @Consumes({ APPLICATION_JSON })
     @Transactional
     public void nestedRollback(JsonEntity entity) {
         nestedCreate(entity);

@@ -2,13 +2,13 @@ package org.deephacks.westty.tests;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import org.deephacks.tools4j.config.spi.BeanManager;
+import org.deephacks.confit.admin.AdminContext;
+import org.deephacks.confit.jaxrs.AdminContextJaxrsProxy;
 import org.deephacks.westty.Westty;
 import org.deephacks.westty.config.ClusterConfig;
 import org.deephacks.westty.config.ProtobufConfig;
 import org.deephacks.westty.config.ServerConfig;
 import org.deephacks.westty.config.SockJsConfig;
-import org.deephacks.westty.jaxrs.JaxrsConfigClient;
 import org.deephacks.westty.protobuf.ProtobufClient;
 import org.deephacks.westty.protobuf.ProtobufSerializer;
 import org.deephacks.westty.spi.IoExecutors;
@@ -20,6 +20,7 @@ import org.deephacks.westty.tests.ClusterMessages.GetSendRequest;
 import org.deephacks.westty.tests.ClusterMessages.GetSendResponse;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.inject.spi.BeanManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class ClusterIntegrationTest {
     }
     private static ProtobufConfig protobufConfig = new ProtobufConfig();
     private static final ProtobufClient protobufClient = new ProtobufClient(new IoExecutors(), serializer, new ProtobufConfig());
-    private static final JaxrsConfigClient jaxrsConfigClient = new JaxrsConfigClient();
+    private static final AdminContext admin = AdminContextJaxrsProxy.get("localhost", 8080);
 
     private static final Westty w1 = new Westty("w1");
     private static final Westty w2 = new Westty("w2");
@@ -184,7 +185,6 @@ public class ClusterIntegrationTest {
 
     }
 
-
     private String httpGet(String path, int num) {
         JaxrsClient client = new JaxrsClient(ServerConfig.DEFAULT_IP_ADDRESS, ServerConfig.DEFAULT_HTTP_PORT + num);
         return client.gethttp(path);
@@ -227,19 +227,19 @@ public class ClusterIntegrationTest {
             ServerConfig server = new ServerConfig(serverNames[i]);
             server.setHttpPort(ServerConfig.DEFAULT_HTTP_PORT + i);
             server.setClusterPort(ServerConfig.DEFAULT_CLUSTER_PORT + i);
-            jaxrsConfigClient.create(server);
+            admin.createObject(server);
             cluster.addServer(server);
 
             ProtobufConfig proto = new ProtobufConfig(serverNames[i]);
             proto.setPort(protobufConfig.getPort() + i);
-            jaxrsConfigClient.create(proto);
+            admin.createObject(proto);
 
             SockJsConfig sockjs = new SockJsConfig(serverNames[i]);
             sockjs.setHttpPort(SockJsConfig.DEFAULT_HTTP_PORT + i);
             sockjs.setEventBusPort(SockJsConfig.DEFAULT_EVENTBUS_PORT + i);
-            jaxrsConfigClient.create(sockjs);
+            admin.createObject(sockjs);
         }
 
-        jaxrsConfigClient.create(cluster);
+        admin.createObject(cluster);
     }
 }

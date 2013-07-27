@@ -1,8 +1,8 @@
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
+import org.deephacks.confit.Config;
+import org.deephacks.confit.ConfigScope;
+import org.deephacks.confit.Id;
 
 @ConfigScope
 @Config(name="websocket", desc="Websocket configuration. Changes requires restart.")

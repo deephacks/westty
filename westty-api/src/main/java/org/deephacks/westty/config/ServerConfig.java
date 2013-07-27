@@ -13,9 +13,9 @@
  */
 package org.deephacks.westty.config;
 
-import org.deephacks.tools4j.config.Config;
-import org.deephacks.tools4j.config.ConfigScope;
-import org.deephacks.tools4j.config.Id;
+import org.deephacks.confit.Config;
+import org.deephacks.confit.ConfigScope;
+import org.deephacks.confit.Id;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
