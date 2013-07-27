@@ -7,7 +7,7 @@ programming model for building optimized web applications productively.
 
 * [Netty](http://netty.io)
 * [Weld](http://seamframework.org/Weld)
-* [tools4j-config](https://github.com/deephacks/tools4j-config)
+* [Conf-it](https://github.com/deephacks/confit)
 
 The mission is to enable modular and extendable application designs that keep the underlying server runtime process 
 clean from irrevelant dependencies, encouraging frontend technologies such as [angular.js](http://angularjs.org) or 
