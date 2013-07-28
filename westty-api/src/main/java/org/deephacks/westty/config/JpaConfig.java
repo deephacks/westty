@@ -22,6 +22,7 @@ public class JpaConfig {
     public static final String VALIDATION_PRE_PERSIST = "javax.persistence.validation.group.pre-persist";
     public static final String VALIDATION_PRE_UPDATE = "javax.persistence.validation.group.pre-update";
     public static final String VALIDATION_PRE_REMOVE = "javax.persistence.transactionType";
+    public static final String VALIDATION_MODE = "javax.persistence.validation.mode";
     public static final String HIBERNATE_DIALECT = "hibernate.dialect";
     public static final String HIBERNATE_HBM2DDL_AUTO = "hibernate.hbm2ddl.auto";
     public static final String HIBERNATE_SHOW_SQL = "hibernate.show_sql";
@@ -47,6 +48,9 @@ public class JpaConfig {
 
     @Config(name = TX_TYPE)
     private String txType = "RESOURCE_LOCAL";
+
+    @Config(name = VALIDATION_MODE)
+    private String validationMode;
 
     @Config(name = VALIDATION_PRE_PERSIST)
     private String validationPrePersist;
@@ -136,6 +140,10 @@ public class JpaConfig {
 
     public String getTxType() {
         return txType;
+    }
+
+    public String getValidationMode() {
+        return validationMode;
     }
 
     public String getValidationPrePersist() {
