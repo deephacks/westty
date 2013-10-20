@@ -5,7 +5,7 @@
   <artifactId>westty-root</artifactId>
   <name>Westty Root</name>
   <packaging>pom</packaging>
-  <version>0.1.4</version>
+  <version>0.1.5-SNAPSHOT</version>
   <description>Server engine using Weld and Netty for building REST applications.</description>
   <url>http://westty.deephacks.org</url>
   <inceptionYear>2012</inceptionYear>
@@ -27,7 +27,7 @@
     <connection>scm:git:git@github.com:deephacks/westty.git</connection>
     <developerConnection>scm:git:git@github.com:deephacks/westty.git</developerConnection>
     <url>scm:git:git@github.com/deephacks/westty</url>
-    <tag>0.1.4</tag>
+    <tag>0.1.2-SNAPSHOT</tag>
   </scm>
   <licenses>
     <license>
@@ -51,7 +51,7 @@
   </developers>
 
   <properties>
-    <version.westty>0.1.4</version.westty>
+    <version.westty>0.1.5-SNAPSHOT</version.westty>
     <version.confit>0.16.0</version.confit>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
