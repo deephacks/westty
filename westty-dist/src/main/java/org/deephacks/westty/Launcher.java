@@ -99,7 +99,9 @@ public class Launcher {
 
     public void add(File file) {
         if (!file.exists()) {
-            throw new IllegalArgumentException(file.getAbsolutePath() + " does not exist.");
+            if (debug) {
+                System.out.println(file.getAbsolutePath() + " does not exist.");
+            }
         }
         if (file.isDirectory()) {
             File[] files = file.listFiles();
