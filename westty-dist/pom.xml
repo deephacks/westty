@@ -6,7 +6,7 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>westty-dist</artifactId>
+  <artifactId>westty</artifactId>
   <name>Westty Distribution</name>
 
   <dependencies>
@@ -163,7 +163,7 @@
             <configuration>
               <finalName>westty-${project.version}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
-              <attach>false</attach>
+              <attach>true</attach> 
               <descriptors>
                 <descriptor>${project.basedir}/assembly.xml</descriptor>
               </descriptors>
