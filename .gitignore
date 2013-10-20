@@ -8,7 +8,6 @@
 target/
 eclipse-out/
 test-output/
-bin/
 .idea
 release.properties
 *.releaseBackup

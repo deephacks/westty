@@ -1,0 +1,44 @@
+#!/bin/sh
+
+if [ -z "$WESTTY_LAUNCHER_HOME" ] ; then
+  ## resolve links
+  PRG="$0"
+
+  # for relative symlinks
+  while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+      PRG="$link"
+    else
+      PRG="`dirname "$PRG"`/$link"
+    fi
+  done
+
+  saveddir=`pwd`
+
+  WESTTY_LAUNCHER_HOME=`dirname "$PRG"`/..
+
+  # make it fully qualified
+  WESTTY_LAUNCHER_HOME=`cd "$WESTTY_LAUNCHER_HOME" && pwd`
+
+  cd "$saveddir"
+fi
+
+
+JAVA_OPTS=$JAVA_OPTS
+
+. $WESTTY_LAUNCHER_HOME/bin/westty_vars
+
+WESTTY_CONF_DIR=${WESTTY_CONF_DIR-${WESTTY_LAUNCHER_HOME}/conf}
+WESTTY_LIB_DIR=${WESTTY_LIB_DIR-${WESTTY_LAUNCHER_HOME}/lib}
+WESTTY_APP_DIR=${WESTTY_APP_DIR-${WESTTY_LAUNCHER_HOME}/app}
+
+exec java -classpath "${WESTTY_LIB_DIR}"/westty-launcher.jar \
+  "-DWESTTY_LAUNCHER_HOME=${WESTTY_LAUNCHER_HOME}"  \
+  "-Dapplication.conf=${WESTTY_CONF_DIR}/westty.conf"  \
+  $JAVA_OPTS \
+  "-Dmain.class=org.deephacks.westty.Westty"  \
+  "-DWESTTY_CONF_DIR=${WESTTY_CONF_DIR}" \
+  "-DWESTTY_LIB_DIR=${WESTTY_LIB_DIR}" \
+  "-DWESTTY_APP_DIR=${WESTTY_APP_DIR}" org.deephacks.westty.Launcher "$@"

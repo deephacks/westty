@@ -1,0 +1,5 @@
+# set the following environment variables to override default
+
+# WESTTY_CONF_DIR=/etc
+# WESTTY_LIB_DIR=/usr/local/westty/westty/lib
+# WESTTY_APP_DIR=/usr/local/westty/app
