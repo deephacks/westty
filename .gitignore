@@ -11,3 +11,4 @@ test-output/
 bin/
 .idea
 release.properties
+*.releaseBackup
