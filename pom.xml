@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.deephacks.westty</groupId>
   <artifactId>westty-root</artifactId>
   <name>Westty Root</name>
   <packaging>pom</packaging>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.1.1</version>
   <description>Server engine using Weld and Netty for building REST applications.</description>
   <url>http://westty.deephacks.org</url>
   <inceptionYear>2012</inceptionYear>
@@ -28,6 +27,7 @@
     <connection>scm:git:git@github.com:deephacks/westty.git</connection>
     <developerConnection>scm:git:git@github.com:deephacks/westty.git</developerConnection>
     <url>scm:git:git@github.com/deephacks/westty</url>
+    <tag>0.1.1</tag>
   </scm>
   <licenses>
     <license>
@@ -41,7 +41,7 @@
       <name>Kristoffer Sjogren</name>
       <id>krisskross</id>
       <email>stoffe -at- gmail.com</email>
-      <organization/>
+      <organization />
       <roles>
         <role>Developer</role>
       </roles>
@@ -51,7 +51,7 @@
   </developers>
 
   <properties>
-    <version.westty>0.1.1-SNAPSHOT</version.westty>
+    <version.westty>0.1.1</version.westty>
     <version.confit>0.16.0</version.confit>
     <!-- java -->
     <version.java-compiler>1.7</version.java-compiler>
@@ -62,7 +62,7 @@
     <version.eclipse-plugin>2.8</version.eclipse-plugin>
     <version.compiler-plugin>2.3.2</version.compiler-plugin>
     <version.jar-plugin>2.3.2</version.jar-plugin>
-    <version.javadoc-plugin>2.8</version.javadoc-plugin>
+    <version.javadoc-plugin>2.9.1</version.javadoc-plugin>
     <version.source-plugin>2.1.2</version.source-plugin>
   </properties>
 
@@ -525,9 +525,6 @@
                 <phase>site</phase>
               </execution>
             </executions>
-            <configuration>
-              <javadoc:aggregate>true</javadoc:aggregate>
-            </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
