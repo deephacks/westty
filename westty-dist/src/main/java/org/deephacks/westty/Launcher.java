@@ -22,18 +22,23 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Launcher is responsible for setting the classpath and 
+ * Launcher is responsible for setting the classpath and
  * launching the main program.
  */
 public class Launcher {
     /** files to put on current thread classloader */
-    private final List<File> classpath = new ArrayList<File>();
-    /** system property to determine launcher run script directory  */
-    private static final String LAUNCHER_HOME_PROP = "root.dir";
+    private final List<File> classpath = new ArrayList<>();
     /** system property of main class to launch  */
     private static final String MAIN_CLASS_PROP = "main.class";
-    /** system property of directory to load classpath from */
-    private static final String LIB_DIR_PROP = "lib.dir";
+    /** system property to determine launcher run script directory  */
+    private static final String LAUNCHER_HOME_PROP = "WESTTY_LAUNCHER_HOME";
+    /** system property of directory to load westty classpath from */
+    private static final String LIB_DIR_PROP = "WESTTY_LIB_DIR";
+    /** system property of directory to load application classpath from */
+    private static final String APP_DIR_PROP = "WESTTY_APP_DIR";
+    /** system property of directory to load application classpath from */
+    private static final String CONF_DIR_PROP = "WESTTY_CONF_DIR";
+
     /** Are we in debug mode, --debug */
     private boolean debug = false;
 
@@ -50,7 +55,7 @@ public class Launcher {
     public void run(String[] args) throws Exception {
         String launcherHome = System.getProperty(LAUNCHER_HOME_PROP);
         if (launcherHome == null || "".equals(launcherHome)) {
-            throw new IllegalArgumentException("set launcher.home system property");
+            throw new IllegalArgumentException("set " + LAUNCHER_HOME_PROP + " system property");
         }
         String mainClass = System.getProperty(MAIN_CLASS_PROP);
         if (mainClass == null || "".equals(launcherHome)) {
@@ -58,11 +63,20 @@ public class Launcher {
         }
         String libDir = System.getProperty(LIB_DIR_PROP);
         if (libDir == null || "".equals(libDir)) {
-            throw new IllegalArgumentException("set lib.dir system property");
+            throw new IllegalArgumentException("set " + LIB_DIR_PROP + " system property");
         }
-        add(new File(launcherHome, libDir));
+        String appDir = System.getProperty(APP_DIR_PROP);
+        if (appDir == null || "".equals(appDir)) {
+            throw new IllegalArgumentException("set " + APP_DIR_PROP + " system property");
+        }
+        String confDir = System.getProperty(CONF_DIR_PROP);
+        if (confDir == null || "".equals(confDir)) {
+            throw new IllegalArgumentException("set " + CONF_DIR_PROP + " system property");
+        }
+        add(new File(libDir));
+        add(new File(appDir));
         setContextClassLoader();
-        initLogback(new File(launcherHome + "/conf", "logback.xml"));
+        initLogback(new File(confDir, "westty-logback.xml"));
 
         Class<?> main = Thread.currentThread().getContextClassLoader().loadClass(mainClass);
         main.getDeclaredMethod("main", String[].class).invoke(null, new Object[] { args });
