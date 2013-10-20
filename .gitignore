@@ -10,3 +10,4 @@ eclipse-out/
 test-output/
 bin/
 .idea
+release.properties

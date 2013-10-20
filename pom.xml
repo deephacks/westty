@@ -79,6 +79,7 @@
     <module>westty-cluster</module>
     <module>westty-protobuf</module>
     <module>westty-tests</module>
+    <module>westty-dist</module>
     <module>westty-docbkx</module>
   </modules>
   <build>
@@ -163,6 +164,16 @@
             <descriptor>src/main/assembly/assembly.xml</descriptor>
           </descriptors>
           <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <preparationGoals>clean verify</preparationGoals>
+          <tagNameFormat>@{project.version}</tagNameFormat>
+          <useReleaseProfile>true</useReleaseProfile>
         </configuration>
       </plugin>
     </plugins>

@@ -29,6 +29,12 @@
       <artifactId>westty-jaxrs</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+    </dependency>
+
+<!--
+    <dependency>
       <groupId>org.deephacks.westty</groupId>
       <artifactId>westty-sockjs</artifactId>
     </dependency>
@@ -124,11 +130,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
-    <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-validator</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
@@ -144,6 +145,7 @@
       <artifactId>derby</artifactId>
       <version>10.9.1.0</version>
     </dependency>
+-->
   </dependencies>
 
   <build>
