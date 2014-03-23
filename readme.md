@@ -1,7 +1,5 @@
 ![My image](https://raw.github.com/deephacks/westty/master/westty.png)
 
-[![Build Status](https://travis-ci.org/deephacks/westty.png?branch=master)](https://travis-ci.org/deephacks/westty)
-
 Westty is a NIO server engine built on a foundation of Weld and Netty, enabling a lightweight CDI 
 programming model for building optimized web applications productively. 
 
